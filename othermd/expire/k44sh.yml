@@ -1,0 +1,12 @@
+version: '3'
+services:
+  nginx-fancy:
+    image: k44sh/nginx:latest
+    container_name: nginx-fancy
+    ports:
+      - "8011:8080" # 注意：该镜像默认使用 8080 端口
+    volumes:
+      - ./html:/var/www/html:ro
+      - ./config:/etc/nginx/
+    restart: unless-stopped
+

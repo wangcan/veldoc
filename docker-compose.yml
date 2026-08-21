@@ -2,9 +2,9 @@ services:
   veldoc:
     image: aredoff/veldoc:latest
     ports:
-      - "8080:8080"
+      - "8011:8080"
     volumes:
-      - ./data:/data:ro
+      - ./docs:/data:ro
     environment:
       VELDOC_AUTH: none
     restart: unless-stopped

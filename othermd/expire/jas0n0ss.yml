@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  tengine-fancy:
+    # 使用镜像，也可以使用 build: . 从源码构建
+    image: jas0n0ss/tengine-fancyindex:latest
+    container_name: tengine-fancy
+    ports:
+      - "8011:80"      # HTTP 端口映射
+      #- "8012:443"     # HTTPS 端口映射
+    environment:
+      # 基础认证开关 (on/off)
+      HTTP_AUTH: "off"
+      # 如开启认证，可设置用户名和密码
+      # HTTP_USERNAME: "admin"
+      # HTTP_PASSWD: "admin"
+      # SSL开关 (on/off)
+      ENABLE_SSL: "off"
+    volumes:
+      # 挂载你的文件目录到容器内
+      - ./public:/app/public
+      # 如启用 SSL，需挂载证书目录
+      # - ./ssl:/app/ssl
+    restart: unless-stopped

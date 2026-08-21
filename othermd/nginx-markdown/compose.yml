@@ -1,0 +1,16 @@
+services:
+  nginx-mk:
+    image: nginx-mk
+    container_name: nginx-mk
+    build:
+      context: .
+    ports:
+      - 8011:80
+    volumes:
+      - ./public:/var/www/html/
+      - ./nginx:/etc/nginx
+      - /data:/data
+    restart: unless-stopped
+
+volumes:
+  httpd-docs:

@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  nginx-fancy:
+    image: 80x86/nginx-fancyindex:latest
+    container_name: nginx-fancy
+    ports:
+      - "8011:80"   # 将宿主机的8080端口映射到容器的80端口
+    volumes:
+      - ./files:/usr/share/nginx/html:ro   # 挂载你的文件目录
+    restart: unless-stopped
