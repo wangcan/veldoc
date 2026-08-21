@@ -9,6 +9,11 @@ case $1 in
   sourcePath="/data/frontapp/vitesse"
   resources=(.claude CLAUDE.md .requirements MEMORY.md README.zh-CN.md)
   ;;
+'vben')
+  fullPath="${targetPath}frontend/vue-vben-admin/"
+  sourcePath="/data/frontapp/vue-vben-admin"
+  resources=(.claude README.zh-CN.md)
+  ;;
 *)
   echo 'error type'-
   exit 1
