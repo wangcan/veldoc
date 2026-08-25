@@ -6,12 +6,17 @@ targetPath='/data/docker/veldoc/docs/rd/'
 case $1 in
 'vitesse')
   fullPath="${targetPath}frontend/vitesse/"
-  sourcePath="/data/frontapp/vitesse"
+  sourcePath="/data/project/frontapp/vitesse"
   resources=(.claude CLAUDE.md .requirements MEMORY.md README.zh-CN.md)
+  ;;
+'laravel')
+  fullPath="${targetPath}backend/laravel/"
+  sourcePath="/data/project/backend/ai-laravel"
+  resources=(.mcp.json boost.json .claude CLAUDE.md README.md)
   ;;
 'vben')
   fullPath="${targetPath}frontend/vue-vben-admin/"
-  sourcePath="/data/frontapp/vue-vben-admin"
+  sourcePath="/data/project/frontapp/vue-vben-admin"
   resources=(.claude README.zh-CN.md)
   ;;
 *)
