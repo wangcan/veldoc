@@ -1,0 +1,51 @@
+{
+  "$schema": "https://claude.ai/schema/settings.json",
+  "project": {
+    "name": "ai-laravel",
+    "description": "Laravel 13 backend project with SQLite, PHPUnit, and Tailwind CSS 4"
+  },
+  "model": "sonnet",
+  "permissions": {
+    "allow": [
+      "Bash(composer *)",
+      "Bash(npm run *)",
+      "Bash(php artisan *)",
+      "Bash(php vendor/bin/pint *)",
+      "Bash(php artisan test *)",
+      "Bash(php artisan migrate *)",
+      "Bash(php artisan config:*)",
+      "Bash(php artisan route:*)",
+      "Bash(php artisan cache:*)",
+      "Bash(php artisan db:*)",
+      "Bash(git status)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git branch *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Read(**)",
+      "Edit(**)",
+      "Write(**)",
+      "mcp__laravel-boost__*"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "laravel-boost"
+  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "php vendor/bin/pint --dirty --format agent"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -12,12 +12,12 @@ case $1 in
 'laravel')
   fullPath="${targetPath}backend/laravel/"
   sourcePath="/data/project/backend/ai-laravel"
-  resources=(.mcp.json boost.json .claude CLAUDE.md README.md)
+  resources=(.mcp.json boost.json .claude .requirements CLAUDE.md README.md)
   ;;
 'vben')
   fullPath="${targetPath}frontend/vue-vben-admin/"
-  sourcePath="/data/project/frontapp/vue-vben-admin"
-  resources=(.claude README.zh-CN.md)
+  sourcePath="/data/project/frontend/vue-vben-admin"
+  resources=(.mcp.json .claude .requirements CLAUDE.md README.zh-CN.md)
   ;;
 *)
   echo 'error type'-

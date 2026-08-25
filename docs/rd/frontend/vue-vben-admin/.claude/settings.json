@@ -1,0 +1,81 @@
+{
+  "$schema": "https://claude.ai/schema/settings.json",
+  "project": {
+    "name": "vue-vben-admin",
+    "description": "Vue 3 企业级管理后台框架",
+    "version": "5.7.0"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(pnpm *)",
+      "Bash(npm *)",
+      "Bash(node *)",
+      "Bash(npx *)",
+      "Bash(turbo *)",
+      "Bash(vite *)",
+      "Bash(vitest *)",
+      "Bash(tsc)",
+      "Bash(eslint *)",
+      "Bash(oxlint *)",
+      "Bash(stylelint *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(git push *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(find *)",
+      "Bash(mkdir *)",
+      "Bash(rm -rf node_modules)",
+      "Read",
+      "Edit",
+      "Write"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf .)",
+      "Bash(git push --force)",
+      "Bash(git reset --hard origin/main)"
+    ]
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "VITE_DEV": "true"
+  },
+  "ui": {
+    "theme": "auto",
+    "language": "zh-CN"
+  },
+  "tools": {
+    "enabled": [
+      "Bash",
+      "Read",
+      "Edit",
+      "Write",
+      "WebSearch",
+      "WebFetch"
+    ]
+  },
+  "agents": {
+    "enabled": [
+      "vue-component-developer",
+      "api-developer",
+      "test-engineer",
+      "code-reviewer"
+    ]
+  },
+  "skills": {
+    "enabled": [
+      "create-component",
+      "create-api",
+      "create-test",
+      "add-route"
+    ]
+  }
+}

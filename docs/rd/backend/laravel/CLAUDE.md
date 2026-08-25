@@ -160,3 +160,24 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
 
 </laravel-boost-guidelines>
+
+## Project Commands
+
+### Development
+- `composer run dev` — Start Laravel dev server with live reload
+- `npm run dev` — Start Vite frontend dev server
+- `npm run build` — Build frontend assets for production
+
+### Setup
+- `composer run setup` — Full project setup (install dependencies, migrate, build assets)
+
+## Database
+
+- SQLite database at `database/database.sqlite`
+- Tests use in-memory SQLite
+- Migrations: `php artisan migrate`, `php artisan migrate:fresh`
+
+## Frontend
+
+- Vite 8 with Tailwind CSS 4
+- Entry points: `resources/css/app.css`, `resources/js/app.js`

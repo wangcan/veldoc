@@ -1,0 +1,112 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/data/project/frontend/vue-vben-admin"
+      ],
+      "disabled": false,
+      "description": "文件系统操作 MCP，提供文件读写、目录管理等功能",
+      "env": {}
+    },
+    "pnpm": {
+      "command": "pnpm",
+      "args": [
+        "mcp"
+      ],
+      "disabled": false,
+      "description": "pnpm 包管理器 MCP，提供依赖管理、脚本执行等功能",
+      "env": {
+        "NPM_CONFIG_REGISTRY": "https://registry.npmmirror.com"
+      }
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git",
+        "--repository",
+        "/data/project/frontend/vue-vben-admin"
+      ],
+      "disabled": false,
+      "description": "Git 操作 MCP，提供版本控制、分支管理等功能",
+      "env": {}
+    },
+    "web-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-web-search"
+      ],
+      "disabled": false,
+      "description": "Web 搜索 MCP，提供文档查找、库使用方法搜索等功能",
+      "env": {}
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp-server"
+      ],
+      "disabled": false,
+      "description": "Playwright 测试 MCP，提供浏览器自动化、E2E 测试等功能",
+      "env": {}
+    },
+    "database": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "--db-path",
+        "/data/project/frontend/vue-vben-admin/.data/app.db"
+      ],
+      "disabled": true,
+      "description": "SQLite 数据库 MCP，提供数据库操作功能（可选）",
+      "env": {}
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "disabled": true,
+      "description": "Brave 搜索 MCP，提供高级搜索功能（需要 API Key）",
+      "env": {
+        "BRAVE_API_KEY": ""
+      }
+    },
+    "fetch": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ],
+      "disabled": false,
+      "description": "HTTP 请求 MCP，提供 API 调用、网页抓取等功能",
+      "env": {}
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "disabled": false,
+      "description": "内存存储 MCP，提供上下文记忆、会话管理等功能",
+      "env": {}
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "disabled": false,
+      "description": "顺序思考 MCP，提供复杂问题分解、逐步推理等功能",
+      "env": {}
+    }
+  }
+}
