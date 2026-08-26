@@ -1,52 +1,118 @@
-# SQLite Database Rules
+# MySQL Database Rules
 
-This project uses **SQLite** as the database engine.
+This project uses **MySQL** as the primary database engine, with support for multiple database connections across different modules.
 
-## SQLite Considerations
+## Database Connections
 
-### Database Location
+### Multiple Database Configuration
 
-The SQLite database is located at `database/database.sqlite`. It must exist before migrations run:
+Different modules may use different databases. Configure connections in `config/database.php`:
 
-```bash
-touch database/database.sqlite
+```php
+'connections' => [
+    'mysql' => [
+        'driver' => 'mysql',
+        'host' => env('DB_HOST', '127.0.0.1'),
+        'port' => env('DB_PORT', '3306'),
+        'database' => env('DB_DATABASE', 'forge'),
+        'username' => env('DB_USERNAME', 'forge'),
+        'password' => env('DB_PASSWORD', ''),
+        // ... other options
+    ],
+
+    'mysql_logs' => [
+        'driver' => 'mysql',
+        'host' => env('DB_LOGS_HOST', '127.0.0.1'),
+        'database' => env('DB_LOGS_DATABASE', 'logs'),
+        // ... other options
+    ],
+],
 ```
 
-### SQLite Limitations
+### Using Multiple Connections
 
-1. **No Foreign Key Enforcement by Default**: SQLite doesn't enforce foreign keys unless enabled. Laravel enables this by default.
+```php
+// Specify connection on query
+DB::connection('mysql_logs')->table('audit_logs')->get();
 
-2. **ALTER TABLE Limitations**: SQLite has limited ALTER TABLE support. For complex schema changes:
-   - Use the `doctrine/dbal` package (not installed by default)
-   - Create new tables and migrate data
-   - Use SQLite-specific workarounds
+// Specify connection on model
+class AuditLog extends Model
+{
+    protected $connection = 'mysql_logs';
+}
+```
 
-3. **No JSON Column Type**: Use `text` columns for JSON data and cast to array in models.
+## MySQL Specific Features
 
-4. **Concurrent Writes**: SQLite handles concurrent reads well but locks on writes. Suitable for development and low-traffic production.
+### Transaction Support
 
-### Testing with SQLite
+MySQL fully supports transactions with row-level locking:
 
-Tests use an in-memory SQLite database (`:memory:`). This is fast but data doesn't persist between tests.
+```php
+DB::transaction(function () {
+    // Operations within transaction
+    User::create([...]);
+    Profile::create([...]);
+});
 
-### Migration Considerations
+// Or manual transaction control
+DB::beginTransaction();
+try {
+    // Operations
+    DB::commit();
+} catch (\Exception $e) {
+    DB::rollBack();
+    throw $e;
+}
+```
 
-For SQLite compatibility:
-- Avoid `DROP COLUMN` in migrations (create new table instead)
-- Use `$table->renameColumn()` with caution
-- Test migrations on SQLite before production
+### Foreign Key Constraints
 
-## Commands
+MySQL enforces foreign key constraints by default:
 
-```bash
-# Create database file if missing
-php artisan db --create
+```php
+Schema::create('posts', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('user_id')
+        ->constrained('users')
+        ->cascadeOnDelete()
+        ->cascadeOnUpdate();
+});
+```
 
-# Run migrations
-php artisan migrate
+### JSON Column Support
 
-# Fresh migration (reset everything)
-php artisan migrate:fresh
+MySQL 5.7+ supports native JSON columns:
+
+```php
+$table->json('metadata')->nullable();
+
+// In model
+protected function casts(): array
+{
+    return [
+        'metadata' => 'array',
+    ];
+}
+```
+
+### Index Optimization
+
+Create indexes for frequently queried columns:
+
+```php
+$table->index(['user_id', 'created_at']); // Composite index
+$table->unique('email'); // Unique index
+$table->fullText('content'); // Full-text index for MySQL 5.6+
+```
+
+## Testing
+
+Tests use an in-memory SQLite database by default for speed. For MySQL-specific tests:
+
+```php
+// In phpunit.xml or test class
+'connection' => 'mysql_testing',
 ```
 
 ## Schema Inspection
@@ -57,4 +123,23 @@ Use the `database-schema` MCP tool to inspect tables:
 # Via MCP
 database-schema --summary
 database-schema --filter=users --include_column_details
+
+# Or via Artisan
+php artisan db:table users
+```
+
+## Common Commands
+
+```bash
+# Run migrations
+php artisan migrate
+
+# Fresh migration (reset everything) - USE WITH CAUTION
+php artisan migrate:fresh --seed
+
+# Check migration status
+php artisan migrate:status
+
+# Rollback last batch
+php artisan migrate:rollback
 ```

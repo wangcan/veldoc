@@ -20,6 +20,7 @@
 结合项目当前的技术栈，为项目再配置几个mcp，介绍一下各个mcp的特点和所起到的作用，结果存到文件.requirements/ai/mcp.md
 
 需求1:
+ 当前项目数据库使用MySQL，不同的模块可能会使用不同的数据库；本项目是纯后端 API 服务，不渲染任何服务端模板。
 结合当前项目的技术栈，按下面提供的目录结构，完善系统的Claude相关设置，生成若干agents、skills、rules、commands、hooks相关的文件。处理结果的描述信息存到文件：.requirements/ai/init-claude.md
 
 ├── .claude/                      # 项目级配置主目录

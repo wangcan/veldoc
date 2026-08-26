@@ -165,19 +165,20 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 ### Development
 - `composer run dev` — Start Laravel dev server with live reload
-- `npm run dev` — Start Vite frontend dev server
-- `npm run build` — Build frontend assets for production
 
 ### Setup
-- `composer run setup` — Full project setup (install dependencies, migrate, build assets)
+- `composer run setup` — Full project setup (install dependencies, migrate)
 
 ## Database
 
-- SQLite database at `database/database.sqlite`
-- Tests use in-memory SQLite
+- MySQL database with multi-connection support
+- Different modules may use different database connections
+- Tests use in-memory SQLite by default
 - Migrations: `php artisan migrate`, `php artisan migrate:fresh`
 
-## Frontend
+## Architecture
 
-- Vite 8 with Tailwind CSS 4
-- Entry points: `resources/css/app.css`, `resources/js/app.js`
+- Pure backend API service (no server-side templates)
+- All responses are JSON
+- Frontend is a separate application consuming this API
+- Use API Resources for response transformation

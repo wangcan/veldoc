@@ -1,101 +1,142 @@
-# Frontend Stack Rules
+# Pure API Backend Rules
 
-This project uses **Vite 8** with **Tailwind CSS 4**.
+This project is a **pure backend API service** with no server-side template rendering.
 
-## Technology Stack
+## Architecture
 
-- **Build Tool**: Vite 8.0.0
-- **CSS Framework**: Tailwind CSS 4.0.0
-- **Plugin**: @tailwindcss/vite
-- **Laravel Integration**: laravel-vite-plugin 3.1
+### API-Only Design
 
-## Build Commands
+- No Blade views are rendered
+- All responses are JSON
+- Frontend is a separate application consuming this API
+- Uses Laravel API Resources for response transformation
 
-```bash
-# Development (hot reload)
-npm run dev
+### API Resources
 
-# Production build
-npm run build
-```
+Use Eloquent API Resources to transform models into JSON responses:
 
-## Entry Points
+```php
+// Create a resource
+php artisan make:resource UserResource
 
-- CSS: `resources/css/app.css`
-- JS: `resources/js/app.js`
+// In controller
+public function index(): JsonResponse
+{
+    $users = User::with('profile')->paginate();
 
-## Using Assets in Blade
-
-```blade
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>App</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body>
-    <!-- Content -->
-</body>
-</html>
-```
-
-## Tailwind CSS 4
-
-Tailwind 4 has a new configuration approach. Configuration is done in CSS:
-
-```css
-/* resources/css/app.css */
-@import "tailwindcss";
-
-@theme {
-  --color-brand: #your-color;
+    return response()->json([
+        'data' => UserResource::collection($users),
+        'meta' => [
+            'current_page' => $users->currentPage(),
+            'total' => $users->total(),
+        ],
+    ]);
 }
 ```
 
-### Key Changes from Tailwind 3
+### Response Format
 
-- No more `tailwind.config.js` (optional)
-- Configuration via CSS `@theme` directive
-- Improved performance
-- Simplified setup
+Standardize API responses:
 
-## Development Workflow
+```php
+// Success response
+return response()->json([
+    'success' => true,
+    'data' => $data,
+    'message' => 'Operation successful',
+], 200);
 
-### Start Development
-
-```bash
-# Option 1: Laravel dev server (includes Vite)
-composer run dev
-
-# Option 2: Separate terminals
-php artisan serve
-npm run dev
+// Error response
+return response()->json([
+    'success' => false,
+    'message' => 'Error description',
+    'errors' => $errors,
+], 400);
 ```
 
-### Production Deployment
+### API Versioning
 
-```bash
-npm run build
+Support API versioning for backward compatibility:
+
+```php
+// routes/api.php
+Route::prefix('v1')->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+});
+
+Route::prefix('v2')->group(function () {
+    Route::get('/users', [UserV2Controller::class, 'index']);
+});
 ```
 
-This creates optimized assets in `public/build/`.
+## Authentication
 
-## Troubleshooting
+### API Token Authentication
 
-### Vite Manifest Error
+Use Laravel Sanctum or Passport for API authentication:
 
-If you see `Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest`:
+```php
+// Sanctum token authentication
+$user = User::where('email', $request->email)->first();
 
-```bash
-npm run build
-# Or run dev server
-npm run dev
+if ($user && Hash::check($request->password, $user->password)) {
+    $token = $user->createToken('api-token')->plainTextToken;
+
+    return response()->json([
+        'token' => $token,
+        'user' => new UserResource($user),
+    ]);
+}
 ```
 
-### Changes Not Reflected
+## CORS Configuration
 
-If frontend changes don't appear:
-1. Ensure Vite dev server is running (`npm run dev`)
-2. Clear browser cache
-3. Hard refresh (Ctrl+Shift+R or Cmd+Shift+R)
+Configure CORS for frontend application in `config/cors.php`:
+
+```php
+'paths' => ['api/*'],
+'allowed_methods' => ['*'],
+'allowed_origins' => ['https://frontend.example.com'],
+'allowed_headers' => ['*'],
+```
+
+## No Frontend Assets
+
+Since this is a pure API:
+
+- No Vite build process needed for this project
+- No Blade templates or views
+- Focus on API endpoints and data transformation
+- Frontend is a separate repository/application
+
+## Testing API Endpoints
+
+```php
+use Tests\TestCase;
+use App\Models\User;
+
+class ApiTest extends TestCase
+{
+    #[Test]
+    public function it_returns_users_list(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->getJson('/api/v1/users');
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => ['id', 'name', 'email'],
+                ],
+            ]);
+    }
+}
+```
+
+## Documentation
+
+Consider using tools like:
+- **Swagger/OpenAPI** for API documentation
+- **Scribe** for automatic API documentation generation
+- **Postman** collections for testing

@@ -5,9 +5,10 @@ This directory contains project-specific rules that guide AI assistants when wor
 ## Rule Files
 
 - [`laravel-version.md`](laravel-version.md) - Laravel 13 specific patterns and APIs
-- [`database.md`](database.md) - SQLite-specific considerations
+- [`database.md`](database.md) - MySQL database configuration and multi-database support
+- [`api-development.md`](api-development.md) - API development patterns and best practices
 - [`testing.md`](testing.md) - PHPUnit testing conventions
-- [`frontend.md`](frontend.md) - Frontend stack (Vite + Tailwind CSS 4)
+- [`frontend.md`](frontend.md) - Pure API backend architecture
 - [`code-style.md`](code-style.md) - PHP code style and Pint configuration
 
 ## How Rules Work

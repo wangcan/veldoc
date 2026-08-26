@@ -1,0 +1,17 @@
+
+为userCenter模块的所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/develop/user-center_api.json
+
+忽略以下所有需求描述
+
+用nwidart/laravel-modules新增一个用户中心模块。
+数据库使用基础数据库 DB_DATABASE=job_passport
+
+模块功能：
+1. 管理用户；
+2. 用户认证使用jwt；
+3. 支持账号、密码登录；
+4. 支持手机号（限中国大陆手机号）、验证码登录；
+5. 引入laravel/passport，支持第三方认证授权；
+6. 引入spatie/laravel-permission，提供完整的角色权限系统
+
+需求执行结果的，记录到文件：.requirements/develop/user-center.md
