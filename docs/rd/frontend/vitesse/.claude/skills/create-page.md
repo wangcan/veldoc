@@ -1,203 +1,119 @@
 ---
 name: create-page
-description: 创建新的页面组件，配置路由和布局
+description: 创建新的页面，自动处理路由配置和布局选择
+trigger: /create-page
 ---
 
-# 创建页面组件
+# 创建页面技能
 
-这个 skill 用于创建新的页面组件，配置路由和布局。
+使用此技能快速创建符合项目规范的 Vue 页面。
 
-## 使用场景
+## 使用方法
 
-当需要创建新的页面时使用此 skill。
+```
+/create-page <页面路径> [描述]
+```
+
+## 示例
+
+```
+/create-page gallery/index 图片画廊列表页
+/create-page gallery/[id] 图片详情页，显示单张图片
+/create-page books/[id]/[chapter] 书籍章节阅读页
+```
 
 ## 执行步骤
 
-1. **确定路由路径**
-   - 确定页面的 URL 路径
-   - 确定是否需要动态路由参数
-   - 确定文件位置（`src/pages/`）
-
-2. **选择布局**
-   - 从现有布局中选择（default、home、404）
-   - 或创建新的布局组件
-
-3. **创建页面文件**
-   - 使用 `<script setup lang="ts">` 语法
-   - 设置页面元信息
-   - 实现页面逻辑
-   - 使用 UnoCSS 样式
-
-4. **配置国际化**
-   - 在语言文件中添加翻译键
-   - 使用 `useI18n()` 获取翻译函数
+1. 确认页面路径和功能描述
+2. 确定路由类型：
+   - 静态路由 (`index.vue`)
+   - 动态路由 (`[id].vue`)
+   - 嵌套路由 (目录结构)
+3. 选择合适的布局
+4. 在 `src/pages/` 目录创建页面文件
+5. 生成页面代码，包括：
+   - SEO 元信息
+   - 响应式布局
+   - 必要的组件引用
 
 ## 页面模板
 
-### 基础页面模板
+### 列表页
 
 ```vue
 <script setup lang="ts">
-/**
- * [页面名称]
- * @description [页面描述]
- */
-
-defineOptions({
-  name: '[PageName]Page',
-})
-
-const { t } = useI18n()
+import { useHead } from '@unhead/vue'
 
 useHead({
-  title: () => t('[translation-key]'),
+  title: '页面标题',
+  meta: [
+    { name: 'description', content: '页面描述' },
+  ],
 })
+
+// 列表数据
+const items = ref([])
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto p-6">
-    <!-- 页面内容 -->
+  <div class="page-list p-4 md:p-6">
+    <h1 class="text-2xl md:text-3xl font-bold mb-6">页面标题</h1>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <!-- 列表项 -->
+    </div>
   </div>
 </template>
-
-<route lang="yaml">
-meta:
-  layout: default
-</route>
 ```
 
-### 动态路由页面模板
+### 详情页（动态路由）
 
 ```vue
 <script setup lang="ts">
-/**
- * [页面名称]
- * @description [页面描述]
- */
+import { useRoute } from 'vue-router/auto'
 
-defineOptions({
-  name: '[PageName]Page',
-})
+const route = useRoute('/gallery/[id]')
 
-const route = useRoute()
-const router = useRouter()
-const param = computed(() => route.params.param as string)
+// 使用路由参数
+const id = computed(() => route.params.id)
 
-const { t } = useI18n()
-
-useHead({
-  title: () => t('[translation-key]'),
-})
-
-// 加载数据
-const data = ref(null)
-const loading = ref(true)
+// 获取详情数据
+const detail = ref(null)
 
 onMounted(async () => {
-  // 加载数据逻辑
-  loading.value = false
+  // 加载数据
 })
 </script>
 
 <template>
-  <div v-if="loading" class="text-center py-8">
-    Loading...
-  </div>
-  <div v-else class="max-w-4xl mx-auto p-6">
-    <!-- 页面内容 -->
-  </div>
-</template>
-
-<route lang="yaml">
-meta:
-  layout: default
-</route>
-```
-
-## 路由配置规则
-
-### 文件路径映射
-
-- `src/pages/index.vue` → `/`
-- `src/pages/about.vue` → `/about`
-- `src/pages/users/index.vue` → `/users`
-- `src/pages/users/[id].vue` → `/users/:id`
-- `src/pages/users/[id]/settings.vue` → `/users/:id/settings`
-
-### 路由元信息
-
-在页面中使用 `<route>` 块配置元信息：
-
-```vue
-<route lang="yaml">
-meta:
-  layout: admin
-  requiresAuth: true
-  title: 'Admin Dashboard'
-</route>
-```
-
-## 布局选择
-
-### default 布局
-- 标准页面布局
-- 包含页眉和页脚
-- 适用于大多数页面
-
-### home 布局
-- 首页布局
-- 居中显示
-- 适用于落地页、首页
-
-### 404 布局
-- 404 错误页面布局
-- 简洁显示错误信息
-
-### 自定义布局
-如需新布局，在 `src/layouts/` 创建：
-
-```vue
-<!-- src/layouts/admin.vue -->
-<script setup lang="ts">
-// 布局逻辑
-</script>
-
-<template>
-  <div class="min-h-screen flex">
-    <aside class="w-64">
-      <!-- 侧边栏 -->
-    </aside>
-    <main class="flex-1">
-      <slot />
-    </main>
+  <div class="page-detail p-4 md:p-6">
+    <h1 class="text-2xl md:text-3xl font-bold mb-6">{{ detail?.title }}</h1>
+    
+    <!-- 详情内容 -->
   </div>
 </template>
 ```
 
-## 国际化配置
+## 布局配置
 
-在对应的语言文件中添加翻译键：
-
-```yaml
-# locales/en.yml
-page:
-  title: 'Page Title'
-  description: 'Page Description'
+```vue
+<route lang="yaml">
+definePage:
+  layout: home
+</route>
 ```
 
-```yaml
-# locales/zh-CN.yml
-page:
-  title: '页面标题'
-  description: '页面描述'
+## Markdown 页面
+
+对于简单的内容页面，可以使用 Markdown：
+
+```markdown
+---
+title: 页面标题
+description: 页面描述
+---
+
+# 标题
+
+页面内容...
 ```
-
-## 注意事项
-
-1. 页面组件放在 `src/pages/` 目录
-2. 使用 `defineOptions` 设置组件名称（以 `Page` 结尾）
-3. 总是设置页面标题（`useHead`）
-4. 为异步数据提供加载状态
-5. 处理路由参数错误和数据加载失败
-6. 使用国际化管理页面文本
-7. 遵循代码规范和命名约定

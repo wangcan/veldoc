@@ -1,1 +1,0 @@
-后续要在当前这个 vitesse 框架 基础上 开发和扩展应用。分析一下当前项目的技术架构，提供一个 供claude 辅助开发的 CLAUDE.md文件，以及生成若干供claude使用的 agent、rule、skill

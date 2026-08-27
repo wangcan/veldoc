@@ -1,0 +1,31 @@
+{
+  "$schema": "https://claude.ai/schema/settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm preview:*)",
+      "Read(**/*.vue)",
+      "Read(**/*.ts)",
+      "Read(**/*.js)",
+      "Read(**/*.json)",
+      "Read(**/*.css)",
+      "Read(**/*.md)",
+      "Read(**/*.yml)",
+      "Edit(**/*.vue)",
+      "Edit(**/*.ts)",
+      "Edit(**/*.js)",
+      "Edit(**/*.css)",
+      "Edit(**/*.md)",
+      "Edit(src/**/*.vue)",
+      "Edit(src/**/*.ts)",
+      "Edit(src/**/*.css)",
+      "Edit(locales/**/*.yml)"
+    ]
+  }
+}

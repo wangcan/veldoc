@@ -6,8 +6,8 @@ targetPath='/data/docker/veldoc/docs/rd/'
 case $1 in
 'vitesse')
   fullPath="${targetPath}frontend/vitesse/"
-  sourcePath="/data/project/frontapp/vitesse"
-  resources=(.claude CLAUDE.md .requirements MEMORY.md README.zh-CN.md)
+  sourcePath="/data/project/frontend/vitesse"
+  resources=(.claude CLAUDE.md .requirements README.zh-CN.md)
   ;;
 'laravel')
   fullPath="${targetPath}backend/laravel/"
