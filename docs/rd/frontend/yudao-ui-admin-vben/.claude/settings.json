@@ -1,0 +1,26 @@
+{
+  "$schema": "https://claude.ai/settings.schema.json",
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm install)",
+      "Bash(pnpm add:*)",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "Bash(git status)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Read(**)",
+      "Edit(**/.claude/**)",
+      "Edit(**/.requirements/**)"
+    ],
+    "deny": []
+  }
+}

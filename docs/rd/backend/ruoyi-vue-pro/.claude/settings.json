@@ -1,0 +1,29 @@
+{
+  "project": {
+    "name": "ruoyi-vue-pro",
+    "description": "芋道 ruoyi-vue-pro 企业级快速开发平台",
+    "javaVersion": "25",
+    "springBootVersion": "4.1.0"
+  },
+  "build": {
+    "command": "mvn clean package -DskipTests",
+    "testCommand": "mvn test",
+    "startCommand": "mvn spring-boot:run -pl yudao-server"
+  },
+  "rules": [
+    ".claude/rules/java-code-style.md",
+    ".claude/rules/spring-boot-patterns.md",
+    ".claude/rules/mybatis-plus-patterns.md",
+    ".claude/rules/security-patterns.md"
+  ],
+  "agents": [
+    ".claude/agents/java-developer.md",
+    ".claude/agents/code-reviewer.md",
+    ".claude/agents/sql-developer.md"
+  ],
+  "skills": [
+    ".claude/skills/create-module.md",
+    ".claude/skills/create-crud.md",
+    ".claude/skills/run-tests.md"
+  ]
+}

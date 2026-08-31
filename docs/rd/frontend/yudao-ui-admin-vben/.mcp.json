@@ -1,0 +1,53 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/data/project/frontend/yudao-ui-admin-vben"
+      ],
+      "description": "文件系统访问 - 用于代码文件操作、目录浏览、批量文件生成"
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "description": "GitHub集成 - 用于仓库管理、Issue/PR操作、代码协作",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "fetch": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ],
+      "description": "HTTP请求 - 用于API测试、文档获取、接口调试"
+    },
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "description": "知识图谱 - 用于存储项目知识、架构决策、业务规则"
+    },
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "description": "结构化思考 - 用于复杂问题分析、架构设计、决策推理"
+    }
+  }
+}

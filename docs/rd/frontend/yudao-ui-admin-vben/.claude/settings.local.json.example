@@ -1,0 +1,47 @@
+{
+  "$schema": "https://claude.ai/schema/settings.local.json",
+  "_comment": "本地个人配置文件示例。请复制此文件为 settings.local.json 并根据需要修改。",
+
+  "personal": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "preferredLanguage": "zh-CN"
+  },
+
+  "preferences": {
+    "codeStyle": {
+      "indentSize": 2,
+      "useTabs": false,
+      "semi": true,
+      "singleQuote": true,
+      "trailingComma": "all",
+      "printWidth": 80
+    },
+
+    "editor": {
+      "formatOnSave": true,
+      "autoSave": "afterDelay",
+      "autoSaveDelay": 1000
+    },
+
+    "development": {
+      "defaultApp": "web-ele",
+      "autoReload": true,
+      "showNotifications": true
+    }
+  },
+
+  "customizations": {
+    "_comment": "在此添加您的自定义配置",
+
+    "favoriteAgents": [
+      "vue-component-generator",
+      "page-builder"
+    ],
+
+    "frequentlyUsedCommands": [
+      "/create-module",
+      "/generate-api"
+    ]
+  }
+}

@@ -27,5 +27,6 @@
       "Edit(src/**/*.css)",
       "Edit(locales/**/*.yml)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true
 }

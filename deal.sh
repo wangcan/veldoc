@@ -19,6 +19,16 @@ case $1 in
   sourcePath="/data/project/frontend/vue-vben-admin"
   resources=(.mcp.json .claude .requirements CLAUDE.md README.zh-CN.md)
   ;;
+'ruoyi')
+  fullPath="${targetPath}backend/ruoyi-vue-pro/"
+  sourcePath="/data/project/java/ruoyi-vue-pro"
+  resources=(.claude .requirements CLAUDE.md README.md)
+  ;;
+'yudao')
+  fullPath="${targetPath}frontend/yudao-ui-admin-vben/"
+  sourcePath="/data/project/frontend/yudao-ui-admin-vben"
+  resources=(.mcp.json .claude .requirements CLAUDE.md README.md)
+  ;;
 *)
   echo 'error type'-
   exit 1
@@ -33,3 +43,5 @@ for currentResource in ${resources[*]}; do
   $(\cp ${sourcePath}/${currentResource} ${fullPath}/${currentResource} -rf)
   echo "${sourcePath}/${currentResource} ${fullPath}/${currentResource}"
 done
+
+$(rm -f ${fullPath}/.claude/settings.local.json)
