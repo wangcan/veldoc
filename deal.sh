@@ -1,31 +1,37 @@
 #!/bin/bash
 # sync research & development project claude
 
-targetPath='/data/docker/veldoc/docs/rd/'
+targetPath='/data/docker/veldoc/docs/'
 
 case $1 in
-'vitesse')
-  fullPath="${targetPath}frontend/vitesse/"
-  sourcePath="/data/project/frontend/vitesse"
-  resources=(.claude CLAUDE.md .requirements README.zh-CN.md)
+'liupin-parent')
+  fullPath="${targetPath}projects/java/liupin-parent/"
+  sourcePath="/data/java/liupin-parent"
+  resources=(.claude .requirements CLAUDE.md)
   ;;
+
 'laravel')
-  fullPath="${targetPath}backend/laravel/"
+  fullPath="${targetPath}rd/backend/laravel/"
   sourcePath="/data/project/backend/ai-laravel"
   resources=(.mcp.json boost.json .claude .requirements CLAUDE.md README.md)
   ;;
-'vben')
-  fullPath="${targetPath}frontend/vue-vben-admin/"
-  sourcePath="/data/project/frontend/vue-vben-admin"
-  resources=(.mcp.json .claude .requirements CLAUDE.md README.zh-CN.md)
-  ;;
 'ruoyi')
-  fullPath="${targetPath}backend/ruoyi-vue-pro/"
+  fullPath="${targetPath}rd/backend/ruoyi-vue-pro/"
   sourcePath="/data/project/java/ruoyi-vue-pro"
   resources=(.claude .requirements CLAUDE.md README.md)
   ;;
+'vitesse')
+  fullPath="${targetPath}rd/frontend/vitesse/"
+  sourcePath="/data/project/frontend/vitesse"
+  resources=(.claude CLAUDE.md .requirements README.zh-CN.md)
+  ;;
+'vben')
+  fullPath="${targetPath}rd/frontend/vue-vben-admin/"
+  sourcePath="/data/project/frontend/vue-vben-admin"
+  resources=(.mcp.json .claude .requirements CLAUDE.md README.zh-CN.md)
+  ;;
 'yudao')
-  fullPath="${targetPath}frontend/yudao-ui-admin-vben/"
+  fullPath="${targetPath}rd/frontend/yudao-ui-admin-vben/"
   sourcePath="/data/project/frontend/yudao-ui-admin-vben"
   resources=(.mcp.json .claude .requirements CLAUDE.md README.md)
   ;;
@@ -45,3 +51,4 @@ for currentResource in ${resources[*]}; do
 done
 
 $(rm -f ${fullPath}/.claude/settings.local.json)
+$(rm -f ${fullPath}/.requirements/.gitignore)

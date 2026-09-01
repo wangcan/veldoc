@@ -1,0 +1,1388 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "liupin-oa-service API 文档",
+    "description": "OA 办公自动化服务接口文档",
+    "version": "1.0.0",
+    "contact": {
+      "name": "liupin"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:10011",
+      "description": "开发环境"
+    }
+  ],
+  "tags": [
+    {
+      "name": "个人职责管理",
+      "description": "个人职责相关接口"
+    },
+    {
+      "name": "员工入职管理",
+      "description": "员工待入职信息相关接口"
+    },
+    {
+      "name": "薪酬福利管理",
+      "description": "薪酬福利相关接口"
+    },
+    {
+      "name": "OKR管理",
+      "description": "OKR 目标管理相关接口"
+    },
+    {
+      "name": "审批流程管理",
+      "description": "审批流程相关接口"
+    },
+    {
+      "name": "审批流程效率统计",
+      "description": "审批流程效率统计相关接口"
+    },
+    {
+      "name": "组织架构管理",
+      "description": "组织架构相关接口"
+    },
+    {
+      "name": "页面视图",
+      "description": "页面视图控制器"
+    }
+  ],
+  "paths": {
+    "/api/v1/personDuty/page": {
+      "get": {
+        "tags": ["个人职责管理"],
+        "summary": "查询个人职责分页数据",
+        "description": "根据 fdId 和 type 查询个人职责分页数据",
+        "operationId": "personDutyPage",
+        "parameters": [
+          {
+            "name": "fdId",
+            "in": "query",
+            "description": "用户ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "类型",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/personDuty/save": {
+      "post": {
+        "tags": ["个人职责管理"],
+        "summary": "保存个人职责信息",
+        "description": "保存个人职责信息，包括职责类型和工作习惯",
+        "operationId": "personDutySave",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersionDutyResultParam"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/staffEntry/pendingEmploymentInsert": {
+      "get": {
+        "tags": ["员工入职管理"],
+        "summary": "待入职员工信息提交",
+        "description": "员工待入职信息提交，先将待入职的数据保存至数据库，然后定时匹配员工表里的手机号，将数据修改",
+        "operationId": "pendingEmploymentInsert",
+        "parameters": [
+          {
+            "name": "userFdId",
+            "in": "query",
+            "description": "用户ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fdMobileNo",
+            "in": "query",
+            "description": "手机号",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rank",
+            "in": "query",
+            "description": "职级",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contractType",
+            "in": "query",
+            "description": "合同类型：1-劳动合同 2-劳务合同 3-实习合同 4-兼职合同 5-其他合同",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "superiorLeader",
+            "in": "query",
+            "description": "上级领导",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supervisor",
+            "in": "query",
+            "description": "导师",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "employeeStatus",
+            "in": "query",
+            "description": "员工状态：1-全职 2-兼职 3-实习 4-临时工 5-退休返聘 6-劳务 7-外派",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "isContinuousService",
+            "in": "query",
+            "description": "是否为连续工龄：1-是 2-否",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "clothingSize",
+            "in": "query",
+            "description": "衣服尺寸：1-S 2-M 3-L 4-XL 5-XXL 6-XXXL",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/staffEntry/getByUserPhone": {
+      "get": {
+        "tags": ["员工入职管理"],
+        "summary": "根据手机号查询待入职员工信息",
+        "description": "根据手机号查询待入职员工信息",
+        "operationId": "getByUserPhone",
+        "parameters": [
+          {
+            "name": "phone",
+            "in": "query",
+            "description": "手机号",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/welfare/bizWelfareList": {
+      "get": {
+        "tags": ["薪酬福利管理"],
+        "summary": "查询薪酬福利列表",
+        "description": "分页查询薪酬福利列表",
+        "operationId": "bizWelfareList",
+        "parameters": [
+          {
+            "name": "curPage",
+            "in": "query",
+            "description": "当前页码",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页大小",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "fdName",
+            "in": "query",
+            "description": "员工姓名",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/welfare/update": {
+      "post": {
+        "tags": ["薪酬福利管理"],
+        "summary": "更新薪酬福利信息",
+        "description": "更新员工薪酬福利信息",
+        "operationId": "welfareUpdate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BizWelfareUpdateParam"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/welfare/bizWelfareExport": {
+      "get": {
+        "tags": ["薪酬福利管理"],
+        "summary": "导出薪酬福利数据",
+        "description": "导出薪酬福利数据到Excel",
+        "operationId": "bizWelfareExport",
+        "parameters": [
+          {
+            "name": "fdName",
+            "in": "query",
+            "description": "员工姓名",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/welfare/salaryUpdate": {
+      "post": {
+        "tags": ["薪酬福利管理"],
+        "summary": "员工薪资同步更新",
+        "description": "员工薪资同步更新，手机号必须为11位",
+        "operationId": "salaryUpdate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BizSalaryParam"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/okr/personalOkr": {
+      "get": {
+        "tags": ["OKR管理"],
+        "summary": "查询个人OKR数据",
+        "description": "根据用户ID和月份查询个人OKR数据",
+        "operationId": "personalOkr",
+        "parameters": [
+          {
+            "name": "userFdId",
+            "in": "query",
+            "description": "用户ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "monthNum",
+            "in": "query",
+            "description": "月份数字（必填）",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/okr/pullOkrDataByMonthNum": {
+      "get": {
+        "tags": ["OKR管理"],
+        "summary": "根据月份拉取OKR数据",
+        "description": "根据月份从Tita系统拉取OKR数据",
+        "operationId": "pullOkrDataByMonthNum",
+        "parameters": [
+          {
+            "name": "monthNum",
+            "in": "query",
+            "description": "月份数字",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviewMain/reviewMainTemplateCategory": {
+      "get": {
+        "tags": ["审批流程管理"],
+        "summary": "获取审批模板分类",
+        "description": "获取所有审批模板分类列表",
+        "operationId": "reviewMainTemplateCategory",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviewMain/list": {
+      "get": {
+        "tags": ["审批流程管理"],
+        "summary": "查询审批流程列表",
+        "description": "分页查询审批流程列表，支持按用户、搜索文本、关联用户、日期范围等条件查询",
+        "operationId": "reviewMainList",
+        "parameters": [
+          {
+            "name": "curPage",
+            "in": "query",
+            "description": "当前页码",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页大小",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "userFdId",
+            "in": "query",
+            "description": "用户ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchText",
+            "in": "query",
+            "description": "搜索文本",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "relateUser",
+            "in": "query",
+            "description": "关联用户",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateRange",
+            "in": "query",
+            "description": "日期范围（格式：2024-01-01 - 2024-01-31）",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviewMainConsuming/consumingList": {
+      "post": {
+        "tags": ["审批流程效率统计"],
+        "summary": "审批流程效率统计列表查询",
+        "description": "分页查询审批流程效率统计列表，支持按日期范围、用户、部门、审批模板等维度统计",
+        "operationId": "consumingList",
+        "parameters": [
+          {
+            "name": "curPage",
+            "in": "query",
+            "description": "当前页码",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页大小",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "dateRange",
+            "in": "query",
+            "description": "日期范围（格式：2024-01-01 - 2024-01-31），为空则默认最近一个月",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "userFdIds",
+            "in": "query",
+            "description": "用户ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "deptFdIds",
+            "in": "query",
+            "description": "部门ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "templateFdIds",
+            "in": "query",
+            "description": "审批模板ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviewMainConsuming/consumingListExport": {
+      "post": {
+        "tags": ["审批流程效率统计"],
+        "summary": "审批效率统计导出",
+        "description": "导出审批流程效率统计数据到Excel",
+        "operationId": "consumingListExport",
+        "parameters": [
+          {
+            "name": "dateRange",
+            "in": "query",
+            "description": "日期范围（格式：2024-01-01 - 2024-01-31），为空则默认最近一个月",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "userFdIds",
+            "in": "query",
+            "description": "用户ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "deptFdIds",
+            "in": "query",
+            "description": "部门ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "templateFdIds",
+            "in": "query",
+            "description": "审批模板ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviewMainConsuming/consumingDetailList": {
+      "post": {
+        "tags": ["审批流程效率统计"],
+        "summary": "审批详情统计列表查询",
+        "description": "分页查询审批详情统计列表",
+        "operationId": "consumingDetailList",
+        "parameters": [
+          {
+            "name": "curPage",
+            "in": "query",
+            "description": "当前页码",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页大小",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "dateRange",
+            "in": "query",
+            "description": "日期范围（格式：2024-01-01 - 2024-01-31），为空则默认最近一个月",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "userFdIds",
+            "in": "query",
+            "description": "用户ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "deptFdIds",
+            "in": "query",
+            "description": "部门ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "templateFdIds",
+            "in": "query",
+            "description": "审批模板ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviewMainConsuming/consumingDetailListExport": {
+      "post": {
+        "tags": ["审批流程效率统计"],
+        "summary": "审批详情统计导出",
+        "description": "导出审批详情统计数据到Excel",
+        "operationId": "consumingDetailListExport",
+        "parameters": [
+          {
+            "name": "dateRange",
+            "in": "query",
+            "description": "日期范围（格式：2024-01-01 - 2024-01-31），为空则默认最近一个月",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "userFdIds",
+            "in": "query",
+            "description": "用户ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "deptFdIds",
+            "in": "query",
+            "description": "部门ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "templateFdIds",
+            "in": "query",
+            "description": "审批模板ID列表（逗号分隔）",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sysOrgElement/auth": {
+      "post": {
+        "tags": ["组织架构管理"],
+        "summary": "授权认证",
+        "description": "使用secret和sign进行身份验证，验证成功后返回授权信息",
+        "operationId": "sysOrgElementAuth",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "secret": {
+                    "type": "string",
+                    "description": "密钥"
+                  },
+                  "sign": {
+                    "type": "string",
+                    "description": "签名"
+                  }
+                },
+                "required": ["secret", "sign"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "认证失败"
+          }
+        }
+      }
+    },
+    "/api/v1/sysOrgElement/list": {
+      "get": {
+        "tags": ["组织架构管理"],
+        "summary": "个人职责用户列表",
+        "description": "分页查询个人职责用户列表",
+        "operationId": "sysOrgElementList",
+        "parameters": [
+          {
+            "name": "curPage",
+            "in": "query",
+            "description": "当前页码",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页大小",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "fdName",
+            "in": "query",
+            "description": "用户姓名",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userFdId",
+            "in": "query",
+            "description": "用户ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sysOrgElement/personList": {
+      "get": {
+        "tags": ["组织架构管理"],
+        "summary": "员工信息列表",
+        "description": "分页查询员工信息列表",
+        "operationId": "personList",
+        "parameters": [
+          {
+            "name": "curPage",
+            "in": "query",
+            "description": "当前页码",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页大小",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "fdName",
+            "in": "query",
+            "description": "员工姓名",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sysOrgElement/deptTree": {
+      "get": {
+        "tags": ["组织架构管理"],
+        "summary": "查询部门树",
+        "description": "查询完整的企业部门树结构",
+        "operationId": "deptTree",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sysOrgElement/postList": {
+      "get": {
+        "tags": ["组织架构管理"],
+        "summary": "岗位列表",
+        "description": "分页查询岗位列表",
+        "operationId": "postList",
+        "parameters": [
+          {
+            "name": "curPage",
+            "in": "query",
+            "description": "当前页码",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页大小",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "fdName",
+            "in": "query",
+            "description": "岗位名称",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userFdId",
+            "in": "query",
+            "description": "用户ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/view/reviewMainPage": {
+      "get": {
+        "tags": ["页面视图"],
+        "summary": "审批流程分页视图",
+        "description": "渲染审批流程分页页面",
+        "operationId": "reviewMainPage",
+        "parameters": [
+          {
+            "name": "userFdId",
+            "in": "query",
+            "description": "用户ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/view/reviewMainConsumingPage": {
+      "get": {
+        "tags": ["页面视图"],
+        "summary": "审批流程效率统计视图",
+        "description": "渲染审批流程效率统计页面",
+        "operationId": "reviewMainConsumingPage",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/view/reviewMainConsumingDetailPage": {
+      "post": {
+        "tags": ["页面视图"],
+        "summary": "审批流程效率详情视图",
+        "description": "渲染审批流程效率详情页面",
+        "operationId": "reviewMainConsumingDetailPage",
+        "parameters": [
+          {
+            "name": "dateRange",
+            "in": "query",
+            "description": "日期范围",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "userFdNames",
+            "in": "query",
+            "description": "用户名称列表",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "deptFdNames",
+            "in": "query",
+            "description": "部门名称列表",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "templateFdNames",
+            "in": "query",
+            "description": "模板名称列表",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "userFdIds",
+            "in": "query",
+            "description": "用户ID列表（JSON数组格式）",
+            "schema": {
+              "type": "string",
+              "default": "[]"
+            }
+          },
+          {
+            "name": "deptFdIds",
+            "in": "query",
+            "description": "部门ID列表（JSON数组格式）",
+            "schema": {
+              "type": "string",
+              "default": "[]"
+            }
+          },
+          {
+            "name": "templateFdIds",
+            "in": "query",
+            "description": "模板ID列表（JSON数组格式）",
+            "schema": {
+              "type": "string",
+              "default": "[]"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/view/personSearch": {
+      "get": {
+        "tags": ["页面视图"],
+        "summary": "人员查询视图",
+        "description": "渲染人员查询页面",
+        "operationId": "personSearch",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/view/deptTree": {
+      "get": {
+        "tags": ["页面视图"],
+        "summary": "部门树视图",
+        "description": "渲染部门树页面",
+        "operationId": "viewDeptTree",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/view/templateTree": {
+      "get": {
+        "tags": ["页面视图"],
+        "summary": "审批模板树视图",
+        "description": "渲染审批模板树页面",
+        "operationId": "templateTree",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "description": "统一响应对象",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "状态码"
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息"
+          },
+          "data": {
+            "type": "object",
+            "description": "响应数据"
+          }
+        }
+      },
+      "PersionDutyResultParam": {
+        "type": "object",
+        "description": "个人职责结果参数",
+        "properties": {
+          "persionDutyId": {
+            "type": "integer",
+            "description": "个人职责ID"
+          },
+          "dutyTypeList": {
+            "type": "array",
+            "description": "职责类型列表",
+            "items": {
+              "$ref": "#/components/schemas/BizPersionDutyType"
+            }
+          },
+          "habitList": {
+            "type": "array",
+            "description": "工作习惯列表",
+            "items": {
+              "$ref": "#/components/schemas/BizPersionWorkHabit"
+            }
+          }
+        },
+        "required": ["persionDutyId"]
+      },
+      "BizPersionDutyType": {
+        "type": "object",
+        "description": "职责类型",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID"
+          },
+          "typeName": {
+            "type": "string",
+            "description": "类型名称"
+          }
+        }
+      },
+      "BizPersionWorkHabit": {
+        "type": "object",
+        "description": "工作习惯",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID"
+          },
+          "habitName": {
+            "type": "string",
+            "description": "习惯名称"
+          }
+        }
+      },
+      "BizWelfareUpdateParam": {
+        "type": "object",
+        "description": "薪酬福利更新参数",
+        "properties": {
+          "fdId": {
+            "type": "string",
+            "description": "员工ID"
+          },
+          "fdIdCard": {
+            "type": "string",
+            "description": "身份证号"
+          },
+          "fdPayrollAccount": {
+            "type": "string",
+            "description": "银行账号"
+          },
+          "fdSurplusAccount": {
+            "type": "string",
+            "description": "收款方联行号"
+          },
+          "fdPayrollName": {
+            "type": "string",
+            "description": "开户银行"
+          },
+          "fdPayrollBank": {
+            "type": "string",
+            "description": "开户行"
+          },
+          "fdSocialSecurityNumber": {
+            "type": "string",
+            "description": "支付宝账号"
+          }
+        },
+        "required": ["fdId"]
+      },
+      "BizSalaryParam": {
+        "type": "object",
+        "description": "薪资参数",
+        "properties": {
+          "fdMobileNo": {
+            "type": "string",
+            "description": "手机号（11位）"
+          },
+          "probationSalary": {
+            "type": "string",
+            "description": "试用薪资"
+          },
+          "regularSalary": {
+            "type": "string",
+            "description": "转正薪资"
+          }
+        },
+        "required": ["fdMobileNo", "probationSalary", "regularSalary"]
+      }
+    }
+  }
+}

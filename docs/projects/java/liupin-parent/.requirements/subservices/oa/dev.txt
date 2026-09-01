@@ -1,0 +1,22 @@
+oa业务模块开发
+模块地址：liupin-service/liupin-oa-service/
+
+开发需求2：
+1. 接口 /api/v1/welfare/bizWelfareList 功能整改；
+2. 当前记录fd_parentid为空时，通过fd_pre_dept_id获取部门名称；
+
+忽略以下所有需求描述
+
+开发需求1：
+1. 模块resources当前所在目录：src/resources/，希望移动到  src/main/resources/；
+2. 评估一下是否会影响模块的功能，以及是否需要在调整代码；
+3. 需求执行结果，保存在：.requirements/subservices/oa/dev-resources.md
+
+开发需求2：
+1. 接口 /api/v1/welfare/bizWelfareList 功能整改；
+2. 新增返回值部门ID；
+3. 新增一个连接数据库oapi的数据库连接；
+4. 基于当前返回值里的部门名称字段，查询数据库oapi的数据表department_oa，查询条件为 部门名称=`department_oa`.`oa_name`；
+5. 接口返回值新增：匹配到的department_oa记录的id（金蝶ID)、oa_code(OA部门编码)、jd_number(金蝶部门编码)。
+6. 新增的返回值，一并增加到相关的导出功能；
+7. 需求执行结果，保存在：.requirements/subservices/oa/dev-welfarelist.md

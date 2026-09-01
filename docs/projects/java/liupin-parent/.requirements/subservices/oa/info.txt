@@ -1,0 +1,8 @@
+oa业务模块需求
+1. 模块地址：liupin-service/liupin-oa-service/
+2. 分析介绍这个模块的功能。结果保存在 .requirements/subservices/oa/intro-module.md
+3. 提供模块打包、热部署等相关的命令操作文档。结果保存在 .requirements/subservices/oa/intro-deploy.md
+4. 为oa业务模块所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/subservices/oa/api.json
+
+忽略以下所有需求描述
+-. 。结果保存在 .requirements/info/intro-.md
