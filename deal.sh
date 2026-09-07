@@ -30,6 +30,11 @@ case $1 in
   sourcePath="/data/project/frontend/vue-vben-admin"
   resources=(.mcp.json .claude .requirements CLAUDE.md README.zh-CN.md)
   ;;
+'gemini')
+  fullPath="${targetPath}agentai/gemini-langgraph/"
+  sourcePath="/data/agentai/gemini-langgraph"
+  resources=(.claude .requirements CLAUDE.md README.md)
+  ;;
 'yudao')
   fullPath="${targetPath}rd/frontend/yudao-ui-admin-vben/"
   sourcePath="/data/project/frontend/yudao-ui-admin-vben"

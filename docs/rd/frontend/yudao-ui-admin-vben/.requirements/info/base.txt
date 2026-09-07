@@ -1,1 +1,7 @@
-当前项目安装了什么包？结果输出到 .requirements/info/package.md
+需求
+1. 分析说明一次路由请求的完整的运行周期。结果保存在 .requirements/info/route-cycle.md
+2. 详细介绍一下系统是如何配合后端接口完成登录、认证的。结果保存在 .requirements/info/auth.md
+3. 详细介绍一下系统是如何配合后端接口完成菜单、角色、权限处理的。结果保存在 .requirements/info/permission.md
+
+忽略以下所有需求描述
+-. 。结果保存在 .requirements/info/intro-.md

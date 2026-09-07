@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(make dev)",
+      "Bash(make dev-frontend)",
+      "Bash(make dev-backend)",
+      "Bash(npm install)",
+      "Bash(npm run dev)",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npm run preview)",
+      "Bash(npx shadcn@latest:*)",
+      "Bash(pip install:*)",
+      "Bash(pip install .)",
+      "Bash(pip install -e:*)",
+      "Bash(langgraph dev)",
+      "Bash(langgraph build)",
+      "Bash(ruff:*)",
+      "Bash(mypy:*)",
+      "Bash(pytest:*)",
+      "Bash(eslint:*)",
+      "Bash(tsc:*)",
+      "Bash(vite:*)",
+      "Bash(docker build:*)",
+      "Bash(docker-compose:*)",
+      "Bash(docker compose:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(python examples/cli_research.py:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~/*)",
+      "Read(backend/.env)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/secrets/*)"
+    ]
+  },
+  "env": {
+    "PYTHON_VERSION": "3.11",
+    "BACKEND_PORT": "2024",
+    "FRONTEND_PORT": "5173",
+    "LANGGRAPH_API_URL": "http://127.0.0.1:2024",
+    "FRONTEND_BASE_PATH": "/app/"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": ".claude/hooks/check-secrets.sh" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": ".claude/hooks/format-python.sh" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": ".claude/hooks/notify-done.sh" }
+        ]
+      }
+    ]
+  }
+}

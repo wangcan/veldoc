@@ -1,0 +1,6861 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "liupin-custom-service 接口文档",
+    "description": "留品字帖/毛笔定制业务服务（liupin-custom-service）接口文档。由源码静态解析生成，覆盖 controller 包下全部 HTTP 接口。\n\n- 统一返回结构：ApiResponse（status/msg/data 及分页字段）。\n- 请求体与响应 data 的结构见 components.schemas。\n- 鉴权：多数接口依赖登录态（LoginContext / CustomerAssert.checkLogin），经网关鉴权后转发。\n- 服务端口：9097；网关前缀示例：/customService。",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.liupinshuyuan.com/customService",
+      "description": "生产环境（经网关）"
+    },
+    {
+      "url": "https://route.liupinyike.com/customService",
+      "description": "测试/灰度环境（经网关）"
+    },
+    {
+      "url": "http://localhost:9097",
+      "description": "本地直连"
+    }
+  ],
+  "tags": [
+    {
+      "name": "CustomBizConfigController",
+      "description": "控制器: CustomBizConfigController"
+    },
+    {
+      "name": "CustomController",
+      "description": "控制器: CustomController"
+    },
+    {
+      "name": "CustomKnowledgeController",
+      "description": "控制器: CustomKnowledgeController"
+    },
+    {
+      "name": "CustomQuestionController",
+      "description": "控制器: CustomQuestionController"
+    },
+    {
+      "name": "CustomUserController",
+      "description": "控制器: CustomUserController"
+    },
+    {
+      "name": "CustomUserOrderReviewsController",
+      "description": "控制器: CustomUserOrderReviewsController"
+    },
+    {
+      "name": "CustomUserSelectController",
+      "description": "控制器: CustomUserSelectController"
+    },
+    {
+      "name": "CustomUserViedoPlayController",
+      "description": "控制器: CustomUserViedoPlayController"
+    },
+    {
+      "name": "FileController",
+      "description": "控制器: FileController"
+    },
+    {
+      "name": "LogisticsController",
+      "description": "控制器: LogisticsController"
+    },
+    {
+      "name": "OrderController",
+      "description": "控制器: OrderController"
+    },
+    {
+      "name": "ProductController",
+      "description": "控制器: ProductController"
+    },
+    {
+      "name": "ShareController",
+      "description": "控制器: ShareController"
+    },
+    {
+      "name": "UserAddressController",
+      "description": "控制器: UserAddressController"
+    },
+    {
+      "name": "AdminCustomBizConfigController",
+      "description": "控制器: AdminCustomBizConfigController"
+    },
+    {
+      "name": "AdminCustomBizSettingController",
+      "description": "控制器: AdminCustomBizSettingController"
+    },
+    {
+      "name": "AdminCustomStatisticsController",
+      "description": "控制器: AdminCustomStatisticsController"
+    },
+    {
+      "name": "AdminWarrantyQuestionSubmitController",
+      "description": "控制器: AdminWarrantyQuestionSubmitController"
+    },
+    {
+      "name": "MemberController",
+      "description": "控制器: MemberController"
+    },
+    {
+      "name": "NewcomerPrizesController",
+      "description": "控制器: NewcomerPrizesController"
+    },
+    {
+      "name": "OrderLogisticsPushWechatController",
+      "description": "控制器: OrderLogisticsPushWechatController"
+    },
+    {
+      "name": "ProduceSourceUserController",
+      "description": "控制器: ProduceSourceUserController"
+    },
+    {
+      "name": "WarrantyQuestionSubmitController",
+      "description": "控制器: WarrantyQuestionSubmitController"
+    },
+    {
+      "name": "WarrantyQuestionTypeController",
+      "description": "控制器: WarrantyQuestionTypeController"
+    },
+    {
+      "name": "RaffleDrawController",
+      "description": "控制器: RaffleDrawController"
+    },
+    {
+      "name": "ScanBarCodeController",
+      "description": "控制器: ScanBarCodeController"
+    },
+    {
+      "name": "LoginController",
+      "description": "控制器: LoginController"
+    },
+    {
+      "name": "TaoBaoCustomKnowledgeController",
+      "description": "控制器: TaoBaoCustomKnowledgeController"
+    },
+    {
+      "name": "TaoBaoCustomQuestionController",
+      "description": "控制器: TaoBaoCustomQuestionController"
+    },
+    {
+      "name": "TaobaoCustomController",
+      "description": "控制器: TaobaoCustomController"
+    },
+    {
+      "name": "TaobaoCustomUserOrderReviewsController",
+      "description": "控制器: TaobaoCustomUserOrderReviewsController"
+    },
+    {
+      "name": "TaobaoCustomUserSelectController",
+      "description": "控制器: TaobaoCustomUserSelectController"
+    },
+    {
+      "name": "TaobaoOrderController",
+      "description": "控制器: TaobaoOrderController"
+    },
+    {
+      "name": "TaobaoProductController",
+      "description": "控制器: TaobaoProductController"
+    },
+    {
+      "name": "UserCouponPrizesRecordController",
+      "description": "控制器: UserCouponPrizesRecordController"
+    }
+  ],
+  "paths": {
+    "/api/homePage": {
+      "get": {
+        "tags": [
+          "CustomBizConfigController"
+        ],
+        "operationId": "CustomBizConfigController_homePage",
+        "summary": "homePage",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/HomePageResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/homePage/produceSourceText": {
+      "get": {
+        "tags": [
+          "CustomBizConfigController"
+        ],
+        "operationId": "CustomBizConfigController_produceSourceText",
+        "summary": "produceSourceText",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/homePage/deliverOrderTipIsDisplay": {
+      "get": {
+        "tags": [
+          "CustomBizConfigController"
+        ],
+        "operationId": "CustomBizConfigController_deliverOrderTipIsDisplay",
+        "summary": "订单发货提示",
+        "description": "订单发货提示",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeliverOrderTipIsDisplayResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/penPointPage": {
+      "post": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_penPointPage",
+        "summary": "penPointPage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PenPointParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PenPointResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/penPointSpecSelect": {
+      "post": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_penPointSpecSelect",
+        "summary": "penPointSpecSelect",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PenPointSpecParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PenPointSpecResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/getPenPointByProductId": {
+      "get": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_getPenPointByProductId",
+        "summary": "getPenPointByProductId",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PenPointResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/penHolderPage": {
+      "get": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_penHolderPage",
+        "summary": "penHolderPage",
+        "parameters": [
+          {
+            "name": "penPointSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "penHolderSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PenHolderResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/getPenHolderByProductId": {
+      "get": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_getPenHolderByProductId",
+        "summary": "getPenHolderByProductId",
+        "parameters": [
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rangeId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "penHolderSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PenHolderResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/skuCheck": {
+      "get": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_skuCheck",
+        "summary": "skuCheck",
+        "parameters": [
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/letteringPage": {
+      "get": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_letteringPage",
+        "summary": "letteringPage",
+        "parameters": [
+          {
+            "name": "penPointSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "penHolderSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chooseColor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LetteringResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/drawPic": {
+      "post": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_drawPic",
+        "summary": "drawPic",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewParams"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DrawPicResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/previewPage": {
+      "get": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_previewPage",
+        "summary": "previewPage",
+        "parameters": [
+          {
+            "name": "selectId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PreviewResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/sharePic": {
+      "get": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_sharePic",
+        "summary": "sharePic",
+        "parameters": [
+          {
+            "name": "previewId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pointHolderPic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/sharePrice": {
+      "post": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_share",
+        "summary": "分享立减",
+        "description": "分享立减",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ShareResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/penPackagePage": {
+      "get": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_penPackagePage",
+        "summary": "penPackagePage",
+        "parameters": [
+          {
+            "name": "penHolderSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PenPackageResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/customAgain": {
+      "post": {
+        "tags": [
+          "CustomController"
+        ],
+        "operationId": "CustomController_customAgain",
+        "summary": "customAgain",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomAgainParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CustomAgainResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/knowledge/selectCategory": {
+      "get": {
+        "tags": [
+          "CustomKnowledgeController"
+        ],
+        "operationId": "CustomKnowledgeController_selectCategory",
+        "summary": "selectCategory",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CustomKnowledgeCategoryResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/knowledge/selectByCategoryId": {
+      "get": {
+        "tags": [
+          "CustomKnowledgeController"
+        ],
+        "operationId": "CustomKnowledgeController_selectByCategoryId",
+        "summary": "selectByCategoryId",
+        "parameters": [
+          {
+            "name": "videoCategoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CustomKnowledgeLibraryResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/question/isQuestionPlay": {
+      "get": {
+        "tags": [
+          "CustomQuestionController"
+        ],
+        "operationId": "CustomQuestionController_isQuestionPlay",
+        "summary": "isQuestionPlay",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/question/nextQuestion": {
+      "get": {
+        "tags": [
+          "CustomQuestionController"
+        ],
+        "operationId": "CustomQuestionController_nextQuestion",
+        "summary": "nextQuestion",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CustomQuestionResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/question/questionRecommend": {
+      "get": {
+        "tags": [
+          "CustomQuestionController"
+        ],
+        "operationId": "CustomQuestionController_questionSubmit",
+        "summary": "提交答案和跳过",
+        "description": "提交答案和跳过",
+        "parameters": [
+          {
+            "name": "options",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CustomRecommendResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/user/get": {
+      "get": {
+        "tags": [
+          "CustomUserController"
+        ],
+        "operationId": "CustomUserController_get",
+        "summary": "get",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CustomUserDetailResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/previews/previewList": {
+      "get": {
+        "tags": [
+          "CustomUserOrderReviewsController"
+        ],
+        "operationId": "CustomUserOrderReviewsController_previewList",
+        "summary": "精选口碑评价列表 , 只查询有库存的评价",
+        "description": "精选口碑评价列表 , 只查询有库存的评价",
+        "parameters": [
+          {
+            "name": "pageNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/previews/insert": {
+      "post": {
+        "tags": [
+          "CustomUserOrderReviewsController"
+        ],
+        "operationId": "CustomUserOrderReviewsController_insert",
+        "summary": "insert",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserOrderReviewParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/previews/previewDetail": {
+      "get": {
+        "tags": [
+          "CustomUserOrderReviewsController"
+        ],
+        "operationId": "CustomUserOrderReviewsController_previewDetail",
+        "summary": "previewDetail",
+        "parameters": [
+          {
+            "name": "orderNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserOrderRreviewsResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/userSelect/userRecord": {
+      "get": {
+        "tags": [
+          "CustomUserSelectController"
+        ],
+        "operationId": "CustomUserSelectController_userRecord",
+        "summary": "userRecord",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UserRecordResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/userSelect/userRecordCount": {
+      "get": {
+        "tags": [
+          "CustomUserSelectController"
+        ],
+        "operationId": "CustomUserSelectController_userRecordCount",
+        "summary": "userRecordCount",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/custom/userSelect/del/{id}": {
+      "get": {
+        "tags": [
+          "CustomUserSelectController"
+        ],
+        "operationId": "CustomUserSelectController_del",
+        "summary": "del",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videoPlay/insert": {
+      "post": {
+        "tags": [
+          "CustomUserViedoPlayController"
+        ],
+        "operationId": "CustomUserViedoPlayController_insert",
+        "summary": "insert",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videoPlay/isPlay": {
+      "get": {
+        "tags": [
+          "CustomUserViedoPlayController"
+        ],
+        "operationId": "CustomUserViedoPlayController_isPlay",
+        "summary": "isPlay",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/file/imgFile": {
+      "post": {
+        "tags": [
+          "FileController"
+        ],
+        "operationId": "FileController_imgFileUpload",
+        "summary": "imgFileUpload",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/file/videoFile": {
+      "post": {
+        "tags": [
+          "FileController"
+        ],
+        "operationId": "FileController_videoFileUpload",
+        "summary": "videoFileUpload",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/logistics/getByOrderNum": {
+      "get": {
+        "tags": [
+          "LogisticsController"
+        ],
+        "operationId": "LogisticsController_getByOrderNum",
+        "summary": "getByOrderNum",
+        "parameters": [
+          {
+            "name": "orderNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/logistics/testLogisticsNumByOrderNum": {
+      "get": {
+        "tags": [
+          "LogisticsController"
+        ],
+        "operationId": "LogisticsController_testLogisticsNumByOrderNum",
+        "summary": "testLogisticsNumByOrderNum",
+        "parameters": [
+          {
+            "name": "orderNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/payDetailPage": {
+      "post": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_payDetailPage",
+        "summary": "payDetailPage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayDetailParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PayDetailResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/submitOrder": {
+      "post": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_orderSubmit",
+        "summary": "orderSubmit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderSubmitParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/refund": {
+      "post": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_refund",
+        "summary": "refund",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/cancelPay": {
+      "get": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_cancelPay",
+        "summary": "cancelPay",
+        "parameters": [
+          {
+            "name": "orderNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/orderList": {
+      "get": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_orderList",
+        "summary": "orderList",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/OrderListResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/reviewsList": {
+      "get": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_reviewsList",
+        "summary": "reviewsList",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/OrderListResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/orderDetail": {
+      "get": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_orderDetail",
+        "summary": "orderDetail",
+        "parameters": [
+          {
+            "name": "orderNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OrderDetailResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/wxPayCallback": {
+      "post": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_payNotify",
+        "summary": "毛笔定制回调",
+        "description": "毛笔定制回调",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/wxPayCallbackTest001": {
+      "get": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_wxPayCallbackTest001",
+        "summary": "手动修复订单",
+        "description": "手动修复订单",
+        "parameters": [
+          {
+            "name": "orderNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/wxPayCallback2": {
+      "post": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_payNotify",
+        "summary": "payNotify",
+        "parameters": [
+          {
+            "name": "xmlStr",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/wxRefundPayCallback": {
+      "post": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_wxRefundPayCallback",
+        "summary": "wxRefundPayCallback",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/freezeStockTest": {
+      "get": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_freezeStockTest",
+        "summary": "freezeStockTest",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/realStockTest": {
+      "get": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_realStockTest",
+        "summary": "realStockTest",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/realStockTest2": {
+      "get": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_realStockTest2",
+        "summary": "realStockTest2",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/order/repairOrder": {
+      "get": {
+        "tags": [
+          "OrderController"
+        ],
+        "operationId": "OrderController_repairOrder",
+        "summary": "repairOrder",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "wxCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/product/desc": {
+      "get": {
+        "tags": [
+          "ProductController"
+        ],
+        "operationId": "ProductController_penPointPage",
+        "summary": "penPointPage",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/share/custom": {
+      "get": {
+        "tags": [
+          "ShareController"
+        ],
+        "operationId": "ShareController_payDetailPage",
+        "summary": "payDetailPage",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userAddress/list": {
+      "get": {
+        "tags": [
+          "UserAddressController"
+        ],
+        "operationId": "UserAddressController_list",
+        "summary": "list",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UserAddressInfo"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userAddress/getById": {
+      "get": {
+        "tags": [
+          "UserAddressController"
+        ],
+        "operationId": "UserAddressController_getById",
+        "summary": "getById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserAddressInfo"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userAddress/delete": {
+      "get": {
+        "tags": [
+          "UserAddressController"
+        ],
+        "operationId": "UserAddressController_delete",
+        "summary": "delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userAddress/defaultAddress": {
+      "get": {
+        "tags": [
+          "UserAddressController"
+        ],
+        "operationId": "UserAddressController_defaultAddress",
+        "summary": "defaultAddress",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userAddress/insert": {
+      "post": {
+        "tags": [
+          "UserAddressController"
+        ],
+        "operationId": "UserAddressController_insert",
+        "summary": "insert",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAddressInfo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userAddress/update": {
+      "post": {
+        "tags": [
+          "UserAddressController"
+        ],
+        "operationId": "UserAddressController_update",
+        "summary": "update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAddressInfo"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/homePage/get": {
+      "get": {
+        "tags": [
+          "AdminCustomBizConfigController"
+        ],
+        "operationId": "AdminCustomBizConfigController_getByPlatId",
+        "summary": "getByPlatId",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AdminCustomBizConfigResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/wxTradeGet": {
+      "get": {
+        "tags": [
+          "AdminCustomBizConfigController"
+        ],
+        "operationId": "AdminCustomBizConfigController_wxTradeGet",
+        "summary": "wxTradeGet",
+        "parameters": [
+          {
+            "name": "sec",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "middleOrder",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/setting/customerDetail": {
+      "get": {
+        "tags": [
+          "AdminCustomBizSettingController"
+        ],
+        "operationId": "AdminCustomBizSettingController_customer",
+        "summary": "customer",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/setting/sendMsg": {
+      "get": {
+        "tags": [
+          "AdminCustomBizSettingController"
+        ],
+        "operationId": "AdminCustomBizSettingController_sendMsg",
+        "summary": "sendMsg",
+        "parameters": [
+          {
+            "name": "wxCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/statistics/users": {
+      "get": {
+        "tags": [
+          "AdminCustomStatisticsController"
+        ],
+        "operationId": "AdminCustomStatisticsController_userStatistics",
+        "summary": "userStatistics",
+        "parameters": [
+          {
+            "name": "pageNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/statistics/usersExport": {
+      "get": {
+        "tags": [
+          "AdminCustomStatisticsController"
+        ],
+        "operationId": "AdminCustomStatisticsController_usersExport",
+        "summary": "usersExport",
+        "parameters": [
+          {
+            "name": "pageNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/statistics/userSelect": {
+      "get": {
+        "tags": [
+          "AdminCustomStatisticsController"
+        ],
+        "operationId": "AdminCustomStatisticsController_userSelect",
+        "summary": "userSelect",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UserSelectResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/statistics/userOrders": {
+      "get": {
+        "tags": [
+          "AdminCustomStatisticsController"
+        ],
+        "operationId": "AdminCustomStatisticsController_userOrders",
+        "summary": "userOrders",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UserPaySuccessOrderResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/statistics/useReviews": {
+      "get": {
+        "tags": [
+          "AdminCustomStatisticsController"
+        ],
+        "operationId": "AdminCustomStatisticsController_useReviews",
+        "summary": "useReviews",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UseReviewResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/warrantyQuestionSubmit/pageList": {
+      "get": {
+        "tags": [
+          "AdminWarrantyQuestionSubmitController"
+        ],
+        "operationId": "AdminWarrantyQuestionSubmitController_pageList",
+        "summary": "溯源分页查询",
+        "description": "溯源分页查询",
+        "parameters": [
+          {
+            "name": "pageNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceCodeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "timeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "createTime",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mobile",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/warrantyQuestionSubmit/export": {
+      "get": {
+        "tags": [
+          "AdminWarrantyQuestionSubmitController"
+        ],
+        "operationId": "AdminWarrantyQuestionSubmitController_export",
+        "summary": "excel导出",
+        "description": "excel导出",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceCodeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "timeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "createTime",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mobile",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/WarrantyProduceSourcePageResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/warrantyQuestionSubmit/detail": {
+      "get": {
+        "tags": [
+          "AdminWarrantyQuestionSubmitController"
+        ],
+        "operationId": "AdminWarrantyQuestionSubmitController_detail",
+        "summary": "数据详情",
+        "description": "数据详情",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/WarrantyProduceSourceDetailResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/warrantyQuestionSubmit/handle": {
+      "get": {
+        "tags": [
+          "AdminWarrantyQuestionSubmitController"
+        ],
+        "operationId": "AdminWarrantyQuestionSubmitController_handle",
+        "summary": "质保处理",
+        "description": "质保处理",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "creatorName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/member/contactsQR": {
+      "get": {
+        "tags": [
+          "MemberController"
+        ],
+        "operationId": "MemberController_isMember",
+        "summary": "isMember",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/member/isMember": {
+      "get": {
+        "tags": [
+          "MemberController"
+        ],
+        "operationId": "MemberController_isMember",
+        "summary": "isMember",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/newcomerPrizes/list": {
+      "get": {
+        "tags": [
+          "NewcomerPrizesController"
+        ],
+        "operationId": "NewcomerPrizesController_list",
+        "summary": "list",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orderLogisticsPushWechat/pushTest": {
+      "get": {
+        "tags": [
+          "OrderLogisticsPushWechatController"
+        ],
+        "operationId": "OrderLogisticsPushWechatController_pushTest",
+        "summary": "pushTest",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userProduceSource/countdownTimes": {
+      "get": {
+        "tags": [
+          "ProduceSourceUserController"
+        ],
+        "operationId": "ProduceSourceUserController_countdownTimes",
+        "summary": "溯源页读秒时间",
+        "description": "溯源页读秒时间",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userProduceSource/scanPageCarouselPic": {
+      "get": {
+        "tags": [
+          "ProduceSourceUserController"
+        ],
+        "operationId": "ProduceSourceUserController_scanPageCarouselPic",
+        "summary": "扫码页轮播图",
+        "description": "扫码页轮播图",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userProduceSource/produceSource": {
+      "get": {
+        "tags": [
+          "ProduceSourceUserController"
+        ],
+        "operationId": "ProduceSourceUserController_produceSource",
+        "summary": "扫码溯源页面(已废弃)",
+        "description": "扫码溯源页面(已废弃)",
+        "parameters": [
+          {
+            "name": "sourceCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userProduceSource/produceSourceV2": {
+      "get": {
+        "tags": [
+          "ProduceSourceUserController"
+        ],
+        "operationId": "ProduceSourceUserController_produceSourceV2",
+        "summary": "扫码溯源页面(新版本)",
+        "description": "扫码溯源页面(新版本)",
+        "parameters": [
+          {
+            "name": "sourceCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userProduceSource/list": {
+      "get": {
+        "tags": [
+          "ProduceSourceUserController"
+        ],
+        "operationId": "ProduceSourceUserController_list",
+        "summary": "list",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ProduceSourceUserListResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userProduceSource/getReportPic": {
+      "get": {
+        "tags": [
+          "ProduceSourceUserController"
+        ],
+        "operationId": "ProduceSourceUserController_getReportPic",
+        "summary": "getReportPic",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userProduceSource/canWarranty": {
+      "get": {
+        "tags": [
+          "ProduceSourceUserController"
+        ],
+        "operationId": "ProduceSourceUserController_canWarranty",
+        "summary": "是否仍在质保期内",
+        "description": "是否仍在质保期内",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/userProduceSource/externalUserId": {
+      "post": {
+        "tags": [
+          "ProduceSourceUserController"
+        ],
+        "operationId": "ProduceSourceUserController_externalUserId",
+        "summary": "外部用户id迁移 商城用户触发账号合并， 旧用删除  同步把溯源记录的旧用户id改成新的",
+        "description": "外部用户id迁移 商城用户触发账号合并， 旧用删除  同步把溯源记录的旧用户id改成新的",
+        "parameters": [
+          {
+            "name": "oldUserId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "newUserId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/warrantyQuestionSubmit/preWarrantyVerification": {
+      "get": {
+        "tags": [
+          "WarrantyQuestionSubmitController"
+        ],
+        "operationId": "WarrantyQuestionSubmitController_preWarrantyVerification",
+        "summary": "质保前校验",
+        "description": "质保前校验",
+        "parameters": [
+          {
+            "name": "produceSourceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PreWarrantyVerificationResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/warrantyQuestionSubmit/add": {
+      "post": {
+        "tags": [
+          "WarrantyQuestionSubmitController"
+        ],
+        "operationId": "WarrantyQuestionSubmitController_add",
+        "summary": "新增质保问题提交",
+        "description": "新增质保问题提交",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarrantyQuestionSubmitParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/warrantyQuestionSubmit/myList": {
+      "get": {
+        "tags": [
+          "WarrantyQuestionSubmitController"
+        ],
+        "operationId": "WarrantyQuestionSubmitController_myList",
+        "summary": "我的延保列表",
+        "description": "我的延保列表",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/MyWarrantyListResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/warrantyQuestionType/list": {
+      "get": {
+        "tags": [
+          "WarrantyQuestionTypeController"
+        ],
+        "operationId": "WarrantyQuestionTypeController_list",
+        "summary": "查询全部问题类型（不分页）",
+        "description": "查询全部问题类型（不分页）",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/WarrantyQuestionType"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/userWinAwardsCopyWriting": {
+      "get": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_userWinAwardsCopyWriting",
+        "summary": "userWinAwardsCopyWriting",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/getDrawCount": {
+      "get": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_getDrawCount",
+        "summary": "getDrawCount",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/isGiftByCurrentDay": {
+      "get": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_isGiftByCurrentDay",
+        "summary": "isGiftByCurrentDay",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/giftText": {
+      "get": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_giftText",
+        "summary": "giftText",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/giftDrawCount": {
+      "get": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_giftDrawCount",
+        "summary": "领抽奖次数 , 每天只赠送一次",
+        "description": "领抽奖次数 , 每天只赠送一次",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/recentlyExpireAward": {
+      "get": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_recentlyExpireAward",
+        "summary": "即将失效的订单",
+        "description": "即将失效的订单",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/userWinAwards": {
+      "get": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_userWinAwards",
+        "summary": "userWinAwards",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UserWinAwardsResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/userDraw": {
+      "get": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_userDraw",
+        "summary": "userDraw",
+        "parameters": [
+          {
+            "name": "raffleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserDrawResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/userWinAwardDetail": {
+      "get": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_userWinAwardDetail",
+        "summary": "userWinAwardDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RaffleUserWinAwardDetailResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/payWinAward": {
+      "post": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_payWinAward",
+        "summary": "payWinAward",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RaffleUserPayWinAwardParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RaffleDrawOrderDetailResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/raffle/orderDetail": {
+      "get": {
+        "tags": [
+          "RaffleDrawController"
+        ],
+        "operationId": "RaffleDrawController_orderDetail",
+        "summary": "orderDetail",
+        "parameters": [
+          {
+            "name": "orderNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RaffleDrawOrderDetailResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/barCode/scanPageCount": {
+      "get": {
+        "tags": [
+          "ScanBarCodeController"
+        ],
+        "operationId": "ScanBarCodeController_scanPageCount",
+        "summary": "scanPageCount",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/barCode/create": {
+      "post": {
+        "tags": [
+          "ScanBarCodeController"
+        ],
+        "operationId": "ScanBarCodeController_create",
+        "summary": "create",
+        "parameters": [
+          {
+            "name": "bizId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/barCode/userScan": {
+      "post": {
+        "tags": [
+          "ScanBarCodeController"
+        ],
+        "operationId": "ScanBarCodeController_userScan",
+        "summary": "userScan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BarCodeUserScanParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BarCodeUserScanResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/barCode/userBindStatus": {
+      "get": {
+        "tags": [
+          "ScanBarCodeController"
+        ],
+        "operationId": "ScanBarCodeController_userBindStatus",
+        "summary": "userBindStatus",
+        "parameters": [
+          {
+            "name": "bizConfigId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/login": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "operationId": "LoginController_login",
+        "summary": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaobaoLoginParams"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/refreshToken": {
+      "get": {
+        "tags": [
+          "LoginController"
+        ],
+        "operationId": "LoginController_refreshToken",
+        "summary": "refreshToken",
+        "parameters": [
+          {
+            "name": "refreshToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/knowledge/selectCategory": {
+      "get": {
+        "tags": [
+          "TaoBaoCustomKnowledgeController"
+        ],
+        "operationId": "TaoBaoCustomKnowledgeController_selectCategory",
+        "summary": "selectCategory",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CustomKnowledgeCategoryResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/knowledge/selectByCategoryId": {
+      "get": {
+        "tags": [
+          "TaoBaoCustomKnowledgeController"
+        ],
+        "operationId": "TaoBaoCustomKnowledgeController_selectByCategoryId",
+        "summary": "selectByCategoryId",
+        "parameters": [
+          {
+            "name": "videoCategoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CustomKnowledgeLibraryResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/question/isQuestionPlay": {
+      "get": {
+        "tags": [
+          "TaoBaoCustomQuestionController"
+        ],
+        "operationId": "TaoBaoCustomQuestionController_isQuestionPlay",
+        "summary": "isQuestionPlay",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/question/nextQuestion": {
+      "get": {
+        "tags": [
+          "TaoBaoCustomQuestionController"
+        ],
+        "operationId": "TaoBaoCustomQuestionController_nextQuestion",
+        "summary": "nextQuestion",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CustomQuestionResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/question/questionRecommend": {
+      "get": {
+        "tags": [
+          "TaoBaoCustomQuestionController"
+        ],
+        "operationId": "TaoBaoCustomQuestionController_questionSubmit",
+        "summary": "提交答案和跳过",
+        "description": "提交答案和跳过",
+        "parameters": [
+          {
+            "name": "options",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CustomRecommendResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/penPointPage": {
+      "post": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_penPointPage",
+        "summary": "penPointPage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PenPointParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PenPointResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/penPointSpecSelect": {
+      "post": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_penPointSpecSelect",
+        "summary": "penPointSpecSelect",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PenPointSpecParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PenPointSpecResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/getPenPointByProductId": {
+      "get": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_getPenPointByProductId",
+        "summary": "getPenPointByProductId",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PenPointResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/penHolderPage": {
+      "get": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_penHolderPage",
+        "summary": "penHolderPage",
+        "parameters": [
+          {
+            "name": "penPointSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "penHolderSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PenHolderResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/getPenHolderByProductId": {
+      "get": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_getPenHolderByProductId",
+        "summary": "getPenHolderByProductId",
+        "parameters": [
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rangeId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "penHolderSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PenHolderResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/skuCheck": {
+      "get": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_skuCheck",
+        "summary": "skuCheck",
+        "parameters": [
+          {
+            "name": "skuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/letteringPage": {
+      "get": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_letteringPage",
+        "summary": "letteringPage",
+        "parameters": [
+          {
+            "name": "penPointSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "penHolderSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chooseColor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LetteringResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/drawPic": {
+      "post": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_drawPic",
+        "summary": "drawPic",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewParams"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DrawPicResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/previewPage": {
+      "get": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_previewPage",
+        "summary": "previewPage",
+        "parameters": [
+          {
+            "name": "selectId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PreviewResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/sharePic": {
+      "get": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_sharePic",
+        "summary": "sharePic",
+        "parameters": [
+          {
+            "name": "previewId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pointHolderPic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/penPackagePage": {
+      "get": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_penPackagePage",
+        "summary": "penPackagePage",
+        "parameters": [
+          {
+            "name": "penHolderSkuCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PenPackageResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/customAgain": {
+      "post": {
+        "tags": [
+          "TaobaoCustomController"
+        ],
+        "operationId": "TaobaoCustomController_customAgain",
+        "summary": "customAgain",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomAgainParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CustomAgainResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/previews/previewList": {
+      "get": {
+        "tags": [
+          "TaobaoCustomUserOrderReviewsController"
+        ],
+        "operationId": "TaobaoCustomUserOrderReviewsController_previewList",
+        "summary": "精选口碑评价列表 , 只查询有库存的评价",
+        "description": "精选口碑评价列表 , 只查询有库存的评价",
+        "parameters": [
+          {
+            "name": "pageNum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/userSelect/userRecord": {
+      "get": {
+        "tags": [
+          "TaobaoCustomUserSelectController"
+        ],
+        "operationId": "TaobaoCustomUserSelectController_userRecord",
+        "summary": "userRecord",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/UserRecordResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/userSelect/userRecordCount": {
+      "get": {
+        "tags": [
+          "TaobaoCustomUserSelectController"
+        ],
+        "operationId": "TaobaoCustomUserSelectController_userRecordCount",
+        "summary": "userRecordCount",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/userSelect/del/{id}": {
+      "get": {
+        "tags": [
+          "TaobaoCustomUserSelectController"
+        ],
+        "operationId": "TaobaoCustomUserSelectController_del",
+        "summary": "del",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/order/payDetailPage": {
+      "post": {
+        "tags": [
+          "TaobaoOrderController"
+        ],
+        "operationId": "TaobaoOrderController_payDetailPage",
+        "summary": "payDetailPage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayDetailParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PayDetailResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/order/submitOrder": {
+      "post": {
+        "tags": [
+          "TaobaoOrderController"
+        ],
+        "operationId": "TaobaoOrderController_orderSubmit",
+        "summary": "orderSubmit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaobaoOrderSubmitParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoCustom/product/desc": {
+      "get": {
+        "tags": [
+          "TaobaoProductController"
+        ],
+        "operationId": "TaobaoProductController_penPointPage",
+        "summary": "penPointPage",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coupon/user/userPrizesTip": {
+      "get": {
+        "tags": [
+          "UserCouponPrizesRecordController"
+        ],
+        "operationId": "UserCouponPrizesRecordController_userPrizesTip",
+        "summary": "userPrizesTip",
+        "parameters": [
+          {
+            "name": "sourceCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coupon/user/couponPrizeSend": {
+      "post": {
+        "tags": [
+          "UserCouponPrizesRecordController"
+        ],
+        "operationId": "UserCouponPrizesRecordController_couponPrizeSend",
+        "summary": "couponPrizeSend",
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coupon/user/couponPrizeSendForSourceCode": {
+      "post": {
+        "tags": [
+          "UserCouponPrizesRecordController"
+        ],
+        "operationId": "UserCouponPrizesRecordController_couponPrizeSendForSourceCode",
+        "summary": "couponPrizeSendForSourceCode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouponPrizeSendParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coupon/user/list": {
+      "get": {
+        "tags": [
+          "UserCouponPrizesRecordController"
+        ],
+        "operationId": "UserCouponPrizesRecordController_list",
+        "summary": "list",
+        "parameters": [
+          {
+            "name": "sourceCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/NewcomerPrizesUserRecordResult"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/coupon/user/useCoupon": {
+      "post": {
+        "tags": [
+          "UserCouponPrizesRecordController"
+        ],
+        "operationId": "UserCouponPrizesRecordController_useCoupon",
+        "summary": "useCoupon",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCouponUseParam"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "成功响应（ApiResponse 包装）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserCouponUseResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "description": "统一响应包装类 ApiResponse<T>。status=0 表示成功，其他为错误码；msg 为消息；data 为业务数据；分页接口附带 totalNum/pageIndex/pageSize/totalPage。",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "返回响应码:0=成功，其他=错误"
+          },
+          "msg": {
+            "type": "string",
+            "description": "返回响应消息"
+          },
+          "data": {
+            "type": "object",
+            "description": "返回数据（具体结构见各接口响应）"
+          },
+          "totalNum": {
+            "type": "integer",
+            "description": "分页总条数"
+          },
+          "pageIndex": {
+            "type": "integer",
+            "description": "当前页码"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "每页条数"
+          },
+          "totalPage": {
+            "type": "integer",
+            "description": "总页数"
+          }
+        }
+      },
+      "LetteringResult": {
+        "type": "object",
+        "properties": {
+          "letteringId": {
+            "type": "integer"
+          },
+          "penPointSkuCode": {
+            "type": "string"
+          },
+          "penHolderSkuCode": {
+            "type": "string"
+          },
+          "pointHolderPic": {
+            "type": "string"
+          },
+          "locations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "color": {
+            "type": "string",
+            "description": "后台的默认颜色"
+          }
+        }
+      },
+      "CustomRecommendResult": {
+        "type": "object",
+        "properties": {
+          "penPointSkuCode": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OrderDetailResult": {
+        "type": "object",
+        "properties": {
+          "orderNum": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "middleOrderNum": {
+            "type": "string"
+          },
+          "penPointProductImage": {
+            "type": "string"
+          },
+          "penPointSkuCode": {
+            "type": "string"
+          },
+          "penPointDesc": {
+            "type": "string"
+          },
+          "penHolderProductImage": {
+            "type": "string"
+          },
+          "penHolderSkuCode": {
+            "type": "string"
+          },
+          "penHolderDesc": {
+            "type": "string"
+          },
+          "penPackageSkuCode": {
+            "type": "string"
+          },
+          "penPackageDesc": {
+            "type": "string"
+          },
+          "locations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "totalPrice": {
+            "type": "string"
+          },
+          "payPrice": {
+            "type": "string"
+          },
+          "reducePrice": {
+            "type": "string"
+          },
+          "penPointPrice": {
+            "type": "string"
+          },
+          "penHolderPrice": {
+            "type": "string"
+          },
+          "penPackagePrice": {
+            "type": "string"
+          },
+          "firstOrderReducePrice": {
+            "type": "string",
+            "description": "首单"
+          },
+          "fullAmountDiscountPrice": {
+            "type": "string",
+            "description": "满享优惠"
+          },
+          "totalSubtractPrice": {
+            "type": "string"
+          },
+          "userCouponList": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "用户个人优惠券"
+          },
+          "address": {
+            "$ref": "#/components/schemas/CustomUserAddressInfo"
+          },
+          "payTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliverTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tradedTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "letteringId": {
+            "type": "integer"
+          },
+          "isEngraved": {
+            "type": "integer"
+          },
+          "chooseColor": {
+            "type": "string"
+          },
+          "wechatQrCode": {
+            "type": "string",
+            "description": "客服二维码"
+          },
+          "produceBarCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PenPackageResult": {
+        "type": "object",
+        "properties": {
+          "penPackages": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "productId": {
+            "type": "integer"
+          },
+          "productImages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomQuestionResult": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "TaobaoLoginParams": {
+        "type": "object",
+        "properties": {
+          "openId": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "taobaoAppId": {
+            "type": "integer",
+            "description": "5-六品堂甄选旗舰店"
+          }
+        }
+      },
+      "PenHolderResult": {
+        "type": "object",
+        "properties": {
+          "penHolderPriceRanges": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "productId": {
+            "type": "integer"
+          },
+          "customAgain": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "productImage": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          },
+          "letteringId": {
+            "type": "integer"
+          },
+          "isEngraved": {
+            "type": "integer"
+          },
+          "rangeId": {
+            "type": "integer"
+          },
+          "priceName": {
+            "type": "string"
+          },
+          "penHolders": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "CustomAgainResult": {
+        "type": "object",
+        "properties": {
+          "penPointStatus": {
+            "type": "integer",
+            "description": "0- 正常 1-无库存"
+          },
+          "penHolderStatus": {
+            "type": "integer"
+          }
+        }
+      },
+      "BarCodeUserScanResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "1-码不合法 2-用户或码已被领取   3-领取成功"
+          },
+          "barCouponName": {
+            "type": "string",
+            "description": "优惠全名"
+          },
+          "name": {
+            "type": "string",
+            "description": "活动展会名"
+          },
+          "price": {
+            "type": "string"
+          }
+        }
+      },
+      "UserOrderReviewParam": {
+        "type": "object",
+        "properties": {
+          "orderNum": {
+            "type": "string"
+          },
+          "pics": {
+            "type": "string"
+          },
+          "videos": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "PreviewResult": {
+        "type": "object",
+        "properties": {
+          "penPointSkuCode": {
+            "type": "string"
+          },
+          "penPointDescList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "penHolderSkuCode": {
+            "type": "string"
+          },
+          "penHolderDescList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "reducePrice": {
+            "type": "string",
+            "description": "分享立减"
+          },
+          "firstOrderReducePrice": {
+            "type": "string",
+            "description": "首单优惠"
+          },
+          "newPrice": {
+            "type": "string",
+            "description": "优惠价"
+          },
+          "totalPrice": {
+            "type": "string"
+          },
+          "totalSign": {
+            "type": "string"
+          },
+          "previews": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "pointHolderPic": {
+            "type": "string"
+          },
+          "previewId": {
+            "type": "integer"
+          },
+          "previewTopPic": {
+            "type": "string"
+          },
+          "previewUnderPic": {
+            "type": "string"
+          },
+          "zoomRatio": {
+            "type": "string"
+          },
+          "x": {
+            "type": "string"
+          },
+          "y": {
+            "type": "string"
+          },
+          "scale": {
+            "type": "string"
+          },
+          "angle": {
+            "type": "string"
+          }
+        }
+      },
+      "PreWarrantyVerificationResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mainPic": {
+            "type": "string"
+          },
+          "sourceCodeType": {
+            "type": "integer"
+          },
+          "overWarranty": {
+            "type": "boolean",
+            "description": "是否超过质保期"
+          },
+          "warrantyRemainingDays": {
+            "type": "integer",
+            "description": "质保剩余天数，超过质保期时为 null"
+          },
+          "warrantyRemainingDaysText": {
+            "type": "string"
+          }
+        }
+      },
+      "CouponPrizeSendParam": {
+        "type": "object",
+        "properties": {
+          "sourceCode": {
+            "type": "string"
+          }
+        }
+      },
+      "ShareResult": {
+        "type": "object",
+        "properties": {
+          "totalPrice": {
+            "type": "string"
+          },
+          "newPrice": {
+            "type": "string"
+          },
+          "reducePrice": {
+            "type": "string"
+          },
+          "firstOrderReducePrice": {
+            "type": "string"
+          },
+          "totalSign": {
+            "type": "string"
+          }
+        }
+      },
+      "WarrantyQuestionSubmitParam": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer"
+          },
+          "produceSourceId": {
+            "type": "integer"
+          },
+          "questionTypeId": {
+            "type": "integer"
+          },
+          "pic": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "UserCouponUseParam": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "wxCode": {
+            "type": "string",
+            "description": "获取微信用户信息相关"
+          },
+          "encryptedData": {
+            "type": "string"
+          },
+          "iv": {
+            "type": "string"
+          }
+        }
+      },
+      "RaffleUserWinAwardDetailResult": {
+        "type": "object",
+        "properties": {
+          "member": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "integer",
+            "description": "0-入库  1-已发货 2-过期 3-已领取"
+          },
+          "name": {
+            "type": "string"
+          },
+          "awardMainPic": {
+            "type": "string"
+          },
+          "awardDetailPic": {
+            "type": "string",
+            "description": "奖品详情图 /"
+          },
+          "awardPrice": {
+            "type": "string"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "payPrice": {
+            "type": "string"
+          },
+          "paySign": {
+            "type": "string"
+          }
+        }
+      },
+      "PayDetailResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "库存状态  0-正常 1-库存不足"
+          },
+          "minSkuCode": {
+            "type": "string"
+          },
+          "minSkuStock": {
+            "type": "integer"
+          },
+          "pointHolderPic": {
+            "type": "string"
+          },
+          "penPointSkuCode": {
+            "type": "string"
+          },
+          "penHolderSkuCode": {
+            "type": "string"
+          },
+          "penPackageSkuCode": {
+            "type": "string"
+          },
+          "penPointPrice": {
+            "type": "string"
+          },
+          "penHolderPrice": {
+            "type": "string"
+          },
+          "penPackagePrice": {
+            "type": "string"
+          },
+          "penPointDesc": {
+            "type": "string"
+          },
+          "penHolderDesc": {
+            "type": "string"
+          },
+          "penPackageDesc": {
+            "type": "string"
+          },
+          "colorText": {
+            "type": "string"
+          },
+          "locations": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "count": {
+            "type": "integer"
+          },
+          "reducePrice": {
+            "type": "string"
+          },
+          "firstOrderReducePrice": {
+            "type": "string",
+            "description": "首单优惠"
+          },
+          "fullAmountPrice": {
+            "type": "string",
+            "description": "满享折扣"
+          },
+          "userCouponList": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "description": "用户个人优惠券"
+          },
+          "fullAmountText": {
+            "type": "string"
+          },
+          "totalSubtractPrice": {
+            "type": "string"
+          },
+          "payPrice": {
+            "type": "string"
+          },
+          "paySign": {
+            "type": "string"
+          },
+          "tips": {
+            "type": "string"
+          },
+          "defaultUserAddressInfo": {
+            "$ref": "#/components/schemas/UserAddressInfo"
+          },
+          "userCouponIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "UserCouponUseResult": {
+        "type": "object",
+        "properties": {
+          "newcomerPrizes": {
+            "$ref": "#/components/schemas/NewcomerPrizesUseCouponResult"
+          }
+        }
+      },
+      "WarrantyProduceSourceDetailResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "userId": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mainPic": {
+            "type": "string"
+          },
+          "sourceCode": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "sourceCodeType": {
+            "type": "integer"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "externalUserType": {
+            "type": "integer"
+          },
+          "mobile": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "warrantyQuestionList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarrantyQuestionItemResult"
+            }
+          }
+        }
+      },
+      "PenPointSpecResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "0-正常 1-无库存 2-sku下架 3-商品下架"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "childIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "AdminCustomBizConfigResult": {
+        "type": "object",
+        "properties": {
+          "customId": {
+            "type": "integer"
+          },
+          "platId": {
+            "type": "integer",
+            "description": "业务线id /"
+          },
+          "backUserId": {
+            "type": "integer",
+            "description": "用户id /"
+          },
+          "name": {
+            "type": "string",
+            "description": "定制业务名称 /"
+          },
+          "slogan": {
+            "type": "string",
+            "description": "定制业务文案 /"
+          },
+          "homePagePic": {
+            "type": "string"
+          },
+          "miniProgramPic": {
+            "type": "string",
+            "description": "小程序分享图 /"
+          },
+          "video": {
+            "type": "string",
+            "description": "视频地址 /"
+          },
+          "sharePriceReduce": {
+            "type": "string",
+            "description": "分享立减价格 /"
+          },
+          "defaultOrderDesc": {
+            "type": "string",
+            "description": "默认订单描述 /"
+          },
+          "defaultPreviewSharePic": {
+            "type": "string",
+            "description": "默认评价分享图 /"
+          },
+          "penPointCategoryId": {
+            "type": "integer",
+            "description": "笔头分类id /"
+          },
+          "penHolderCategoryId": {
+            "type": "integer",
+            "description": "笔杆分类id /"
+          },
+          "penPackageCategoryId": {
+            "type": "integer",
+            "description": "包装分类id /"
+          },
+          "tips": {
+            "type": "string"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间 /",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "更新时间 /",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrderSubmitParam": {
+        "type": "object",
+        "properties": {
+          "selectId": {
+            "type": "integer"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "wxCode": {
+            "type": "string",
+            "description": "微信code 部分用户是碑帖app跳转过来的， 支付需要重新获取openId"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "penPackageSkuCode": {
+            "type": "string"
+          },
+          "penPointDesc": {
+            "type": "string"
+          },
+          "penHolderDesc": {
+            "type": "string"
+          },
+          "payPrice": {
+            "type": "string"
+          },
+          "paySign": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "description": "留言"
+          },
+          "userCouponIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "UserOrderRreviewsResult": {
+        "type": "object",
+        "properties": {
+          "orderNum": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "integer"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "userPic": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "pics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "videos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderInfo": {
+            "type": "object"
+          },
+          "sharePic": {
+            "type": "string"
+          },
+          "penPointSkuCode": {
+            "type": "string"
+          },
+          "penPointDesc": {
+            "type": "string"
+          },
+          "penHolderSkuCode": {
+            "type": "string"
+          },
+          "penHolderDesc": {
+            "type": "string"
+          },
+          "penPackageSkuCode": {
+            "type": "string"
+          },
+          "penPackageDesc": {
+            "type": "string"
+          }
+        }
+      },
+      "PenPointParam": {
+        "type": "object",
+        "properties": {
+          "recommendSkuCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "推荐sku集合"
+          },
+          "penPointSkuCode": {
+            "type": "string",
+            "description": "再次定制skuCode"
+          }
+        }
+      },
+      "CustomUserDetailResult": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer"
+          },
+          "unionId": {
+            "type": "string"
+          }
+        }
+      },
+      "HomePageResult": {
+        "type": "object",
+        "properties": {
+          "customId": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slogan": {
+            "type": "string"
+          },
+          "homePagePic": {
+            "type": "string"
+          },
+          "video": {
+            "type": "string"
+          }
+        }
+      },
+      "PenPointResult": {
+        "type": "object",
+        "properties": {
+          "penPoints": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "productId": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "productImage": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "customAgain": {
+            "type": "boolean"
+          },
+          "customAgainChildIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "recommend": {
+            "type": "boolean",
+            "description": "ai推荐的sku属性 /"
+          },
+          "recommendStatus": {
+            "type": "integer"
+          },
+          "recommendChildIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "id": {
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          },
+          "childProperties": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "childId": {
+            "type": "integer"
+          },
+          "childText": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "childIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "childChecked": {
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            }
+          },
+          "allSpecSize": {
+            "type": "integer",
+            "description": "商城属性个数"
+          }
+        }
+      },
+      "RaffleUserPayWinAwardParam": {
+        "type": "object",
+        "properties": {
+          "wxCode": {
+            "type": "string",
+            "description": "微信code 部分用户是碑帖app跳转过来的， 支付需要重新获取openId"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "payPrice": {
+            "type": "string"
+          },
+          "paySign": {
+            "type": "string"
+          }
+        }
+      },
+      "PreviewParams": {
+        "type": "object",
+        "properties": {
+          "letteringId": {
+            "type": "integer"
+          },
+          "penPointSkuCode": {
+            "type": "string"
+          },
+          "penHolderSkuCode": {
+            "type": "string"
+          },
+          "pointHolderPic": {
+            "type": "string"
+          },
+          "locations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "color": {
+            "type": "string"
+          },
+          "colorText": {
+            "type": "string"
+          },
+          "isEngraved": {
+            "type": "integer",
+            "description": "1-刻字  0-不刻字"
+          }
+        }
+      },
+      "RaffleDrawOrderDetailResult": {
+        "type": "object",
+        "properties": {
+          "awardMainPic": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "orderStatus": {
+            "type": "integer"
+          },
+          "middleOrderNum": {
+            "type": "string"
+          },
+          "logistics": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "userAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PenPointSpecParam": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer"
+          },
+          "childIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "CustomAgainParam": {
+        "type": "object",
+        "properties": {
+          "penPointSkuCode": {
+            "type": "string"
+          },
+          "penHolderSkuCode": {
+            "type": "string"
+          }
+        }
+      },
+      "PayDetailParam": {
+        "type": "object",
+        "properties": {
+          "selectId": {
+            "type": "integer"
+          },
+          "penPackageSkuCode": {
+            "type": "string"
+          },
+          "totalPrice": {
+            "type": "string"
+          },
+          "totalSign": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "UserDrawResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "0-未中奖 1-中奖   2-活动关闭 3-抽奖次数用完"
+          },
+          "id": {
+            "type": "integer",
+            "description": "中奖id"
+          },
+          "raffleId": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "awardPrice": {
+            "type": "string"
+          },
+          "awardMainPic": {
+            "type": "string"
+          },
+          "awardDetailPic": {
+            "type": "string"
+          },
+          "awardShowPic": {
+            "type": "string"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DeliverOrderTipIsDisplayResult": {
+        "type": "object",
+        "properties": {
+          "display": {
+            "type": "boolean"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "DrawPicResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "0- 正常 1-合成失败"
+          },
+          "selectId": {
+            "type": "integer"
+          }
+        }
+      },
+      "BarCodeUserScanParam": {
+        "type": "object",
+        "properties": {
+          "barCode": {
+            "type": "string"
+          }
+        }
+      },
+      "TaobaoOrderSubmitParam": {
+        "type": "object",
+        "properties": {
+          "selectId": {
+            "type": "integer"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "penPackageSkuCode": {
+            "type": "string"
+          },
+          "penPointDesc": {
+            "type": "string"
+          },
+          "penHolderDesc": {
+            "type": "string"
+          },
+          "payPrice": {
+            "type": "string"
+          },
+          "paySign": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "description": "留言"
+          }
+        }
+      },
+      "ShareParam": {
+        "type": "object",
+        "properties": {
+          "selectId": {
+            "type": "integer"
+          },
+          "penPointSkuCode": {
+            "type": "string"
+          },
+          "penHolderSkuCode": {
+            "type": "string"
+          },
+          "totalPrice": {
+            "type": "string"
+          },
+          "totalSign": {
+            "type": "string"
+          }
+        }
+      },
+      "UserAddressInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "userId": {
+            "type": "integer",
+            "description": "用户id /"
+          },
+          "userName": {
+            "type": "string",
+            "description": "联系人 /"
+          },
+          "telNumber": {
+            "type": "string",
+            "description": "手机号 /"
+          },
+          "provinceName": {
+            "type": "string",
+            "description": "省 /"
+          },
+          "cityName": {
+            "type": "string",
+            "description": "市 /"
+          },
+          "countyName": {
+            "type": "string",
+            "description": "区 /"
+          },
+          "detailInfo": {
+            "type": "string",
+            "description": "详情 /"
+          },
+          "defaultAddr": {
+            "type": "integer",
+            "description": "默认地址 /"
+          },
+          "pullMsg": {
+            "type": "integer",
+            "description": "是否拉去过信息 /"
+          },
+          "enable": {
+            "type": "integer"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间 /",
+            "format": "date-time"
+          }
+        }
+      },
+      "CustomUserAddressInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "userId": {
+            "type": "integer",
+            "description": "用户id /"
+          },
+          "orderNum": {
+            "type": "string",
+            "description": "订单编号 /"
+          },
+          "contacts": {
+            "type": "string",
+            "description": "联系人 /"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机号 /"
+          },
+          "province": {
+            "type": "string",
+            "description": "省 /"
+          },
+          "city": {
+            "type": "string",
+            "description": "市 /"
+          },
+          "area": {
+            "type": "string",
+            "description": "区 /"
+          },
+          "street": {
+            "type": "string",
+            "description": "街道 /"
+          },
+          "detail": {
+            "type": "string",
+            "description": "详情 /"
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间 /",
+            "format": "date-time"
+          },
+          "region": {
+            "type": "string"
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "userName": {
+            "type": "string"
+          },
+          "telNumber": {
+            "type": "string"
+          },
+          "provinceName": {
+            "type": "string"
+          },
+          "cityName": {
+            "type": "string"
+          },
+          "countyName": {
+            "type": "string"
+          },
+          "detailInfo": {
+            "type": "string"
+          },
+          "regex": {
+            "type": "string"
+          }
+        }
+      },
+      "WarrantyQuestionItemResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string",
+            "description": "问题类型名称"
+          },
+          "content": {
+            "type": "string"
+          },
+          "pic": {
+            "type": "string"
+          },
+          "creatorName": {
+            "type": "string"
+          }
+        }
+      },
+      "NewcomerPrizesUseCouponResult": {
+        "type": "object",
+        "properties": {
+          "tableResult": {
+            "type": "object"
+          },
+          "taoBaoCommandResult": {
+            "type": "object"
+          },
+          "courseCouponResult": {
+            "type": "object"
+          },
+          "addWechat": {
+            "type": "object"
+          },
+          "title": {
+            "type": "string"
+          },
+          "courses": {
+            "type": "array"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
