@@ -1,0 +1,29 @@
+custom业务模块开发
+模块地址：liupin-service/liupin-custom-service/
+
+开发需求5：
+1. 分析一下接口/api/admin/recommendProduct/excelImport功能，当前这个接口处理十余条记录的excel，都要十几秒，分析一下性能瓶颈，以及优化方案，结果保存在 .requirements/subservices/custom/emport-product.md 
+
+忽略以下所有需求描述
+
+开发需求1：
+1. 结合编辑首页推荐文案接口 /api/admin/recommendProductCategory/updateRecommendFirstPageTip，新增一个获取首页推荐文案的接口
+
+开发需求2：
+1. /api/admin/setting/customerDetail 接口新增一个首页推荐文案字段；
+2. /api/admin/recommendProductCategory/insert 成功添加后，把新增信息的id返回；
+
+开发需求3：
+1. 结合获取推荐分类接口 /api/recommendProductCategory/list 以及推荐分类的商品列表接口 /api/recommendProduct/list，新增一个获取所有分类及其关联的商品列表接口；
+2. 分类下的商品不分页，最多取40条商品，商品数据结构跟商品列表接口里的结构保持一致；
+
+开发需求4：
+1. 接口 /api/admin/recommendProductCategory/updateRecommendFirstPageTip。参数tipText 验证条件调整为： 长度为大于0，小于等于6个汉字的字符串长度；
+2. 接口 /api/admin/recommendProductCategory/list 返回数据先按status降序排序，再按sort升序排序；
+3. 接口 /api/admin/recommendProduct/list 返回的总数、当前页、每页信息数数据不对，需要修复一下；
+4. 接口 /api/admin/recommendProduct/list?pageSize=10&pageNum=1&categoryId=14 报错，需要修复一下
+5. 接口 /api/recommendProductCategory/listWithProducts 分类的产品信息 productList数组中，每个数组的description返回值有误，原本有值的，但现在都返回null。
+6. 接口 /api/admin/recommendProductCategory/insert 需要验证参数name的值是否存在，如果已存在，不能插入数据；
+7. 接口 /api/admin/recommendProductCategory/update 需要验证参数name的值是否存在（不包括当前正在编辑的记录），如果已存在，不能编辑数据；
+8. 接口 /api/admin/recommendProductCategory/insert 参数name的值不能为空；
+9. 接口 /api/admin/recommendProductCategory/update 如果调整name值的话，name值不能为空；

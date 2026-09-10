@@ -1,0 +1,1978 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "UserCenter Module API",
+    "description": "REST API for the UserCenter module (authentication, user management, role/menu/permission management).\n\n## Authentication\n\nAll protected endpoints require a JWT bearer token issued by `/auth/login`, `/auth/login-phone`, `/auth/register`, or `/auth/refresh`. Send the token in the `Authorization` header:\n\n```\nAuthorization: Bearer <access_token>\n```\n\nRole-based authorization uses `spatie/laravel-permission`. Endpoints marked with a `permission:` requirement need the named permission on the authenticated user's roles. The super-admin role (`super_admin`) bypasses all permission checks.\n\n## Response envelope\n\nEvery JSON response is wrapped by `App\\Http\\Middleware\\NormalizeApiResponse`, which:\n\n- Injects a business `code` field: `0` for success (original HTTP 2xx), `1` for failure (original 4xx/5xx).\n- Normalizes HTTP status codes: `200/401/404/500` are kept; other 5xx become `500`; everything else (201, 204, 403, 422, 429, ...) becomes `200`.\n\nSo a successful create returns HTTP **200** with `code: 0` (original 201 normalized), a validation failure returns HTTP **200** with `code: 1` (original 422 normalized), while `401` (Unauthenticated), `404` (Not Found) and `500` (Server Error) keep their status. The `code` field is the reliable success/failure indicator — do not rely solely on the HTTP status.\n\nCommon response shapes:\n\n- Success with data: `{ \"success\": true, \"data\": <payload>, \"code\": 0 }`\n- Success with message: `{ \"success\": true, \"message\": \"...\", \"code\": 0 }`\n- Business error: `{ \"success\": false, \"message\": \"...\", \"code\": 1 }`\n- Validation error: `{ \"message\": \"...\", \"errors\": { \"field\": [\"...\"] }, \"code\": 1 }`\n- Unauthenticated: `{ \"message\": \"Unauthenticated.\", \"code\": 1 }` (HTTP 401)\n\n## Phone format\n\nMainland China phone numbers only: regex `^1[3-9]\\d{9}$` (11 digits starting with 1).",
+    "version": "1.0.0",
+    "contact": {
+      "name": "UserCenter Module"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    { "name": "Auth", "description": "Authentication: login, register, logout, token refresh, current user info" },
+    { "name": "User", "description": "User management: CRUD, profile, password, status, role/permission assignment" },
+    { "name": "Role", "description": "Role management (ruoyi-vue-pro permission module)" },
+    { "name": "Menu", "description": "Menu management (ruoyi-vue-pro permission module)" },
+    { "name": "Permission", "description": "Permission assignment: role-menu, role data scope, user-role (ruoyi-vue-pro permission module)" }
+  ],
+  "security": [],
+  "paths": {
+    "/api/v1/user-center/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login with account/phone and password",
+        "description": "Authenticate a user with an account name, email, or phone number plus a password. Returns a JWT access token and the authenticated user summary.",
+        "operationId": "login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/TokenResponse" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed — invalid credentials or inactive account (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/auth/login-phone": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login with phone and SMS verification code",
+        "description": "Authenticate a user with a mainland-China phone number and a 6-digit SMS verification code. If no user exists for the phone, one is created automatically. Returns a JWT access token and the authenticated user summary.",
+        "operationId": "loginWithPhone",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PhoneLoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/TokenResponse" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed — invalid/expired SMS code, invalid phone, or inactive account (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "description": "Register a new user. At least one identifier (email or phone) is expected; the `user` role is assigned by default. Returns a JWT access token and the authenticated user summary.",
+        "operationId": "register",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registration successful (code: 0; original 201 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/TokenResponse" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get the authenticated user",
+        "description": "Returns the full authenticated user model (with roles and permissions loaded).",
+        "operationId": "me",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Authenticated user (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/auth/permission-info": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get permission info for the logged-in user",
+        "description": "Returns the authenticated user's basic profile, role codes, permission identifiers, and menu tree (filtered by the menus assigned to their roles). Used by the ruoyi-vue-pro frontend to build the admin sidebar and guard buttons.",
+        "operationId": "permissionInfo",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Permission info (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/PermissionInfo" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Logout",
+        "description": "Invalidates the current JWT token (blacklists it).",
+        "operationId": "logout",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Logged out (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessMessageResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Refresh token",
+        "description": "Blacklists the current token and issues a new JWT. The new token must be used for subsequent requests.",
+        "operationId": "refresh",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Token refreshed (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/TokenResponse" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated / token invalid or expired (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/users/profile": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get current user profile",
+        "description": "Returns the authenticated user's own profile (full User model).",
+        "operationId": "getUserProfile",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Profile (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["User"],
+        "summary": "Update current user profile",
+        "description": "Updates the authenticated user's own profile fields (name, nickname, avatar). Password and roles cannot be changed here.",
+        "operationId": "updateUserProfile",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateProfileRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/users/change-password": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Change current user password",
+        "description": "Changes the authenticated user's password. Requires the current password to match. All existing tokens remain valid unless explicitly invalidated.",
+        "operationId": "changePassword",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChangePasswordRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessMessageResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed — current password incorrect, or new password invalid (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/ErrorResponse" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "errors": {
+                          "type": "object",
+                          "description": "Present when the failure is a validation error rather than a current-password mismatch."
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/users": {
+      "get": {
+        "tags": ["User"],
+        "summary": "List users (paginated)",
+        "description": "Returns a paginated list of users with roles and permissions loaded. Requires the `manage-users` permission.",
+        "operationId": "listUsers",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/PerPage" },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by user status.",
+            "required": false,
+            "schema": { "$ref": "#/components/schemas/UserStatus" }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Free-text search across name, email, and phone (LIKE match).",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "description": "Filter by role code/name.",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated user list (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/UserPagination" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — missing `manage-users` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["User"],
+        "summary": "Create a user",
+        "description": "Creates a new user and optionally assigns roles. Requires the `manage-users` permission.",
+        "operationId": "createUser",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateUserRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User created (code: 0; original 201 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — missing `manage-users` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/users/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/UserId" }],
+      "get": {
+        "tags": ["User"],
+        "summary": "Get user details",
+        "description": "Returns a single user with roles and permissions loaded. Requires the `manage-users` permission.",
+        "operationId": "getUser",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User details (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — missing `manage-users` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["User"],
+        "summary": "Update user",
+        "description": "Updates an existing user. All fields are optional (partial update). Requires the `manage-users` permission.",
+        "operationId": "updateUser",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateUserRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — missing `manage-users` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["User"],
+        "summary": "Delete user",
+        "description": "Deletes a user. Requires the `manage-users` permission.",
+        "operationId": "deleteUser",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User deleted (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessMessageResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden — missing `manage-users` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found (code: 1)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/users/{id}/activate": {
+      "parameters": [{ "$ref": "#/components/parameters/UserId" }],
+      "post": {
+        "tags": ["User"],
+        "summary": "Activate user",
+        "description": "Sets the user status to `active`. Requires the `manage-users` permission.",
+        "operationId": "activateUser",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User activated (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessMessageResponse" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `manage-users` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "User not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/v1/user-center/users/{id}/deactivate": {
+      "parameters": [{ "$ref": "#/components/parameters/UserId" }],
+      "post": {
+        "tags": ["User"],
+        "summary": "Deactivate user",
+        "description": "Sets the user status to `inactive`. Requires the `manage-users` permission.",
+        "operationId": "deactivateUser",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User deactivated (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessMessageResponse" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `manage-users` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "User not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/v1/user-center/users/{id}/ban": {
+      "parameters": [{ "$ref": "#/components/parameters/UserId" }],
+      "post": {
+        "tags": ["User"],
+        "summary": "Ban user",
+        "description": "Sets the user status to `banned`. Requires the `manage-users` permission.",
+        "operationId": "banUser",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User banned (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessMessageResponse" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `manage-users` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "User not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/v1/user-center/users/{id}/roles": {
+      "parameters": [{ "$ref": "#/components/parameters/UserId" }],
+      "post": {
+        "tags": ["User"],
+        "summary": "Assign roles to user",
+        "description": "Assigns the given role codes to a user (additive — existing roles are kept). Requires the `manage-users` permission.",
+        "operationId": "assignUserRoles",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AssignRolesRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Roles assigned (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessMessageResponse" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `manage-users` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "User not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed — a role does not exist (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/users/{id}/permissions": {
+      "parameters": [{ "$ref": "#/components/parameters/UserId" }],
+      "post": {
+        "tags": ["User"],
+        "summary": "Grant permissions to user",
+        "description": "Grants the given permission names directly to a user (additive). Requires the `manage-users` permission.",
+        "operationId": "giveUserPermissions",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GivePermissionsRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Permissions granted (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessMessageResponse" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `manage-users` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "User not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed — a permission does not exist (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/menus": {
+      "get": {
+        "tags": ["Menu"],
+        "summary": "List menus",
+        "description": "Returns the menu list (flat) for menu management. Requires the `system:menu:query` permission.",
+        "operationId": "listMenus",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter by menu name.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status (0=enabled, 1=disabled).",
+            "required": false,
+            "schema": { "$ref": "#/components/schemas/CommonStatus" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Menu list (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/MenuResource" }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:menu:query` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      },
+      "post": {
+        "tags": ["Menu"],
+        "summary": "Create menu",
+        "description": "Creates a new menu, menu item, or button. Requires the `system:menu:create` permission.",
+        "operationId": "createMenu",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MenuRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Menu created — returns the new menu id (code: 0; original 201 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "type": "integer", "description": "Created menu id", "example": 12 }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:menu:create` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/menus/simple-list": {
+      "get": {
+        "tags": ["Menu"],
+        "summary": "Simple menu list",
+        "description": "Returns a simplified menu list (id, name, parentId, type) for role-menu assignment dropdown options. Authenticated users only; no special permission required.",
+        "operationId": "simpleMenuList",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Simple menu list (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/MenuSimpleResource" }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } }
+        }
+      }
+    },
+    "/api/v1/user-center/menus/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/MenuId" }],
+      "get": {
+        "tags": ["Menu"],
+        "summary": "Get menu details",
+        "description": "Returns a single menu. Requires the `system:menu:query` permission.",
+        "operationId": "getMenu",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Menu details (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/MenuResource" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:menu:query` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "Menu not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Menu"],
+        "summary": "Update menu",
+        "description": "Updates an existing menu. Requires the `system:menu:update` permission.",
+        "operationId": "updateMenu",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MenuRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Menu updated (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:menu:update` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "Menu not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Menu"],
+        "summary": "Delete menu",
+        "description": "Deletes a menu. Requires the `system:menu:delete` permission.",
+        "operationId": "deleteMenu",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Menu deleted (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:menu:delete` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "Menu not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/api/v1/user-center/roles": {
+      "get": {
+        "tags": ["Role"],
+        "summary": "List roles (paginated)",
+        "description": "Returns a paginated role list. Requires the `system:role:query` permission.",
+        "operationId": "listRoles",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/PerPage" },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter by role display name/code.",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "description": "Filter by role code (identifier stored in Spatie's name column).",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status (0=enabled, 1=disabled).",
+            "required": false,
+            "schema": { "$ref": "#/components/schemas/CommonStatus" }
+          },
+          {
+            "name": "start_time",
+            "in": "query",
+            "description": "Created-at lower bound (inclusive).",
+            "required": false,
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "end_time",
+            "in": "query",
+            "description": "Created-at upper bound (inclusive).",
+            "required": false,
+            "schema": { "type": "string", "format": "date-time" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated role list (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/RoleResource" }
+                        },
+                        "meta": { "$ref": "#/components/schemas/PaginationMeta" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:role:query` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      },
+      "post": {
+        "tags": ["Role"],
+        "summary": "Create role",
+        "description": "Creates a new custom role. Requires the `system:role:create` permission.",
+        "operationId": "createRole",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RoleRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role created — returns the new role id (code: 0; original 201 normalized to 200)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "type": "integer", "description": "Created role id", "example": 5 }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:role:create` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed — or role code already exists / reserved (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/roles/simple-list": {
+      "get": {
+        "tags": ["Role"],
+        "summary": "Simple role list",
+        "description": "Returns a simplified enabled-role list (id, name, code) for dropdown options. Authenticated users only; no special permission required.",
+        "operationId": "simpleRoleList",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Simple role list (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/RoleSimpleResource" }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } }
+        }
+      }
+    },
+    "/api/v1/user-center/roles/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/RoleId" }],
+      "get": {
+        "tags": ["Role"],
+        "summary": "Get role details",
+        "description": "Returns a single role. Requires the `system:role:query` permission.",
+        "operationId": "getRole",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Role details (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": { "$ref": "#/components/schemas/RoleResource" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:role:query` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "Role not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Role"],
+        "summary": "Update role",
+        "description": "Updates an existing role. All fields are optional (partial update). Requires the `system:role:update` permission.",
+        "operationId": "updateRole",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RoleRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role updated (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:role:update` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "Role not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed — or code collision / built-in role protected (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Role"],
+        "summary": "Delete role",
+        "description": "Deletes a custom role. Built-in (`System`) roles cannot be deleted. Requires the `system:role:delete` permission.",
+        "operationId": "deleteRole",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Role deleted (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:role:delete` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "Role not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Cannot delete a built-in system role (HTTP 200, code: 1 in practice)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/permissions/role-menus": {
+      "get": {
+        "tags": ["Permission"],
+        "summary": "Get menu ids assigned to a role",
+        "description": "Returns the list of menu ids assigned to the given role. Requires the `system:permission:assign-role-menu` permission.",
+        "operationId": "roleMenus",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "roleId",
+            "in": "query",
+            "description": "Role id.",
+            "required": true,
+            "schema": { "type": "integer", "example": 2 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Menu ids for the role (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "type": "integer" },
+                          "example": [1, 2, 5, 9]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:permission:assign-role-menu` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/permissions/assign-role-menu": {
+      "post": {
+        "tags": ["Permission"],
+        "summary": "Assign menus to a role",
+        "description": "Replaces the set of menus assigned to a role (full sync — omitted/empty `menu_ids` clears the assignment). Requires the `system:permission:assign-role-menu` permission.",
+        "operationId": "assignRoleMenu",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AssignRoleMenuRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Menus assigned (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:permission:assign-role-menu` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed — role not found, etc. (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/permissions/assign-role-data-scope": {
+      "post": {
+        "tags": ["Permission"],
+        "summary": "Assign data scope to a role",
+        "description": "Sets the data-scope (data-level permission) for a role, optionally with a custom set of department ids. Requires the `system:permission:assign-role-data-scope` permission.",
+        "operationId": "assignRoleDataScope",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AssignRoleDataScopeRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data scope assigned (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:permission:assign-role-data-scope` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed — role not found, etc. (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/permissions/user-roles": {
+      "get": {
+        "tags": ["Permission"],
+        "summary": "Get role ids assigned to a user",
+        "description": "Returns the list of role ids assigned to the given user. Requires the `system:permission:assign-user-role` permission.",
+        "operationId": "userRoles",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "User id.",
+            "required": true,
+            "schema": { "type": "integer", "example": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role ids for the user (code: 0)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": { "type": "integer" },
+                          "example": [2, 3]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:permission:assign-user-role` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/user-center/permissions/assign-user-role": {
+      "post": {
+        "tags": ["Permission"],
+        "summary": "Assign roles to a user",
+        "description": "Replaces the set of roles assigned to a user (full sync — omitted/empty `role_ids` clears the assignment). Requires the `system:permission:assign-user-role` permission.",
+        "operationId": "assignUserRole",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AssignUserRoleRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Roles assigned (code: 0)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
+          },
+          "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:permission:assign-user-role` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "422": {
+            "description": "Validation failed — user/role not found, etc. (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT access token returned by the auth endpoints. Send as `Authorization: Bearer <token>`."
+      }
+    },
+    "parameters": {
+      "PerPage": {
+        "name": "per_page",
+        "in": "query",
+        "description": "Number of items per page.",
+        "required": false,
+        "schema": { "type": "integer", "default": 15, "minimum": 1 }
+      },
+      "UserId": {
+        "name": "id",
+        "in": "path",
+        "description": "User id.",
+        "required": true,
+        "schema": { "type": "integer" }
+      },
+      "RoleId": {
+        "name": "id",
+        "in": "path",
+        "description": "Role id.",
+        "required": true,
+        "schema": { "type": "integer" }
+      },
+      "MenuId": {
+        "name": "id",
+        "in": "path",
+        "description": "Menu id.",
+        "required": true,
+        "schema": { "type": "integer" }
+      }
+    },
+    "schemas": {
+      "LoginRequest": {
+        "type": "object",
+        "required": ["login", "password"],
+        "properties": {
+          "login": { "type": "string", "description": "Account name, email, or phone number.", "example": "superadmin" },
+          "password": { "type": "string", "description": "User password.", "example": "123456" }
+        }
+      },
+      "PhoneLoginRequest": {
+        "type": "object",
+        "required": ["phone", "code"],
+        "properties": {
+          "phone": { "type": "string", "pattern": "^1[3-9]\\d{9}$", "description": "Mainland China phone number (11 digits).", "example": "13811974106" },
+          "code": { "type": "string", "minLength": 6, "maxLength": 6, "description": "6-digit SMS verification code.", "example": "123456" }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["password"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 255, "description": "Display name (auto-generated if omitted).", "example": "Alice" },
+          "email": { "type": "string", "format": "email", "description": "Email (must be unique if provided).", "example": "alice@example.com" },
+          "phone": { "type": "string", "pattern": "^1[3-9]\\d{9}$", "description": "Mainland China phone number (must be unique if provided).", "example": "13811974106" },
+          "password": { "type": "string", "minLength": 6, "description": "Password.", "example": "secret123" },
+          "password_confirmation": { "type": "string", "minLength": 6, "description": "Must match `password`.", "example": "secret123" }
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "required": ["name", "password"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 255 },
+          "email": { "type": "string", "format": "email", "nullable": true, "description": "Must be unique." },
+          "phone": { "type": "string", "pattern": "^1[3-9]\\d{9}$", "nullable": true, "description": "Must be unique." },
+          "password": { "type": "string", "minLength": 6 },
+          "status": { "$ref": "#/components/schemas/UserStatus" },
+          "nickname": { "type": "string", "maxLength": 50, "nullable": true },
+          "avatar": { "type": "string", "nullable": true, "description": "Avatar URL." },
+          "roles": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Role codes to assign. Each must exist in `roles.name`.",
+            "example": ["user"]
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "maxLength": 255 },
+          "email": { "type": "string", "format": "email", "description": "Must be unique (excluding this user)." },
+          "phone": { "type": "string", "pattern": "^1[3-9]\\d{9}$", "description": "Must be unique (excluding this user)." },
+          "password": { "type": "string", "minLength": 6, "description": "New password (optional)." },
+          "status": { "$ref": "#/components/schemas/UserStatus" },
+          "nickname": { "type": "string", "maxLength": 50, "nullable": true },
+          "avatar": { "type": "string", "nullable": true },
+          "roles": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Role codes to sync (replaces existing roles)."
+          }
+        }
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "maxLength": 255 },
+          "nickname": { "type": "string", "maxLength": 50, "nullable": true },
+          "avatar": { "type": "string", "nullable": true }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "required": ["current_password", "password"],
+        "properties": {
+          "current_password": { "type": "string", "description": "The user's current password." },
+          "password": { "type": "string", "minLength": 6, "description": "New password." },
+          "password_confirmation": { "type": "string", "minLength": 6, "description": "Must match `password`." }
+        }
+      },
+      "AssignRolesRequest": {
+        "type": "object",
+        "required": ["roles"],
+        "properties": {
+          "roles": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Role codes to assign. Each must exist in `roles.name`.",
+            "example": ["editor", "viewer"]
+          }
+        }
+      },
+      "GivePermissionsRequest": {
+        "type": "object",
+        "required": ["permissions"],
+        "properties": {
+          "permissions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Permission names to grant. Each must exist in `permissions.name`.",
+            "example": ["manage-users"]
+          }
+        }
+      },
+      "MenuRequest": {
+        "type": "object",
+        "required": ["name", "type", "sort", "parent_id", "status"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 50, "description": "Menu display name." },
+          "permission": { "type": "string", "maxLength": 100, "nullable": true, "description": "Permission identifier (e.g. `system:user:query`)." },
+          "type": { "$ref": "#/components/schemas/MenuType" },
+          "sort": { "type": "integer", "description": "Display sort order." },
+          "parent_id": { "type": "integer", "minimum": 0, "description": "Parent menu id; 0 for root." },
+          "path": { "type": "string", "maxLength": 200, "nullable": true, "description": "Route path." },
+          "icon": { "type": "string", "maxLength": 100, "nullable": true, "description": "Icon identifier." },
+          "component": { "type": "string", "maxLength": 255, "nullable": true, "description": "Frontend component path." },
+          "component_name": { "type": "string", "maxLength": 255, "nullable": true, "description": "Frontend component name." },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "visible": { "type": "boolean", "nullable": true, "description": "Whether the menu is visible." },
+          "keep_alive": { "type": "boolean", "nullable": true, "description": "Whether to keep the component alive." },
+          "always_show": { "type": "boolean", "nullable": true, "description": "Always show the root menu even with one child." }
+        }
+      },
+      "RoleRequest": {
+        "type": "object",
+        "required": ["name", "code", "sort"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 30, "description": "Role display name." },
+          "code": { "type": "string", "maxLength": 100, "description": "Role code / identifier (stored in Spatie's `name` column; must be unique)." },
+          "sort": { "type": "integer", "description": "Display sort order." },
+          "remark": { "type": "string", "maxLength": 500, "nullable": true, "description": "Remark." }
+        }
+      },
+      "AssignRoleMenuRequest": {
+        "type": "object",
+        "required": ["role_id"],
+        "properties": {
+          "role_id": { "type": "integer", "description": "Role id." },
+          "menu_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "nullable": true,
+            "description": "Menu ids to assign (full sync). Omit or send empty to clear.",
+            "example": [1, 2, 5, 9]
+          }
+        }
+      },
+      "AssignRoleDataScopeRequest": {
+        "type": "object",
+        "required": ["role_id", "data_scope"],
+        "properties": {
+          "role_id": { "type": "integer", "description": "Role id." },
+          "data_scope": { "$ref": "#/components/schemas/DataScope" },
+          "data_scope_dept_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "nullable": true,
+            "description": "Custom department ids. Required only when `data_scope` is `2` (DeptCustom).",
+            "example": [10, 12]
+          }
+        }
+      },
+      "AssignUserRoleRequest": {
+        "type": "object",
+        "required": ["user_id"],
+        "properties": {
+          "user_id": { "type": "integer", "description": "User id." },
+          "role_ids": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "nullable": true,
+            "description": "Role ids to assign (full sync). Omit or send empty to clear.",
+            "example": [2, 3]
+          }
+        }
+      },
+      "TokenResponse": {
+        "type": "object",
+        "description": "JWT token response returned by auth endpoints.",
+        "properties": {
+          "access_token": { "type": "string", "description": "JWT access token.", "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..." },
+          "token_type": { "type": "string", "example": "bearer" },
+          "expires_in": { "type": "integer", "description": "Token lifetime in seconds.", "example": 3600 },
+          "user": { "$ref": "#/components/schemas/TokenUser" }
+        }
+      },
+      "TokenUser": {
+        "type": "object",
+        "description": "Authenticated user summary embedded in the token response.",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "superadmin" },
+          "email": { "type": "string", "format": "email", "nullable": true, "example": "admin@example.com" },
+          "phone": { "type": "string", "nullable": true, "example": "13811974106" },
+          "status": { "$ref": "#/components/schemas/UserStatus" },
+          "roles": { "type": "array", "items": { "type": "string" }, "description": "Role codes.", "example": ["super_admin"] },
+          "permissions": { "type": "array", "items": { "type": "string" }, "description": "Permission identifiers.", "example": ["manage-users", "system:role:query"] }
+        }
+      },
+      "User": {
+        "type": "object",
+        "description": "Full user model (as returned by the user endpoints; `password` and `remember_token` are hidden).",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "superadmin" },
+          "nickname": { "type": "string", "nullable": true, "example": "Super Admin" },
+          "email": { "type": "string", "format": "email", "nullable": true, "example": "admin@example.com" },
+          "phone": { "type": "string", "nullable": true, "example": "13811974106" },
+          "email_verified_at": { "type": "string", "format": "date-time", "nullable": true },
+          "phone_verified_at": { "type": "string", "format": "date-time", "nullable": true },
+          "status": { "$ref": "#/components/schemas/UserStatus" },
+          "avatar": { "type": "string", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time", "nullable": true },
+          "updated_at": { "type": "string", "format": "date-time", "nullable": true },
+          "roles": {
+            "type": "array",
+            "description": "Roles loaded with the user (raw Spatie Role serialization including ruoyi fields).",
+            "items": { "$ref": "#/components/schemas/Role" }
+          },
+          "permissions": {
+            "type": "array",
+            "description": "Permissions loaded with the user.",
+            "items": { "$ref": "#/components/schemas/Permission" }
+          }
+        }
+      },
+      "Role": {
+        "type": "object",
+        "description": "Role (raw model serialization, as embedded in user responses). The Spatie `name` column holds the role code.",
+        "properties": {
+          "id": { "type": "integer", "example": 2 },
+          "name": { "type": "string", "description": "Role code / identifier.", "example": "editor" },
+          "display_name": { "type": "string", "nullable": true, "description": "Human-readable label.", "example": "Editor" },
+          "guard_name": { "type": "string", "example": "web" },
+          "sort": { "type": "integer", "example": 0 },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "type": { "$ref": "#/components/schemas/RoleType" },
+          "remark": { "type": "string", "nullable": true },
+          "data_scope": { "$ref": "#/components/schemas/DataScope" },
+          "data_scope_dept_ids": { "type": "array", "items": { "type": "integer" }, "nullable": true },
+          "created_at": { "type": "string", "format": "date-time", "nullable": true },
+          "updated_at": { "type": "string", "format": "date-time", "nullable": true },
+          "pivot": { "type": "object", "description": "Pivot row when the role is loaded via a user relation.", "nullable": true }
+        }
+      },
+      "Permission": {
+        "type": "object",
+        "description": "Permission (raw Spatie model serialization).",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "description": "Permission identifier.", "example": "manage-users" },
+          "guard_name": { "type": "string", "example": "web" },
+          "created_at": { "type": "string", "format": "date-time", "nullable": true },
+          "updated_at": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "RoleResource": {
+        "type": "object",
+        "description": "Role resource (role endpoints). `name` is the display name; `code` is the role identifier.",
+        "properties": {
+          "id": { "type": "integer", "example": 2 },
+          "name": { "type": "string", "description": "Display name (falls back to code).", "example": "Editor" },
+          "code": { "type": "string", "description": "Role code / identifier.", "example": "editor" },
+          "sort": { "type": "integer", "example": 0 },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "type": { "$ref": "#/components/schemas/RoleType" },
+          "remark": { "type": "string", "nullable": true },
+          "dataScope": { "$ref": "#/components/schemas/DataScope" },
+          "dataScopeDeptIds": { "type": "array", "items": { "type": "integer" }, "example": [] },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "RoleSimpleResource": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 2 },
+          "name": { "type": "string", "description": "Display name (falls back to code).", "example": "Editor" },
+          "code": { "type": "string", "description": "Role code / identifier.", "example": "editor" }
+        }
+      },
+      "MenuResource": {
+        "type": "object",
+        "description": "Menu resource (menu endpoints).",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "User Management" },
+          "permission": { "type": "string", "nullable": true, "example": "system:user:query" },
+          "type": { "$ref": "#/components/schemas/MenuType" },
+          "sort": { "type": "integer", "example": 0 },
+          "parentId": { "type": "integer", "description": "Parent menu id; 0 for root.", "example": 0 },
+          "path": { "type": "string", "nullable": true, "example": "/system/user" },
+          "icon": { "type": "string", "nullable": true, "example": "user" },
+          "component": { "type": "string", "nullable": true, "example": "system/user/index" },
+          "componentName": { "type": "string", "nullable": true, "example": "SystemUser" },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "visible": { "type": "boolean", "nullable": true, "example": true },
+          "keepAlive": { "type": "boolean", "nullable": true, "example": false },
+          "alwaysShow": { "type": "boolean", "nullable": true, "example": false },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "MenuSimpleResource": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "User Management" },
+          "parentId": { "type": "integer", "example": 0 },
+          "type": { "$ref": "#/components/schemas/MenuType" }
+        }
+      },
+      "PermissionInfo": {
+        "type": "object",
+        "description": "Permission/menu info for the logged-in user.",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "example": 1 },
+              "name": { "type": "string", "example": "superadmin" },
+              "nickname": { "type": "string", "nullable": true, "example": "Super Admin" },
+              "avatar": { "type": "string", "nullable": true }
+            }
+          },
+          "roles": { "type": "array", "items": { "type": "string" }, "description": "Role codes.", "example": ["super_admin"] },
+          "permissions": { "type": "array", "items": { "type": "string" }, "description": "Permission identifiers.", "example": ["manage-users", "system:role:query"] },
+          "menus": {
+            "type": "array",
+            "description": "Menu tree assigned to the user's roles (nested via children).",
+            "items": { "$ref": "#/components/schemas/MenuTreeNode" }
+          }
+        }
+      },
+      "MenuTreeNode": {
+        "type": "object",
+        "description": "Menu tree node (MenuResource shape with optional `children`).",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "permission": { "type": "string", "nullable": true },
+          "type": { "$ref": "#/components/schemas/MenuType" },
+          "sort": { "type": "integer" },
+          "parentId": { "type": "integer" },
+          "path": { "type": "string", "nullable": true },
+          "icon": { "type": "string", "nullable": true },
+          "component": { "type": "string", "nullable": true },
+          "componentName": { "type": "string", "nullable": true },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "visible": { "type": "boolean", "nullable": true },
+          "keepAlive": { "type": "boolean", "nullable": true },
+          "alwaysShow": { "type": "boolean", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true },
+          "children": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/MenuTreeNode" }
+          }
+        }
+      },
+      "UserPagination": {
+        "type": "object",
+        "description": "Laravel paginator payload (the `data` field of the list-users response).",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/User" }
+          },
+          "links": {
+            "type": "object",
+            "properties": {
+              "first": { "type": "string", "nullable": true },
+              "last": { "type": "string", "nullable": true },
+              "prev": { "type": "string", "nullable": true },
+              "next": { "type": "string", "nullable": true }
+            }
+          },
+          "meta": { "$ref": "#/components/schemas/PaginationMeta" }
+        }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "current_page": { "type": "integer", "example": 1 },
+          "last_page": { "type": "integer", "example": 5 },
+          "per_page": { "type": "integer", "example": 15 },
+          "total": { "type": "integer", "example": 67 }
+        }
+      },
+      "SuccessEnvelope": {
+        "type": "object",
+        "description": "Success response with no data payload.",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "code": { "type": "integer", "description": "Business code (0 = success).", "example": 0 }
+        }
+      },
+      "SuccessDataEnvelope": {
+        "type": "object",
+        "description": "Base success response envelope. A `data` property is added per endpoint.",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "code": { "type": "integer", "description": "Business code (0 = success).", "example": 0 }
+        }
+      },
+      "SuccessMessageResponse": {
+        "type": "object",
+        "description": "Success response with a message.",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Successfully logged out" },
+          "code": { "type": "integer", "example": 0 }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Business error response.",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Role not found" },
+          "code": { "type": "integer", "description": "Business code (1 = failure).", "example": 1 }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "description": "Laravel validation error response (original HTTP 422 normalized to 200; code: 1).",
+        "properties": {
+          "message": { "type": "string", "example": "The given data was invalid." },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "example": { "password": ["The password must be at least 6 characters."] }
+          },
+          "code": { "type": "integer", "example": 1 }
+        }
+      },
+      "UnauthenticatedResponse": {
+        "type": "object",
+        "description": "Unauthenticated response (HTTP 401; code: 1).",
+        "properties": {
+          "message": { "type": "string", "example": "Unauthenticated." },
+          "code": { "type": "integer", "example": 1 }
+        }
+      },
+      "UserStatus": {
+        "type": "string",
+        "enum": ["active", "inactive", "banned"],
+        "description": "User account status.",
+        "example": "active"
+      },
+      "CommonStatus": {
+        "type": "integer",
+        "enum": [0, 1],
+        "description": "Common enable/disable status (0 = enabled, 1 = disabled).",
+        "example": 0
+      },
+      "MenuType": {
+        "type": "integer",
+        "enum": [1, 2, 3],
+        "description": "Menu type (1 = Directory, 2 = Menu, 3 = Button).",
+        "example": 2
+      },
+      "RoleType": {
+        "type": "integer",
+        "enum": [1, 2],
+        "description": "Role type (1 = System/built-in, 2 = Custom).",
+        "example": 2
+      },
+      "DataScope": {
+        "type": "integer",
+        "enum": [1, 2, 3, 4, 5],
+        "description": "Data scope (1 = All, 2 = DeptCustom, 3 = DeptOnly, 4 = DeptAndChild, 5 = Self).",
+        "example": 1
+      }
+    }
+  }
+}

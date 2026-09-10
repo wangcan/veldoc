@@ -1,8 +1,18 @@
-custom业务模块需求
-1. 模块地址：liupin-service/liupin-custom-service/
-2. 分析介绍这个模块的功能。结果保存在 .requirements/subservices/custom/intro-module.md
-3. 提供模块打包、热部署等相关的命令操作文档。结果保存在 .requirements/subservices/custom/intro-deploy.md
-4. 为custom业务模块所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/subservices/custom/api.json
+custom业务模块
+模块地址：liupin-service/liupin-custom-service/
+
+需求2：
+git commit 68bcca972f753eaee4aae596737140ce60ad9d65 之后，又有业务功能提交，提交的commit为：commit 89149b0821ae6a2feab8b0de010ae88e52337749
+分析并罗列出新提交的代码中，新增的接口，以及有调整的接口。
+分析结果，新代码功能介绍等相关内容，保存在 .requirements/subservices/custom/custom-v6.md
+为新接口以及功能有调整的接口，生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/subservices/custom/custom-v6.json
 
 忽略以下所有需求描述
+
+需求1：
+1. 分析介绍这个模块的功能。结果保存在 .requirements/subservices/custom/intro-module.md
+2. 提供模块打包、热部署等相关的命令操作文档。结果保存在 .requirements/subservices/custom/intro-deploy.md
+3. 为custom业务模块所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/subservices/custom/api.json
+
+
 -. 。结果保存在 .requirements/info/intro-.md

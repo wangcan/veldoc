@@ -1,0 +1,8 @@
+当前模块是用户中心模块UserCenter；
+
+需求1：
+1. 请求接口 /api/v1/user-center/users 报错：
+"message": "Modules\UserCenter\Services\UserService::paginate(): Argument #2 ($perPage) must be of type int, null given, called in /data/project/backend/ai-laravel/Modules/UserCenter/app/Http/Controllers/Api/V1/UserController.php on line 25",
+
+忽略以下所有需求描述
+

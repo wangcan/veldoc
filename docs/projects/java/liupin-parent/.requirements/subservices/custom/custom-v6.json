@@ -1,0 +1,716 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "custom 业务模块 v6 新增接口文档",
+    "description": "liupin-custom-service 模块在 commit 68bcca972 → 89149b082 之间新增的「推荐商品（Recommend Product）」相关接口。\n\n鉴权说明：\n- 后台接口（/api/admin/**）通过 CustomerAssert.checkCustomBackUserLoginByUrl 校验后台用户登录，token 由 MiddleMallProperties.tokenUrl 指定的鉴权服务校验。\n- 淘宝端接口（/api/taobao*）通过 CustomerAssert.checkLogin() + LoginContext.getPlatId() 校验登录态。\n- 前台接口（/api/recommendProduct、/api/recommendProductCategory）当前未启用登录校验，platId 硬编码为 15（CUSTOM_TAOBAO），待后续接入登录。\n\n统一响应体 ApiResponse：status=0 表示成功，其他表示错误；msg 为提示消息；data 为业务数据。",
+    "version": "1.0.0",
+    "contact": {
+      "name": "liupin custom-service"
+    }
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "liupin-custom-service 网关入口"
+    }
+  ],
+  "tags": [
+    { "name": "后台-推荐商品分类", "description": "AdminRecommendProductCategoryController —— /api/admin/recommendProductCategory" },
+    { "name": "后台-推荐商品", "description": "AdminRecommendProductController —— /api/admin/recommendProduct" },
+    { "name": "前台-推荐分类", "description": "RecommendProductCategoryController —— /api/recommendProductCategory" },
+    { "name": "前台-推荐商品", "description": "RecommendProductController —— /api/recommendProduct" },
+    { "name": "淘宝端-推荐商品", "description": "TaoaboRecommendProductController —— /api/taobaoRecommendProduct" },
+    { "name": "淘宝端-推荐分类", "description": "TaobaoRecommendProductCategoryController —— /api/taobaoRecommendProductCategory" }
+  ],
+  "paths": {
+    "/api/admin/recommendProductCategory/list": {
+      "get": {
+        "tags": ["后台-推荐商品分类"],
+        "summary": "推荐商品分类列表（后台）",
+        "description": "返回全部推荐商品分类，每项包含该分类下的推荐商品数量（recommendProductCount）。",
+        "operationId": "adminRecommendProductCategoryList",
+        "security": [{ "backUserToken": [] }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseCategoryResultList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/recommendProductCategory/insert": {
+      "post": {
+        "tags": ["后台-推荐商品分类"],
+        "summary": "新增推荐商品分类",
+        "description": "新增分类，名称 name 必填且长度不能大于 6。",
+        "operationId": "adminRecommendProductCategoryInsert",
+        "security": [{ "backUserToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryInsertReq" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "成功", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponseEmpty" } } } }
+        }
+      }
+    },
+    "/api/admin/recommendProductCategory/update": {
+      "post": {
+        "tags": ["后台-推荐商品分类"],
+        "summary": "修改推荐商品分类",
+        "description": "按 id 修改分类，可更新 name（限 6 字）、sort、status；只更新传入的字段。",
+        "operationId": "adminRecommendProductCategoryUpdate",
+        "security": [{ "backUserToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryUpdateReq" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "成功", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponseEmpty" } } } }
+        }
+      }
+    },
+    "/api/admin/recommendProductCategory/del/{id}": {
+      "get": {
+        "tags": ["后台-推荐商品分类"],
+        "summary": "删除推荐商品分类",
+        "description": "按 id 删除分类；事务内级联删除该分类下的全部推荐商品。",
+        "operationId": "adminRecommendProductCategoryDel",
+        "security": [{ "backUserToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/IdPath" }
+        ],
+        "responses": {
+          "200": { "description": "成功", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponseEmpty" } } } }
+        }
+      }
+    },
+    "/api/admin/recommendProductCategory/updateRecommendFirstPageTip": {
+      "get": {
+        "tags": ["后台-推荐商品分类"],
+        "summary": "更新推荐首页提示语",
+        "description": "更新 admin_custom_biz_config.admin_recommend_first_page_tip 字段；tipText 必填且长度必须为 6。",
+        "operationId": "adminRecommendProductCategoryUpdateFirstPageTip",
+        "security": [{ "backUserToken": [] }],
+        "parameters": [
+          {
+            "name": "tipText",
+            "in": "query",
+            "required": true,
+            "description": "提示语，长度必须为 6",
+            "schema": { "type": "string", "maxLength": 6, "minLength": 6 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "成功", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponseEmpty" } } } }
+        }
+      }
+    },
+    "/api/admin/recommendProduct/list": {
+      "get": {
+        "tags": ["后台-推荐商品"],
+        "summary": "推荐商品分页列表（后台）",
+        "description": "按分类分页查询推荐商品，返回笔尖/笔杆实时价格与库存、关注数。data 为 PageInfo 包装的列表。",
+        "operationId": "adminRecommendProductList",
+        "security": [{ "backUserToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/PageNum" },
+          { "$ref": "#/components/parameters/PageSize" },
+          { "$ref": "#/components/parameters/CategoryId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseAdminProductPage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/recommendProduct/del/{id}": {
+      "get": {
+        "tags": ["后台-推荐商品"],
+        "summary": "删除推荐商品",
+        "operationId": "adminRecommendProductDel",
+        "security": [{ "backUserToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/IdPath" }
+        ],
+        "responses": {
+          "200": { "description": "成功", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponseEmpty" } } } }
+        }
+      }
+    },
+    "/api/admin/recommendProduct/updateProduct": {
+      "post": {
+        "tags": ["后台-推荐商品"],
+        "summary": "修改推荐商品（简介/排序/关注底数）",
+        "description": "按 id 修改推荐商品，可更新 introduction（简介）、sort（排序）、focusBasicNum（关注底数）；只更新传入的字段。",
+        "operationId": "adminRecommendProductUpdateProduct",
+        "security": [{ "backUserToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProductUpdateReq" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "成功", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponseEmpty" } } } }
+        }
+      }
+    },
+    "/api/admin/recommendProduct/productDetail": {
+      "get": {
+        "tags": ["后台-推荐商品"],
+        "summary": "推荐商品详情（后台）",
+        "description": "返回推荐商品原始实体 AdminRecommendProduct。",
+        "operationId": "adminRecommendProductDetail",
+        "security": [{ "backUserToken": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/IdQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseAdminProduct" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/recommendProduct/excelImport": {
+      "post": {
+        "tags": ["后台-推荐商品"],
+        "summary": "Excel 批量导入推荐商品",
+        "description": "上传 Excel 文件批量导入推荐商品。文件须为 .xls/.xlsx；解析字段：品名(限9字)、描述(限13字)、笔头商品编码、笔杆商品编码、关注底数(数字,默认10)。导入时自动合成刻字效果图与底图。校验：分类须存在、SKU 须存在且未下架、须存在对应笔尖笔杆效果图配置。",
+        "operationId": "adminRecommendProductExcelImport",
+        "security": [{ "backUserToken": [] }],
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": true,
+            "description": "目标分类 ID",
+            "schema": { "type": "integer", "format": "int32" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "imgFile": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Excel 文件（.xls/.xlsx）"
+                  }
+                },
+                "required": ["imgFile"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "成功", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponseEmpty" } } } }
+        }
+      }
+    },
+    "/api/admin/recommendProduct/excelExample": {
+      "post": {
+        "tags": ["后台-推荐商品"],
+        "summary": "下载 Excel 导入模板",
+        "description": "导出含固定表头的示例 Excel 文件（表头不可修改）。响应体为二进制 Excel 流。",
+        "operationId": "adminRecommendProductExcelExample",
+        "security": [{ "backUserToken": [] }],
+        "responses": {
+          "200": {
+            "description": "Excel 文件流",
+            "content": {
+              "application/vnd.ms-excel": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recommendProductCategory/list": {
+      "get": {
+        "tags": ["前台-推荐分类"],
+        "summary": "推荐商品分类列表（前台）",
+        "description": "返回 status=1（开启）的推荐商品分类列表。当前未启用登录校验。",
+        "operationId": "recommendProductCategoryList",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseProductCategoryList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recommendProduct/list": {
+      "get": {
+        "tags": ["前台-推荐商品"],
+        "summary": "推荐商品分页列表（前台）",
+        "description": "按分类分页查询推荐商品；自动过滤笔尖或笔杆无库存的组合；关注数按规则换算（≥1万显示「N万」，≥1千显示「N千」）。platId 当前硬编码 15。",
+        "operationId": "recommendProductList",
+        "parameters": [
+          { "$ref": "#/components/parameters/PageNum" },
+          { "$ref": "#/components/parameters/PageSize" },
+          { "$ref": "#/components/parameters/CategoryId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseRecommendProductPage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recommendProduct/detail": {
+      "get": {
+        "tags": ["前台-推荐商品"],
+        "summary": "推荐商品详情（前台）",
+        "description": "返回推荐商品详情；校验分类开启状态与笔尖/笔杆库存，无库存时抛业务异常。",
+        "operationId": "recommendProductDetail",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseRecommendProductDetail" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recommendProduct/userFocusNumIncrease": {
+      "get": {
+        "tags": ["前台-推荐商品"],
+        "summary": "推荐商品浏览数 +1（前台）",
+        "description": "将指定推荐商品的 focusNum 自增 1。",
+        "operationId": "recommendProductUserFocusNumIncrease",
+        "parameters": [
+          { "$ref": "#/components/parameters/IdQuery" }
+        ],
+        "responses": {
+          "200": { "description": "成功", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponseEmpty" } } } }
+        }
+      }
+    },
+    "/api/taobaoRecommendProduct/list": {
+      "get": {
+        "tags": ["淘宝端-推荐商品"],
+        "summary": "推荐商品分页列表（淘宝端）",
+        "description": "按分类分页查询推荐商品；platId 取自 LoginContext.getPlatId()；自动过滤无库存组合；关注数换算规则同前台。",
+        "operationId": "taobaoRecommendProductList",
+        "security": [{ "loginAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/PageNum" },
+          { "$ref": "#/components/parameters/PageSize" },
+          { "$ref": "#/components/parameters/CategoryId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseRecommendProductPage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoRecommendProduct/detail": {
+      "get": {
+        "tags": ["淘宝端-推荐商品"],
+        "summary": "推荐商品详情（淘宝端）",
+        "description": "返回推荐商品详情；platId 取自 LoginContext。",
+        "operationId": "taobaoRecommendProductDetail",
+        "security": [{ "loginAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/IdQuery" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseRecommendProductDetail" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/taobaoRecommendProduct/userFocusNumIncrease": {
+      "get": {
+        "tags": ["淘宝端-推荐商品"],
+        "summary": "推荐商品浏览数 +1（淘宝端）",
+        "operationId": "taobaoRecommendProductUserFocusNumIncrease",
+        "security": [{ "loginAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/IdQuery" }
+        ],
+        "responses": {
+          "200": { "description": "成功", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiResponseEmpty" } } } }
+        }
+      }
+    },
+    "/api/taobaoRecommendProductCategory/list": {
+      "get": {
+        "tags": ["淘宝端-推荐分类"],
+        "summary": "推荐商品分类列表（淘宝端）",
+        "description": "返回 status=1（开启）的推荐商品分类列表。",
+        "operationId": "taobaoRecommendProductCategoryList",
+        "security": [{ "loginAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponseProductCategoryList" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "PageNum": {
+        "name": "pageNum",
+        "in": "query",
+        "required": true,
+        "description": "页码",
+        "schema": { "type": "integer", "format": "int32", "minimum": 1 }
+      },
+      "PageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "required": true,
+        "description": "每页数量",
+        "schema": { "type": "integer", "format": "int32", "minimum": 1 }
+      },
+      "CategoryId": {
+        "name": "categoryId",
+        "in": "query",
+        "required": true,
+        "description": "分类 ID",
+        "schema": { "type": "integer", "format": "int32" }
+      },
+      "IdQuery": {
+        "name": "id",
+        "in": "query",
+        "required": true,
+        "description": "主键 ID",
+        "schema": { "type": "integer", "format": "int32" }
+      },
+      "IdPath": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "主键 ID",
+        "schema": { "type": "integer", "format": "int32" }
+      }
+    },
+    "securitySchemes": {
+      "backUserToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "token",
+        "description": "后台用户登录 token，由 MiddleMallProperties.tokenUrl 指定的鉴权服务校验"
+      },
+      "loginAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "token",
+        "description": "C 端 / 淘宝端登录态 token，通过 CustomerAssert.checkLogin() + LoginContext 校验"
+      }
+    },
+    "schemas": {
+      "ApiResponseBase": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "integer", "format": "int32", "description": "0=成功，其他=错误" },
+          "msg": { "type": "string", "description": "响应消息" },
+          "totalNum": { "type": "integer", "format": "int32", "nullable": true },
+          "pageIndex": { "type": "integer", "format": "int32", "nullable": true },
+          "pageSize": { "type": "integer", "format": "int32", "nullable": true },
+          "totalPage": { "type": "integer", "format": "int32", "nullable": true }
+        }
+      },
+      "ApiResponseEmpty": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiResponseBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "object", "nullable": true, "description": "无业务数据" }
+            }
+          }
+        ]
+      },
+      "ApiResponseCategoryResultList": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiResponseBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/AdminRecommendProductCategoryResult" }
+              }
+            }
+          }
+        ]
+      },
+      "ApiResponseProductCategoryList": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiResponseBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/AdminRecommendProductCategory" }
+              }
+            }
+          }
+        ]
+      },
+      "ApiResponseAdminProductPage": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiResponseBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "$ref": "#/components/schemas/PageInfoAdminProductResult" }
+            }
+          }
+        ]
+      },
+      "ApiResponseRecommendProductPage": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiResponseBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "$ref": "#/components/schemas/PageInfoRecommendProductResult" }
+            }
+          }
+        ]
+      },
+      "ApiResponseAdminProduct": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiResponseBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "$ref": "#/components/schemas/AdminRecommendProduct" }
+            }
+          }
+        ]
+      },
+      "ApiResponseRecommendProductDetail": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ApiResponseBase" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "$ref": "#/components/schemas/RecommendProductDetailResult" }
+            }
+          }
+        ]
+      },
+      "PageInfoAdminProductResult": {
+        "type": "object",
+        "description": "PageHelper 分页包装",
+        "properties": {
+          "pageNum": { "type": "integer", "format": "int32" },
+          "pageSize": { "type": "integer", "format": "int32" },
+          "size": { "type": "integer", "format": "int32" },
+          "total": { "type": "integer", "format": "int64" },
+          "pages": { "type": "integer", "format": "int32" },
+          "list": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AdminRecommendProductResult" }
+          }
+        }
+      },
+      "PageInfoRecommendProductResult": {
+        "type": "object",
+        "description": "PageHelper 分页包装",
+        "properties": {
+          "pageNum": { "type": "integer", "format": "int32" },
+          "pageSize": { "type": "integer", "format": "int32" },
+          "size": { "type": "integer", "format": "int32" },
+          "total": { "type": "integer", "format": "int64" },
+          "pages": { "type": "integer", "format": "int32" },
+          "list": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/RecommendProductResult" }
+          }
+        }
+      },
+      "AdminRecommendProductCategoryResult": {
+        "type": "object",
+        "description": "后台分类列表项",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "name": { "type": "string" },
+          "recommendProductCount": { "type": "integer", "format": "int32", "description": "该分类下推荐商品数量" },
+          "sort": { "type": "integer", "format": "int32" },
+          "status": { "type": "integer", "format": "int32", "description": "1-开启" }
+        }
+      },
+      "AdminRecommendProductCategory": {
+        "type": "object",
+        "description": "推荐商品分类实体",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "name": { "type": "string" },
+          "sort": { "type": "integer", "format": "int32" },
+          "status": { "type": "integer", "format": "int32", "description": "1-开启" },
+          "createTime": { "type": "string", "format": "date-time" },
+          "updateTime": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AdminRecommendProductResult": {
+        "type": "object",
+        "description": "后台推荐商品列表项",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "categoryId": { "type": "integer", "format": "int32" },
+          "name": { "type": "string" },
+          "pic": { "type": "string", "description": "合成效果图 URL" },
+          "description": { "type": "string", "description": "描述" },
+          "introduction": { "type": "string", "description": "简介" },
+          "penPointAndHolderPrice": { "type": "string", "description": "笔尖和笔杆总价" },
+          "penPointSkuCode": { "type": "string", "description": "笔尖 SKU" },
+          "penPointSkuCodeStock": { "type": "integer", "format": "int32", "description": "笔尖库存" },
+          "penHolderSkuCode": { "type": "string", "description": "笔杆 SKU" },
+          "penHolderSkuCodeStock": { "type": "integer", "format": "int32", "description": "笔杆库存" },
+          "focusBasicNum": { "type": "integer", "format": "int32", "description": "关注基数" },
+          "focusNum": { "type": "integer", "format": "int32", "description": "关注数" },
+          "sort": { "type": "integer", "format": "int32" },
+          "createTime": { "type": "string", "format": "date-time" }
+        }
+      },
+      "RecommendProductResult": {
+        "type": "object",
+        "description": "前台推荐商品列表项",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "categoryId": { "type": "integer", "format": "int32" },
+          "name": { "type": "string" },
+          "pic": { "type": "string" },
+          "description": { "type": "string", "description": "描述" },
+          "penPointAndHolderPrice": { "type": "string", "description": "笔尖和笔杆总价" },
+          "focusNum": { "type": "string", "description": "关注数（换算后字符串，如 1万/2千）" },
+          "penPointStock": { "type": "boolean", "description": "笔尖是否有库存" },
+          "penHolderStock": { "type": "boolean", "description": "笔杆是否有库存" },
+          "createTime": { "type": "string", "format": "date-time" }
+        }
+      },
+      "RecommendProductDetailResult": {
+        "type": "object",
+        "description": "前台推荐商品详情",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "categoryId": { "type": "integer", "format": "int32" },
+          "name": { "type": "string" },
+          "pic": { "type": "string" },
+          "introduction": { "type": "string", "description": "简介" },
+          "penPointAndHolderPrice": { "type": "string", "description": "笔尖和笔杆总价" },
+          "penPointSkuCode": { "type": "string", "description": "笔尖 SKU" },
+          "penHolderSkuCode": { "type": "string", "description": "笔杆 SKU" },
+          "focusNum": { "type": "string", "description": "关注数（换算后字符串）" },
+          "createTime": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AdminRecommendProduct": {
+        "type": "object",
+        "description": "推荐商品实体（后台详情返回）",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "categoryId": { "type": "integer", "format": "int32" },
+          "name": { "type": "string" },
+          "pic": { "type": "string", "description": "合成效果图 URL" },
+          "description": { "type": "string", "description": "描述" },
+          "introduction": { "type": "string", "description": "简介" },
+          "penPointSkuCode": { "type": "string", "description": "笔尖 SKU" },
+          "penHolderSkuCode": { "type": "string", "description": "笔杆 SKU" },
+          "focusBasicNum": { "type": "integer", "format": "int32", "description": "关注基数" },
+          "focusNum": { "type": "integer", "format": "int32", "description": "关注数" },
+          "sort": { "type": "integer", "format": "int32" },
+          "createTime": { "type": "string", "format": "date-time" },
+          "updateTime": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CategoryInsertReq": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "description": "分类名称（长度不能大于 6）", "maxLength": 6 }
+        }
+      },
+      "CategoryUpdateReq": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "name": { "type": "string", "description": "分类名称（长度不能大于 6）", "maxLength": 6 },
+          "sort": { "type": "integer", "format": "int32" },
+          "status": { "type": "integer", "format": "int32", "description": "1-开启" }
+        }
+      },
+      "ProductUpdateReq": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "introduction": { "type": "string", "description": "简介" },
+          "sort": { "type": "integer", "format": "int32" },
+          "focusBasicNum": { "type": "integer", "format": "int32", "description": "关注底数" }
+        }
+      }
+    }
+  }
+}
