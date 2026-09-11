@@ -1,107 +1,70 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.0.3",
   "info": {
-    "title": "BaseTool API",
-    "description": "基础工具模块API文档 - 提供验证码、短信发送和二维码功能",
+    "title": "BaseTool Module API",
+    "description": "基础工具模块 REST API —— 提供图像验证码、短信发送、二维码生成与解析功能。\n\n## 鉴权\n\n本模块所有接口均为**公开接口**，无需鉴权（不带 `auth` 中间件）。\n\n## 响应封装\n\n所有 JSON 响应都经过全局中间件 `App\\Http\\Middleware\\NormalizeApiResponse` 处理，该中间件：\n\n- 注入业务 `code` 字段：`0` 表示成功（原始 HTTP 2xx），`1` 表示失败（原始 4xx/5xx）。\n- 归一化 HTTP 状态码：`200/401/404/500` 保留；其他 5xx 归一为 `500`；其余状态（422、429 等）全部归一为 `200`。\n\n因此一个校验失败或业务失败实际返回 HTTP **200** 且 `code: 1`（原始 422/429 被归一为 200）；只有 `401`（未鉴权，本模块不产生）、`404`、`500` 会保留原状态。**`code` 字段是判断成功/失败的可靠依据，不要仅依赖 HTTP 状态码。**\n\n常见响应结构：\n\n- 成功（带数据）：`{ \"success\": true, \"data\": <payload>, \"code\": 0 }`\n- 成功（带消息）：`{ \"success\": true, \"message\": \"...\", \"code\": 0 }`\n- 业务失败：`{ \"success\": false, \"message\": \"...\", \"code\": 1 }`（短信发送失败时额外带 `error`）\n- 校验失败：`{ \"message\": \"...\", \"errors\": { \"field\": [\"...\"] }, \"code\": 1 }`\n\n## 频率限制\n\n短信相关接口在控制器层做了频率限制（基于 `Illuminate\\Support\\Facades\\RateLimiter`）：\n\n- 同一手机号每 **60 秒** 最多请求 1 次。\n- 同一手机号每天（24 小时窗口）最多请求 **5** 次。\n\n触发限制时返回 `code: 1`（原始 HTTP 429 被归一为 200），`message` 提示剩余等待秒数或当日额度已用尽。\n\n## 手机号格式\n\n仅支持中国大陆手机号：正则 `^1[3-9]\\d{9}$`（11 位、以 1 开头、第二位为 3-9）。",
     "version": "1.0.0",
     "contact": {
-      "name": "API Support"
+      "name": "BaseTool Module"
     }
   },
   "servers": [
     {
-      "url": "http://localhost:8000/api/v1/base-tool",
-      "description": "开发环境"
+      "url": "http://localhost:8000",
+      "description": "本地开发环境"
     }
   ],
   "tags": [
-    {
-      "name": "captcha",
-      "description": "验证码相关接口"
-    },
-    {
-      "name": "sms",
-      "description": "短信发送相关接口"
-    },
-    {
-      "name": "qrcode",
-      "description": "二维码相关接口"
-    }
+    { "name": "Captcha", "description": "图像验证码：生成、校验" },
+    { "name": "Sms", "description": "短信发送：直发短信、发送验证码、校验验证码" },
+    { "name": "QrCode", "description": "二维码：生成、带 Logo 生成、解析" }
   ],
+  "security": [],
   "paths": {
-    "/captcha": {
+    "/api/v1/base-tool/captcha": {
       "get": {
-        "tags": ["captcha"],
-        "summary": "生成验证码",
-        "description": "生成一个新的图像验证码，返回验证码key和图像URL",
+        "tags": ["Captcha"],
+        "summary": "生成图像验证码",
+        "description": "生成一个新的图像验证码，返回验证码唯一 `key`、图像 URL 与过期时间。`key` 用于后续 `/captcha/verify` 校验。所有查询参数均可选，缺省时取 `basetool.captcha` 配置（length=5, width=120, height=36, expire=300 秒）。",
         "operationId": "generateCaptcha",
         "parameters": [
           {
             "name": "length",
             "in": "query",
-            "description": "验证码长度，默认5位",
+            "description": "验证码字符长度，默认 5。",
             "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 5,
-              "minimum": 4,
-              "maximum": 8
-            }
+            "schema": { "type": "integer", "default": 5 }
           },
           {
             "name": "width",
             "in": "query",
-            "description": "图像宽度，默认120像素",
+            "description": "图像宽度（像素），默认 120。",
             "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 120
-            }
+            "schema": { "type": "integer", "default": 120 }
           },
           {
             "name": "height",
             "in": "query",
-            "description": "图像高度，默认36像素",
+            "description": "图像高度（像素），默认 36。",
             "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 36
-            }
+            "schema": { "type": "integer", "default": 36 }
           }
         ],
         "responses": {
           "200": {
-            "description": "成功生成验证码",
+            "description": "验证码生成成功（code: 0）",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "data": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
                       "type": "object",
                       "properties": {
-                        "key": {
-                          "type": "string",
-                          "description": "验证码唯一标识",
-                          "example": "captcha_abc123def456"
-                        },
-                        "captcha": {
-                          "type": "string",
-                          "description": "验证码图像URL或base64",
-                          "example": "data:image/png;base64,..."
-                        },
-                        "expire": {
-                          "type": "integer",
-                          "description": "过期时间（秒）",
-                          "example": 300
-                        }
+                        "data": { "$ref": "#/components/schemas/CaptchaData" }
                       }
                     }
-                  }
+                  ]
                 }
               }
             }
@@ -109,72 +72,38 @@
         }
       }
     },
-    "/captcha/verify": {
+    "/api/v1/base-tool/captcha/verify": {
       "post": {
-        "tags": ["captcha"],
-        "summary": "验证验证码",
-        "description": "验证用户输入的验证码是否正确",
+        "tags": ["Captcha"],
+        "summary": "校验图像验证码",
+        "description": "校验用户输入的验证码值是否与 `key` 对应的缓存值匹配（大小写不敏感）。校验成功后该 `key` 立即失效（不可重复使用）。",
         "operationId": "verifyCaptcha",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["key", "value"],
-                "properties": {
-                  "key": {
-                    "type": "string",
-                    "description": "验证码唯一标识",
-                    "example": "captcha_abc123def456"
-                  },
-                  "value": {
-                    "type": "string",
-                    "description": "用户输入的验证码值",
-                    "example": "A2b3C"
-                  }
-                }
-              }
+              "schema": { "$ref": "#/components/schemas/VerifyCaptchaRequest" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "验证成功",
+            "description": "校验成功（code: 0）",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Captcha verified successfully"
-                    }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/SuccessMessageEnvelope" }
               }
             }
           },
           "422": {
-            "description": "验证失败",
+            "description": "校验失败或请求参数校验失败（HTTP 200，code: 1；原始 422 被归一为 200）。",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Invalid or expired captcha"
-                    }
-                  }
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/BusinessErrorEnvelope" },
+                    { "$ref": "#/components/schemas/ValidationErrorResponse" }
+                  ]
                 }
               }
             }
@@ -182,248 +111,132 @@
         }
       }
     },
-    "/sms/send": {
+    "/api/v1/base-tool/sms/send": {
       "post": {
-        "tags": ["sms"],
+        "tags": ["Sms"],
         "summary": "发送短信",
-        "description": "发送短信到指定手机号（受频率限制：每分钟1次，每天5次）",
+        "description": "向指定手机号直接发送短信内容（受频率限制：同一手机号 60 秒 1 次、每天 5 次）。底层使用 `overtrue/easy-sms`，默认网关由 `basetool.sms.default` 决定。",
         "operationId": "sendSms",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["phone", "content"],
-                "properties": {
-                  "phone": {
-                    "type": "string",
-                    "pattern": "^1[3-9]\\d{9}$",
-                    "description": "中国大陆手机号",
-                    "example": "13800138000"
-                  },
-                  "content": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "description": "短信内容",
-                    "example": "您的验证码是123456"
-                  }
-                }
-              }
+              "schema": { "$ref": "#/components/schemas/SendSmsRequest" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "短信发送成功",
+            "description": "短信发送成功（code: 0）",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "SMS sent successfully"
-                    },
-                    "message_id": {
-                      "type": "string",
-                      "description": "短信网关返回的消息ID",
-                      "example": "msg_123456789"
-                    }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/SmsSendSuccessResponse" }
               }
             }
           },
           "422": {
-            "description": "短信发送失败",
+            "description": "发送失败或请求参数校验失败（HTTP 200，code: 1；原始 422 被归一为 200）。发送失败时带 `error` 字段。",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Failed to send SMS"
-                    },
-                    "error": {
-                      "type": "string",
-                      "example": "Error details"
-                    }
-                  }
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/SmsSendFailureResponse" },
+                    { "$ref": "#/components/schemas/ValidationErrorResponse" }
+                  ]
                 }
               }
             }
           },
           "429": {
-            "description": "频率限制",
+            "description": "触发频率限制（HTTP 200，code: 1；原始 429 被归一为 200）。`message` 提示剩余等待秒数或当日额度已用尽。",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Please wait 60 seconds before sending another SMS"
-                    }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/BusinessErrorEnvelope" }
               }
             }
           }
         }
       }
     },
-    "/sms/send-code": {
+    "/api/v1/base-tool/sms/send-code": {
       "post": {
-        "tags": ["sms"],
-        "summary": "发送验证码",
-        "description": "发送短信验证码到指定手机号（受频率限制：每分钟1次，每天5次）",
+        "tags": ["Sms"],
+        "summary": "发送短信验证码",
+        "description": "向指定手机号生成 6 位随机验证码并短信发送（受频率限制：同一手机号 60 秒 1 次、每天 5 次）。验证码缓存于 `sms_code_{phone}`，有效期由 `basetool.sms.code_expire`（默认 300 秒）决定，随后通过 `/sms/verify-code` 校验。",
         "operationId": "sendSmsCode",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["phone"],
-                "properties": {
-                  "phone": {
-                    "type": "string",
-                    "pattern": "^1[3-9]\\d{9}$",
-                    "description": "中国大陆手机号",
-                    "example": "13800138000"
-                  }
-                }
-              }
+              "schema": { "$ref": "#/components/schemas/SendSmsCodeRequest" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "验证码发送成功",
+            "description": "验证码发送成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SmsSendSuccessResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "发送失败或请求参数校验失败（HTTP 200，code: 1；原始 422 被归一为 200）。发送失败时带 `error` 字段。",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "SMS sent successfully"
-                    }
-                  }
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/SmsSendFailureResponse" },
+                    { "$ref": "#/components/schemas/ValidationErrorResponse" }
+                  ]
                 }
               }
             }
           },
           "429": {
-            "description": "频率限制",
+            "description": "触发频率限制（HTTP 200，code: 1；原始 429 被归一为 200）。",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Daily SMS limit exceeded"
-                    }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/BusinessErrorEnvelope" }
               }
             }
           }
         }
       }
     },
-    "/sms/verify-code": {
+    "/api/v1/base-tool/sms/verify-code": {
       "post": {
-        "tags": ["sms"],
-        "summary": "验证短信验证码",
-        "description": "验证用户输入的短信验证码是否正确",
+        "tags": ["Sms"],
+        "summary": "校验短信验证码",
+        "description": "校验用户输入的 6 位验证码是否与 `sms_code_{phone}` 缓存值一致。校验成功后验证码立即从缓存清除（一次性）。",
         "operationId": "verifySmsCode",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["phone", "code"],
-                "properties": {
-                  "phone": {
-                    "type": "string",
-                    "pattern": "^1[3-9]\\d{9}$",
-                    "description": "中国大陆手机号",
-                    "example": "13800138000"
-                  },
-                  "code": {
-                    "type": "string",
-                    "minLength": 6,
-                    "maxLength": 6,
-                    "description": "6位验证码",
-                    "example": "123456"
-                  }
-                }
-              }
+              "schema": { "$ref": "#/components/schemas/VerifySmsCodeRequest" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "验证成功",
+            "description": "校验成功（code: 0）",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Code verified successfully"
-                    }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/SuccessMessageEnvelope" }
               }
             }
           },
           "422": {
-            "description": "验证失败",
+            "description": "校验失败或请求参数校验失败（HTTP 200，code: 1；原始 422 被归一为 200）。",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Invalid or expired verification code"
-                    }
-                  }
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/BusinessErrorEnvelope" },
+                    { "$ref": "#/components/schemas/ValidationErrorResponse" }
+                  ]
                 }
               }
             }
@@ -431,81 +244,55 @@
         }
       }
     },
-    "/qrcode/generate": {
+    "/api/v1/base-tool/qrcode/generate": {
       "post": {
-        "tags": ["qrcode"],
+        "tags": ["QrCode"],
         "summary": "生成二维码",
-        "description": "根据内容生成二维码图像",
+        "description": "根据给定内容生成二维码图像。`format=png` 时返回 `data:image/png;base64,...` 数据 URI；`format=svg` 时返回 SVG 字符串。底层使用 `simplesoftwareio/simple-qrcode`。",
         "operationId": "generateQrCode",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["content"],
-                "properties": {
-                  "content": {
-                    "type": "string",
-                    "maxLength": 2048,
-                    "description": "二维码内容",
-                    "example": "https://example.com"
-                  },
-                  "size": {
-                    "type": "integer",
-                    "minimum": 100,
-                    "maximum": 1000,
-                    "default": 300,
-                    "description": "二维码尺寸（像素）",
-                    "example": 300
-                  },
-                  "format": {
-                    "type": "string",
-                    "enum": ["png", "svg"],
-                    "default": "png",
-                    "description": "输出格式",
-                    "example": "png"
-                  }
-                }
-              }
+              "schema": { "$ref": "#/components/schemas/GenerateQrCodeRequest" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "二维码生成成功",
+            "description": "二维码生成成功（code: 0）",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "data": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
                       "type": "object",
                       "properties": {
-                        "qrcode": {
-                          "type": "string",
-                          "description": "二维码图像（base64或SVG）",
-                          "example": "data:image/png;base64,..."
-                        }
+                        "data": { "$ref": "#/components/schemas/QrCodeData" }
                       }
                     }
-                  }
+                  ]
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "请求参数校验失败（HTTP 200，code: 1；原始 422 被归一为 200）。",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
               }
             }
           }
         }
       }
     },
-    "/qrcode/generate-with-logo": {
+    "/api/v1/base-tool/qrcode/generate-with-logo": {
       "post": {
-        "tags": ["qrcode"],
-        "summary": "生成带Logo的二维码",
-        "description": "根据内容生成带有Logo的二维码图像",
+        "tags": ["QrCode"],
+        "summary": "生成带 Logo 的二维码",
+        "description": "根据给定内容生成中央嵌入 Logo 的二维码图像（PNG 数据 URI）。Logo 通过 `multipart/form-data` 上传，临时存储后即用即删。",
         "operationId": "generateQrCodeWithLogo",
         "requestBody": {
           "required": true,
@@ -518,20 +305,20 @@
                   "content": {
                     "type": "string",
                     "maxLength": 2048,
-                    "description": "二维码内容",
+                    "description": "二维码内容。",
                     "example": "https://example.com"
                   },
                   "logo": {
                     "type": "string",
                     "format": "binary",
-                    "description": "Logo图像文件（最大1MB）"
+                    "description": "Logo 图像文件（必须是图片，最大 1MB）。"
                   },
                   "size": {
                     "type": "integer",
                     "minimum": 100,
                     "maximum": 1000,
                     "default": 300,
-                    "description": "二维码尺寸（像素）",
+                    "description": "二维码尺寸（像素）。",
                     "example": 300
                   },
                   "logo_size": {
@@ -539,7 +326,7 @@
                     "minimum": 10,
                     "maximum": 100,
                     "default": 50,
-                    "description": "Logo占二维码的百分比",
+                    "description": "Logo 占二维码尺寸的百分比。",
                     "example": 50
                   }
                 }
@@ -549,39 +336,39 @@
         },
         "responses": {
           "200": {
-            "description": "带Logo的二维码生成成功",
+            "description": "带 Logo 二维码生成成功（code: 0）",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "data": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
                       "type": "object",
                       "properties": {
-                        "qrcode": {
-                          "type": "string",
-                          "description": "二维码图像（base64）",
-                          "example": "data:image/png;base64,..."
-                        }
+                        "data": { "$ref": "#/components/schemas/QrCodeData" }
                       }
                     }
-                  }
+                  ]
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "请求参数/上传文件校验失败（HTTP 200，code: 1；原始 422 被归一为 200）。",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
               }
             }
           }
         }
       }
     },
-    "/qrcode/decode": {
+    "/api/v1/base-tool/qrcode/decode": {
       "post": {
-        "tags": ["qrcode"],
-        "summary": "解码二维码",
-        "description": "从图像中解码二维码内容",
+        "tags": ["QrCode"],
+        "summary": "解析二维码",
+        "description": "从上传的图像文件中解析二维码内容。图像通过 `multipart/form-data` 上传，临时存储后即用即删。",
         "operationId": "decodeQrCode",
         "requestBody": {
           "required": true,
@@ -594,7 +381,7 @@
                   "image": {
                     "type": "string",
                     "format": "binary",
-                    "description": "二维码图像文件（最大2MB）"
+                    "description": "包含二维码的图像文件（必须是图片，最大 2MB）。"
                   }
                 }
               }
@@ -603,47 +390,32 @@
         },
         "responses": {
           "200": {
-            "description": "二维码解码成功",
+            "description": "二维码解析成功（code: 0）",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "data": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
                       "type": "object",
                       "properties": {
-                        "content": {
-                          "type": "string",
-                          "description": "二维码内容",
-                          "example": "https://example.com"
-                        }
+                        "data": { "$ref": "#/components/schemas/QrCodeDecodeData" }
                       }
                     }
-                  }
+                  ]
                 }
               }
             }
           },
           "422": {
-            "description": "解码失败",
+            "description": "解析失败（无法从图像中识别二维码）或请求参数/上传文件校验失败（HTTP 200，code: 1；原始 422 被归一为 200）。",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Unable to decode QR code from image"
-                    }
-                  }
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/BusinessErrorEnvelope" },
+                    { "$ref": "#/components/schemas/ValidationErrorResponse" }
+                  ]
                 }
               }
             }
@@ -654,34 +426,207 @@
   },
   "components": {
     "schemas": {
-      "Error": {
+      "SuccessDataEnvelope": {
         "type": "object",
+        "description": "成功响应基础封装（带数据）。具体接口会在其上追加 `data` 字段。",
         "properties": {
-          "success": {
-            "type": "boolean",
-            "example": false
-          },
-          "message": {
-            "type": "string",
-            "example": "Error message"
-          }
+          "success": { "type": "boolean", "example": true },
+          "code": { "type": "integer", "description": "业务码（0 = 成功）。", "example": 0 }
         }
       },
-      "ValidationError": {
+      "SuccessMessageEnvelope": {
         "type": "object",
+        "description": "成功响应封装（带消息）。",
         "properties": {
-          "message": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Captcha verified successfully" },
+          "code": { "type": "integer", "description": "业务码（0 = 成功）。", "example": 0 }
+        }
+      },
+      "BusinessErrorEnvelope": {
+        "type": "object",
+        "description": "业务失败响应封装（HTTP 200，code: 1；原始 4xx/429 被归一为 200）。",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Invalid or expired captcha" },
+          "code": { "type": "integer", "description": "业务码（1 = 失败）。", "example": 1 }
+        }
+      },
+      "SmsSendSuccessResponse": {
+        "type": "object",
+        "description": "短信发送成功响应（code: 0）。",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "SMS sent successfully" },
+          "message_id": {
             "type": "string",
-            "example": "Validation failed"
+            "nullable": true,
+            "description": "短信网关返回的消息 ID；网关未返回时为 null。",
+            "example": "msg_123456789"
           },
+          "code": { "type": "integer", "description": "业务码（0 = 成功）。", "example": 0 }
+        }
+      },
+      "SmsSendFailureResponse": {
+        "type": "object",
+        "description": "短信发送失败响应（HTTP 200，code: 1；原始 422 被归一为 200）。",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Failed to send SMS" },
+          "error": { "type": "string", "description": "底层异常信息。", "example": "Gateway timeout" },
+          "code": { "type": "integer", "description": "业务码（1 = 失败）。", "example": 1 }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "description": "Laravel 请求参数校验失败响应（HTTP 200，code: 1；原始 422 被归一为 200）。",
+        "properties": {
+          "message": { "type": "string", "example": "The given data was invalid." },
           "errors": {
             "type": "object",
             "additionalProperties": {
               "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "items": { "type": "string" }
+            },
+            "example": {
+              "phone": ["The phone field format is invalid."]
             }
+          },
+          "code": { "type": "integer", "description": "业务码（1 = 失败）。", "example": 1 }
+        }
+      },
+      "CaptchaData": {
+        "type": "object",
+        "description": "验证码生成结果。",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "验证码唯一标识，用于 `/captcha/verify`。",
+            "example": "captcha_a1b2c3d4e5f6..."
+          },
+          "captcha": {
+            "type": "string",
+            "description": "验证码图像 URL（由 mews/captcha 生成）。",
+            "example": "http://localhost/captcha/default?12345"
+          },
+          "expire": {
+            "type": "integer",
+            "description": "过期时间（秒）。",
+            "example": 300
+          }
+        }
+      },
+      "QrCodeData": {
+        "type": "object",
+        "description": "二维码生成结果。",
+        "properties": {
+          "qrcode": {
+            "type": "string",
+            "description": "二维码图像。`format=png` 时为 `data:image/png;base64,...` 数据 URI；`format=svg` 时为 SVG 字符串。",
+            "example": "data:image/png;base64,iVBORw0KGgo..."
+          }
+        }
+      },
+      "QrCodeDecodeData": {
+        "type": "object",
+        "description": "二维码解析结果。",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "从图像中解析出的二维码内容。",
+            "example": "https://example.com"
+          }
+        }
+      },
+      "VerifyCaptchaRequest": {
+        "type": "object",
+        "required": ["key", "value"],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "验证码唯一标识（由 `/captcha` 返回）。",
+            "example": "captcha_a1b2c3d4e5f6..."
+          },
+          "value": {
+            "type": "string",
+            "description": "用户输入的验证码值（大小写不敏感）。",
+            "example": "A2b3C"
+          }
+        }
+      },
+      "SendSmsRequest": {
+        "type": "object",
+        "required": ["phone", "content"],
+        "properties": {
+          "phone": {
+            "type": "string",
+            "pattern": "^1[3-9]\\d{9}$",
+            "description": "中国大陆手机号（11 位）。",
+            "example": "13800138000"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "短信内容（最长 500 字符）。",
+            "example": "您的订单已发货。"
+          }
+        }
+      },
+      "SendSmsCodeRequest": {
+        "type": "object",
+        "required": ["phone"],
+        "properties": {
+          "phone": {
+            "type": "string",
+            "pattern": "^1[3-9]\\d{9}$",
+            "description": "中国大陆手机号（11 位）。",
+            "example": "13800138000"
+          }
+        }
+      },
+      "VerifySmsCodeRequest": {
+        "type": "object",
+        "required": ["phone", "code"],
+        "properties": {
+          "phone": {
+            "type": "string",
+            "pattern": "^1[3-9]\\d{9}$",
+            "description": "中国大陆手机号（11 位）。",
+            "example": "13800138000"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6,
+            "description": "6 位短信验证码。",
+            "example": "123456"
+          }
+        }
+      },
+      "GenerateQrCodeRequest": {
+        "type": "object",
+        "required": ["content"],
+        "properties": {
+          "content": {
+            "type": "string",
+            "maxLength": 2048,
+            "description": "二维码内容。",
+            "example": "https://example.com"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 1000,
+            "default": 300,
+            "description": "二维码尺寸（像素）。",
+            "example": 300
+          },
+          "format": {
+            "type": "string",
+            "enum": ["png", "svg"],
+            "default": "png",
+            "description": "输出格式。",
+            "example": "png"
           }
         }
       }

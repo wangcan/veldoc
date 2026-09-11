@@ -1,4 +1,4 @@
-为baseTool模块的所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/develop/base-tool_api.json
+为baseTool模块的所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/modules/basetool/api.json
 
 忽略以下所有需求描述
 

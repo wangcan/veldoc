@@ -1,0 +1,14 @@
+为baseTool模块的所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/modules/basetool/api.json
+
+忽略以下所有需求描述
+
+用nwidart/laravel-modules新增一个通用的基础工具用模块，baseTool。
+数据库使用基础数据库 DB_DATABASE=job_passport
+
+模块功能：
+1. 提供图像验证码相关的功能；
+2. 提供短信发送相关的功能；
+3. 提供生成、读取二维码相关的功能；
+
+需求实现计划，记录到文件：.requirements/develop/base-tool_plan.md
+需求执行结果，记录到文件：.requirements/develop/base-tool.md
