@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "BaseTool Module API",
-    "description": "基础工具模块 REST API —— 提供图像验证码、短信发送、二维码生成与解析功能。\n\n## 鉴权\n\n本模块所有接口均为**公开接口**，无需鉴权（不带 `auth` 中间件）。\n\n## 响应封装\n\n所有 JSON 响应都经过全局中间件 `App\\Http\\Middleware\\NormalizeApiResponse` 处理，该中间件：\n\n- 注入业务 `code` 字段：`0` 表示成功（原始 HTTP 2xx），`1` 表示失败（原始 4xx/5xx）。\n- 归一化 HTTP 状态码：`200/401/404/500` 保留；其他 5xx 归一为 `500`；其余状态（422、429 等）全部归一为 `200`。\n\n因此一个校验失败或业务失败实际返回 HTTP **200** 且 `code: 1`（原始 422/429 被归一为 200）；只有 `401`（未鉴权，本模块不产生）、`404`、`500` 会保留原状态。**`code` 字段是判断成功/失败的可靠依据，不要仅依赖 HTTP 状态码。**\n\n常见响应结构：\n\n- 成功（带数据）：`{ \"success\": true, \"data\": <payload>, \"code\": 0 }`\n- 成功（带消息）：`{ \"success\": true, \"message\": \"...\", \"code\": 0 }`\n- 业务失败：`{ \"success\": false, \"message\": \"...\", \"code\": 1 }`（短信发送失败时额外带 `error`）\n- 校验失败：`{ \"message\": \"...\", \"errors\": { \"field\": [\"...\"] }, \"code\": 1 }`\n\n## 频率限制\n\n短信相关接口在控制器层做了频率限制（基于 `Illuminate\\Support\\Facades\\RateLimiter`）：\n\n- 同一手机号每 **60 秒** 最多请求 1 次。\n- 同一手机号每天（24 小时窗口）最多请求 **5** 次。\n\n触发限制时返回 `code: 1`（原始 HTTP 429 被归一为 200），`message` 提示剩余等待秒数或当日额度已用尽。\n\n## 手机号格式\n\n仅支持中国大陆手机号：正则 `^1[3-9]\\d{9}$`（11 位、以 1 开头、第二位为 3-9）。",
+    "description": "基础工具模块 REST API —— 提供图像验证码、短信发送、二维码生成与解析功能。\n\n## 鉴权\n\n本模块所有接口均为**公开接口**，无需鉴权（不带 `auth` 中间件）。\n\n## 响应封装\n\n所有 JSON 响应都经过全局中间件 `App\\Http\\Middleware\\NormalizeApiResponse` 处理，该中间件：\n\n- 注入业务 `code` 字段：`0` 表示成功（原始 HTTP 2xx），`1` 表示失败（原始 4xx/5xx）。\n- 归一化 HTTP 状态码：`200/401/404/500` 保留；其他 5xx 归一为 `500`；其余状态（422、429 等）全部归一为 `200`。\n\n因此一个校验失败或业务失败实际返回 HTTP **200** 且 `code: 1`（原始 422/429 被归一为 200）；只有 `401`（未鉴权，本模块不产生）、`404`、`500` 会保留原状态。**`code` 字段是判断成功/失败的可靠依据，不要仅依赖 HTTP 状态码。**\n\n常见响应结构：\n\n- 成功（带数据）：`{ \"success\": true, \"data\": <payload>, \"code\": 0 }`\n- 成功（带消息）：`{ \"success\": true, \"message\": \"...\", \"code\": 0 }`\n- 业务失败：`{ \"success\": false, \"message\": \"...\", \"code\": 1 }`（短信发送失败时额外带 `error`）\n- 校验失败：`{ \"message\": \"...\", \"errors\": { \"field\": [\"...\"] }, \"code\": 1 }`\n\n## 频率限制\n\n短信相关接口在控制器层做了频率限制（基于 `Illuminate\\Support\\Facades\\RateLimiter`）：\n\n- `/sms/send`：同一手机号每 **60 秒** 最多 1 次。\n- `/sms/send-code`：同一 (场景, 手机号) 每 **60 秒** 最多 1 次（不同场景互不阻塞）。\n- 同一手机号每天（24 小时窗口）最多 **5** 次（`/sms/send` 与 `/sms/send-code` 共享额度）。\n\n触发限制时返回 `code: 1`（原始 HTTP 429 被归一为 200），`message` 提示剩余等待秒数或当日额度已用尽。\n\n## 验证码场景\n\n`/sms/send-code` 与 `/sms/verify-code` 的 `scene` 参数标识验证码使用场景。验证码按场景隔离缓存（键 `sms_code:{scene}:{phone}`），即某场景签发的验证码不能在另一场景校验通过。可用场景通过 `GET /sms/scenes` 获取，当前支持：`login_register`（登录/注册）、`cancellation`（注销）。新增场景只需在 `basetool.sms.scenes` 配置中增加条目，无需改动代码。\n\n## 手机号格式\n\n仅支持中国大陆手机号：正则 `^1[3-9]\\d{9}$`（11 位、以 1 开头、第二位为 3-9）。",
     "version": "1.0.0",
     "contact": {
       "name": "BaseTool Module"
@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8000",
+      "url": "{{host}}",
       "description": "本地开发环境"
     }
   ],
@@ -111,6 +111,46 @@
         }
       }
     },
+    "/api/v1/base-tool/sms/scenes": {
+      "get": {
+        "tags": ["Sms"],
+        "summary": "获取支持的短信验证码场景",
+        "description": "返回当前配置支持的所有短信验证码场景列表。每个场景包含 `key`（场景标识，用作 `/sms/send-code` 与 `/sms/verify-code` 的 `scene` 参数）与 `label`（中文展示名）。新增场景只需在 `basetool.sms.scenes` 配置中增加条目，无需改动代码。当前支持：`login_register`（登录/注册）、`cancellation`（注销）。",
+        "operationId": "listSmsScenes",
+        "responses": {
+          "200": {
+            "description": "场景列表获取成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "description": "支持的验证码场景列表（顺序与 `basetool.sms.scenes` 配置一致）。",
+                          "items": { "$ref": "#/components/schemas/SmsScene" }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    { "key": "login_register", "label": "登录/注册" },
+                    { "key": "cancellation", "label": "注销" }
+                  ],
+                  "code": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/base-tool/sms/send": {
       "post": {
         "tags": ["Sms"],
@@ -162,7 +202,7 @@
       "post": {
         "tags": ["Sms"],
         "summary": "发送短信验证码",
-        "description": "向指定手机号生成 6 位随机验证码并短信发送（受频率限制：同一手机号 60 秒 1 次、每天 5 次）。验证码缓存于 `sms_code_{phone}`，有效期由 `basetool.sms.code_expire`（默认 300 秒）决定，随后通过 `/sms/verify-code` 校验。",
+        "description": "向指定手机号生成 6 位随机验证码并按指定 `scene` 短信发送。验证码按场景隔离缓存（键 `sms_code:{scene}:{phone}`），即登录/注册场景签发的验证码不能用于注销场景校验。有效期由 `basetool.sms.code_expire`（默认 300 秒）决定，随后通过 `/sms/verify-code` 校验。可用场景通过 `GET /sms/scenes` 获取。受频率限制：同一 (场景, 手机号) 60 秒 1 次（不同场景互不阻塞）；同一手机号每天 5 次（跨场景共享额度）。",
         "operationId": "sendSmsCode",
         "requestBody": {
           "required": true,
@@ -209,7 +249,7 @@
       "post": {
         "tags": ["Sms"],
         "summary": "校验短信验证码",
-        "description": "校验用户输入的 6 位验证码是否与 `sms_code_{phone}` 缓存值一致。校验成功后验证码立即从缓存清除（一次性）。",
+        "description": "校验用户输入的 6 位验证码是否与 `sms_code:{scene}:{phone}` 缓存值一致（按场景隔离）。`scene` 必须与发送时一致，否则即使验证码正确也会校验失败。校验成功后验证码立即从缓存清除（一次性）。",
         "operationId": "verifySmsCode",
         "requestBody": {
           "required": true,
@@ -477,6 +517,23 @@
           "code": { "type": "integer", "description": "业务码（1 = 失败）。", "example": 1 }
         }
       },
+      "SmsScene": {
+        "type": "object",
+        "description": "短信验证码场景。`key` 用作 `/sms/send-code` 与 `/sms/verify-code` 的 `scene` 参数。",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "场景标识。",
+            "enum": ["login_register", "cancellation"],
+            "example": "login_register"
+          },
+          "label": {
+            "type": "string",
+            "description": "场景中文展示名。",
+            "example": "登录/注册"
+          }
+        }
+      },
       "ValidationErrorResponse": {
         "type": "object",
         "description": "Laravel 请求参数校验失败响应（HTTP 200，code: 1；原始 422 被归一为 200）。",
@@ -574,19 +631,25 @@
       },
       "SendSmsCodeRequest": {
         "type": "object",
-        "required": ["phone"],
+        "required": ["phone", "scene"],
         "properties": {
           "phone": {
             "type": "string",
             "pattern": "^1[3-9]\\d{9}$",
             "description": "中国大陆手机号（11 位）。",
             "example": "13800138000"
+          },
+          "scene": {
+            "type": "string",
+            "description": "验证码使用场景。必须为 `basetool.sms.scenes` 中已配置的场景，否则返回 `code: 1`。可用值通过 `GET /sms/scenes` 获取。",
+            "enum": ["login_register", "cancellation"],
+            "example": "login_register"
           }
         }
       },
       "VerifySmsCodeRequest": {
         "type": "object",
-        "required": ["phone", "code"],
+        "required": ["phone", "code", "scene"],
         "properties": {
           "phone": {
             "type": "string",
@@ -600,6 +663,12 @@
             "maxLength": 6,
             "description": "6 位短信验证码。",
             "example": "123456"
+          },
+          "scene": {
+            "type": "string",
+            "description": "验证码使用场景，必须与发送时一致。可用值通过 `GET /sms/scenes` 获取。",
+            "enum": ["login_register", "cancellation"],
+            "example": "login_register"
           }
         }
       },

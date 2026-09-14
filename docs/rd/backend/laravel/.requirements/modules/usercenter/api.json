@@ -929,7 +929,11 @@
             }
           },
           "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
-          "403": { "description": "Forbidden — missing `system:menu:create` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:menu:create` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "400": {
+            "description": "Business error — parent menu invalid, parent menu does not exist, or a menu with the same name already exists under this parent (HTTP 200, code: 1 in practice; original 400 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
           "422": {
             "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
@@ -1022,8 +1026,11 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
           },
           "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
-          "403": { "description": "Forbidden — missing `system:menu:update` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "404": { "description": "Menu not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "403": { "description": "Forbidden — missing `system:menu:update` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "400": {
+            "description": "Business error — menu not found, parent invalid, or duplicate name under the same parent (HTTP 200, code: 1 in practice; original 400 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
           "422": {
             "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
@@ -1042,8 +1049,11 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
           },
           "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
-          "403": { "description": "Forbidden — missing `system:menu:delete` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "404": { "description": "Menu not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+          "403": { "description": "Forbidden — missing `system:menu:delete` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "400": {
+            "description": "Business error — menu not found, or menu has children and cannot be deleted (HTTP 200, code: 1 in practice; original 400 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          }
         }
       }
     },
@@ -1153,10 +1163,14 @@
             }
           },
           "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
-          "403": { "description": "Forbidden — missing `system:role:create` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "422": {
-            "description": "Validation failed — or role code already exists / reserved (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+          "403": { "description": "Forbidden — missing `system:role:create` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "400": {
+            "description": "Business error — role code already exists, role name already exists, or the super_admin code is reserved (HTTP 200, code: 1 in practice; original 400 normalized to 200)",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
           }
         }
       }
@@ -1246,11 +1260,14 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
           },
           "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
-          "403": { "description": "Forbidden — missing `system:role:update` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "404": { "description": "Role not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "422": {
-            "description": "Validation failed — or code collision / built-in role protected (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+          "403": { "description": "Forbidden — missing `system:role:update` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "400": {
+            "description": "Business error — role not found, code/name collision, or built-in system role protected (HTTP 200, code: 1 in practice; original 400 normalized to 200)",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
           }
         }
       },
@@ -1266,10 +1283,9 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
           },
           "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
-          "403": { "description": "Forbidden — missing `system:role:delete` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "404": { "description": "Role not found (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "422": {
-            "description": "Cannot delete a built-in system role (HTTP 200, code: 1 in practice)",
+          "403": { "description": "Forbidden — missing `system:role:delete` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "400": {
+            "description": "Business error — role not found, or built-in system role cannot be deleted (HTTP 200, code: 1 in practice; original 400 normalized to 200)",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
           }
         }
@@ -1344,10 +1360,14 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
           },
           "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
-          "403": { "description": "Forbidden — missing `system:permission:assign-role-menu` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "422": {
-            "description": "Validation failed — role not found, etc. (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+          "403": { "description": "Forbidden — missing `system:permission:assign-role-menu` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "400": {
+            "description": "Business error — role not found (HTTP 200, code: 1 in practice; original 400 normalized to 200)",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
           }
         }
       }
@@ -1373,10 +1393,14 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
           },
           "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
-          "403": { "description": "Forbidden — missing `system:permission:assign-role-data-scope` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "422": {
-            "description": "Validation failed — role not found, etc. (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+          "403": { "description": "Forbidden — missing `system:permission:assign-role-data-scope` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "400": {
+            "description": "Business error — role not found, or built-in system role protected (HTTP 200, code: 1 in practice; original 400 normalized to 200)",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
           }
         }
       }
@@ -1450,10 +1474,14 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessEnvelope" } } }
           },
           "401": { "description": "Unauthenticated (code: 1)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UnauthenticatedResponse" } } } },
-          "403": { "description": "Forbidden — missing `system:permission:assign-user-role` permission (HTTP 200, code: 1 in practice)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
-          "422": {
-            "description": "Validation failed — user/role not found, etc. (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+          "403": { "description": "Forbidden — missing `system:permission:assign-user-role` permission (HTTP 200, code: 1 in practice; original 403 normalized to 200)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "400": {
+            "description": "Business error — user not found (HTTP 200, code: 1 in practice; original 400 normalized to 200)",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "422": {
+            "description": "Validation failed (HTTP 200, code: 1 in practice; original 422 normalized to 200)",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" } } }
           }
         }
       }
@@ -1472,7 +1500,7 @@
       "PerPage": {
         "name": "per_page",
         "in": "query",
-        "description": "Number of items per page.",
+        "description": "Number of items per page. The default differs by endpoint: the users index defaults to 15, the roles index defaults to 10.",
         "required": false,
         "schema": { "type": "integer", "default": 15, "minimum": 1 }
       },

@@ -1,0 +1,6 @@
+需求
+1. 分析当前项目，生成一份项目文档，文档保存在  .requirements/info/intro.md
+2. 生成一个当前项目启动、热部署、打包手册，保存在 .requirements/info/deply.md
+
+忽略以下所有需求描述
+-. 。结果保存在 .requirements/info/intro-.md

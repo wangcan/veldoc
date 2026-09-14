@@ -7,6 +7,11 @@ case $1 in
 'liupin-parent')
   fullPath="${targetPath}projects/java/liupin-parent/"
   sourcePath="/data/java/liupin-parent"
+  resources=(.claude .requirements CLAUDE.md README.md)
+  ;;
+'lptwx')
+  fullPath="${targetPath}projects/java/llpt-wx-platform/"
+  sourcePath="/data/java/lpt-wx-platform"
   resources=(.claude .requirements CLAUDE.md)
   ;;
 
