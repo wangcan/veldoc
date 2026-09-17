@@ -1,0 +1,22 @@
+custom业务模块开发
+模块地址：liupin-service/liupin-custom-service/
+
+需求3：
+1. /api/recommendProductCategory/listWithProducts、/api/admin/recommendProduct/list 接口响应较慢，做下性能优化；
+
+忽略以下所有需求描述
+
+开发需求1：
+接口 /api/admin/recommendProduct/excelImport 功能改造：
+1. 将当前接口业务逻辑中，合成产品图片的功能剥离出来，新建一个定时任务服务来定时执行合成产品图片；
+2. 新增针对excel第一列品名的验证条件：如果品名已经出现过，本条记录标记为已存在，并忽略对本条记录的处理；如果品名没有出现过，但在成品表的相同分类下，已存在，也将本条记录标记为已存在，并忽略对本条记录的处理；
+3. 有不符合验证条件的记录时，不终止业务逻辑的执行，记录下相关不符合条件的原因；
+4. 有符合条件的记录，随时把记录写入到成品表中，记录的create_pic置为1；
+5. 最终返回结果data: data：{"successNum": "成功处理的数量", "errorNum": "处理失败的数量", "failInfos": 人[]}  failInfos 是忽略记录的数组；
+5. 定时任务合成产品图片，取成品表中create_pic =1 的记录逐条合成图片；
+
+需求2：
+再上次执行需求1的基础上做调整：
+1. 导入产品时，注释掉将crate_pic置为1的操作，仅做注释，而不是删掉相关功能；
+2. 产品图片合成相关功能保留，但暂停使用，关闭合成产品图片的定时任务；
+3. 接口：/api/admin/recommendProduct/productDetail、/api/admin/recommendProduct/list、/api/recommendProductCategory/listWithProducts、/api/recommendProduct/detail，这些接口返回的成品信息的pic字段，动态取产品关联的 AdminCustomLettering 信息的point_holder_pic字段。

@@ -1,0 +1,698 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Knowledge Module API",
+    "description": "知识库模块 REST API —— 管理人物（figure）与知识条目（人物/书籍/事件/朝代等原信息）。\n\n## 数据库\n\n知识库使用独立的 PostgreSQL 数据库 `job_knowledge`（连接 `pgsql_knowledge`），与默认 MySQL 库 `job_passport` 相互独立。人物与知识条目数据均存于该库。\n\n## 鉴权\n\n所有接口均需 JWT 鉴权（`auth:api` 中间件）。在请求头携带登录接口签发的 access token：\n\n```\nAuthorization: Bearer <access_token>\n```\n\n角色授权使用 `spatie/laravel-permission`。标注 `permission:` 的接口需要当前用户角色持有对应权限标识。`super_admin` 角色经 `Gate::before` 绕过所有权限校验。\n\n## 响应封装\n\n所有 JSON 响应都经过全局中间件 `App\\Http\\Middleware\\NormalizeApiResponse` 处理，该中间件：\n\n- 注入业务 `code` 字段：`0` 表示成功（原始 HTTP 2xx），`1` 表示失败（原始 4xx/5xx）。\n- 归一化 HTTP 状态码：`200/401/404/500` 保留；其他 5xx 归一为 `500`；其余状态（201、204、403、422、429 等）全部归一为 `200`。\n\n因此一个新建成功实际返回 HTTP **200** 且 `code: 0`（原始 201 被归一）；校验失败/业务失败返回 HTTP **200** 且 `code: 1`（原始 422/403 被归一）；只有 `401`（未鉴权）、`404`（不存在）、`500`（服务端错误）保留原状态。**`code` 字段是判断成功/失败的可靠依据，不要仅依赖 HTTP 状态码。**\n\n常见响应结构：\n\n- 成功（带数据）：`{ \"success\": true, \"data\": <payload>, \"code\": 0 }`\n- 成功（带消息）：`{ \"success\": true, \"message\": \"...\", \"code\": 0 }`\n- 业务失败：`{ \"success\": false, \"message\": \"...\", \"code\": 1 }`\n- 校验失败：`{ \"message\": \"...\", \"errors\": { \"field\": [\"...\"] }, \"code\": 1 }`\n- 未鉴权：`{ \"message\": \"Unauthenticated.\", \"code\": 1 }`（HTTP 401）\n\n## 分页\n\n分页接口支持 `per_page` 查询参数（默认 15，上限 100，由 `knowledge.max_per_page` 配置）。返回原始分页器结构：\n\n```\n{ \"success\": true, \"data\": { \"data\": [...], \"per_page\": 15, \"total\": 100, \"current_page\": 1, \"last_page\": 7 } }\n```\n\n## 人物编码 code\n\n人物的 `code` 字段是其唯一业务标识。API 创建时必须显式提供 `code`；Excel 批量导入时 `code` 可缺省，由系统按姓名自动生成。",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Knowledge Module"
+    }
+  },
+  "servers": [
+    {
+      "url": "{{host}}",
+      "description": "本地开发环境"
+    }
+  ],
+  "tags": [
+    { "name": "Figure", "description": "人物管理：CRUD、精简列表、Excel 批量导入、导入模板下载" },
+    { "name": "KnowledgeItem", "description": "知识条目管理：人物/书籍/事件/朝代等原信息的 CRUD、类型与精简列表" }
+  ],
+  "security": [],
+  "paths": {
+    "/api/v1/knowledge/figures": {
+      "get": {
+        "tags": ["Figure"],
+        "summary": "人物分页列表",
+        "description": "返回人物的分页列表，支持按 `code`、`name`、`dynasty`、`status`、`keyword` 过滤。`keyword` 在 name/description/code 上做模糊匹配。需要 `knowledge:figure:query` 权限。",
+        "operationId": "listFigures",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/PerPage" },
+          { "name": "code", "in": "query", "description": "按 code 模糊匹配。", "required": false, "schema": { "type": "string" } },
+          { "name": "name", "in": "query", "description": "按 name 模糊匹配。", "required": false, "schema": { "type": "string" } },
+          { "name": "dynasty", "in": "query", "description": "按 dynasty 精确匹配。", "required": false, "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "description": "按 status 精确匹配（enabled/disabled）。", "required": false, "schema": { "type": "string", "enum": ["enabled", "disabled"] } },
+          { "name": "keyword", "in": "query", "description": "在 name/description/code 上做模糊匹配。", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "查询成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "allOf": [
+                            { "$ref": "#/components/schemas/PaginationMeta" },
+                            { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/FigureResource" } } } }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      },
+      "post": {
+        "tags": ["Figure"],
+        "summary": "新建人物",
+        "description": "创建一条人物记录。`code` 必填且全表唯一；`code` 重复时返回业务失败（code: 1）。`death_year` 不得早于 `birth_year`。需要 `knowledge:figure:create` 权限。",
+        "operationId": "createFigure",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FigureRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建成功（code: 0，原始 201 被归一为 200）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/FigureResource" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "422": { "$ref": "#/components/responses/Validation" }
+        }
+      }
+    },
+    "/api/v1/knowledge/figures/simple-list": {
+      "get": {
+        "tags": ["Figure"],
+        "summary": "人物精简列表",
+        "description": "返回所有启用（enabled）人物的精简字段（id/code/name/dynasty/birth_year/death_year），用于下拉选择器。",
+        "operationId": "figureSimpleList",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "查询成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/FigureSimple" } } } }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      }
+    },
+    "/api/v1/knowledge/figures/import-template": {
+      "get": {
+        "tags": ["Figure"],
+        "summary": "下载人物导入模板",
+        "description": "下载一个仅含表头与示例行的 `.xlsx` 模板，供批量导入填写。表头为英文小写下划线：`code, name, aliases, description, dynasty, birth_year, death_year, occupation, birth_place, tags`。`aliases`/`tags` 为单元格内逗号分隔字符串。",
+        "operationId": "figureImportTemplate",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "模板文件下载（application/vnd.openxmlformats-officedocument.spreadsheetml.sheet）"
+          },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      }
+    },
+    "/api/v1/knowledge/figures/import": {
+      "post": {
+        "tags": ["Figure"],
+        "summary": "Excel 批量导入人物",
+        "description": "上传一个 `.xlsx`/`.xls`/`.csv` 文件，逐行导入人物。缺省 `code` 时按姓名自动生成唯一编码；已存在的 `code` 执行更新（upsert）。返回导入汇总：created/updated/skipped/failed 及失败行详情。需要 `knowledge:figure:import` 权限。\n\n请求为 `multipart/form-data`，字段名 `file`。",
+        "operationId": "importFigures",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": { "type": "string", "format": "binary", "description": "Excel 文件（.xlsx/.xls/.csv）。" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "导入完成（code: 0）。即使部分行失败，导入整体仍成功，失败详情见 `data.errors`。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/FigureImportSummary" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "422": { "$ref": "#/components/responses/Validation" }
+        }
+      }
+    },
+    "/api/v1/knowledge/figures/{id}": {
+      "get": {
+        "tags": ["Figure"],
+        "summary": "人物详情",
+        "description": "按 id 获取单个人物。需要 `knowledge:figure:query` 权限。",
+        "operationId": "showFigure",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/FigureId" }],
+        "responses": {
+          "200": {
+            "description": "查询成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/FigureResource" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      },
+      "put": {
+        "tags": ["Figure"],
+        "summary": "修改人物",
+        "description": "按 id 更新人物。`code` 可改但需保持全表唯一；`death_year` 不得早于 `birth_year`。需要 `knowledge:figure:update` 权限。",
+        "operationId": "updateFigure",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/FigureId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FigureRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/FigureResource" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/Validation" }
+        }
+      },
+      "delete": {
+        "tags": ["Figure"],
+        "summary": "删除人物",
+        "description": "按 id 软删除人物。需要 `knowledge:figure:delete` 权限。",
+        "operationId": "deleteFigure",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/FigureId" }],
+        "responses": {
+          "200": {
+            "description": "删除成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessMessageEnvelope" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      }
+    },
+    "/api/v1/knowledge/items": {
+      "get": {
+        "tags": ["KnowledgeItem"],
+        "summary": "知识条目分页列表",
+        "description": "返回知识条目的分页列表，支持按 `type`、`name`、`dynasty`、`status`、`tags`、`keyword` 过滤。`tags` 匹配 tags 数组包含任一给定标签的条目；`keyword` 在 name/description 上做模糊匹配。",
+        "operationId": "listKnowledgeItems",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/PerPage" },
+          { "name": "type", "in": "query", "description": "条目类型。", "required": false, "schema": { "type": "string", "enum": ["person", "book", "event", "dynasty"] } },
+          { "name": "name", "in": "query", "description": "按 name 模糊匹配。", "required": false, "schema": { "type": "string" } },
+          { "name": "dynasty", "in": "query", "description": "按 dynasty 精确匹配。", "required": false, "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "description": "按 status 精确匹配（enabled/disabled）。", "required": false, "schema": { "type": "string", "enum": ["enabled", "disabled"] } },
+          { "name": "tags", "in": "query", "description": "标签数组（匹配包含任一标签的条目）。", "required": false, "schema": { "type": "array", "items": { "type": "string" } } },
+          { "name": "keyword", "in": "query", "description": "在 name/description 上做模糊匹配。", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "查询成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "allOf": [
+                            { "$ref": "#/components/schemas/PaginationMeta" },
+                            { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/KnowledgeItemResource" } } } }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      },
+      "post": {
+        "tags": ["KnowledgeItem"],
+        "summary": "新建知识条目",
+        "description": "创建一条知识条目（人物/书籍/事件/朝代）。`type` 必填；当 `type=dynasty` 时 `start_year` 与 `end_year` 必填，且 `end_year` 不得早于 `start_year`。",
+        "operationId": "createKnowledgeItem",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/KnowledgeItemRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建成功（code: 0，原始 201 被归一为 200）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/KnowledgeItemResource" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "422": { "$ref": "#/components/responses/Validation" }
+        }
+      }
+    },
+    "/api/v1/knowledge/items/types": {
+      "get": {
+        "tags": ["KnowledgeItem"],
+        "summary": "可用条目类型",
+        "description": "返回所有可用条目类型及其中文标签（value => label 映射），用于下拉选择。",
+        "operationId": "knowledgeItemTypes",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "查询成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "additionalProperties": { "type": "string" },
+                          "example": { "person": "人物", "book": "书籍", "event": "事件", "dynasty": "朝代" }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      }
+    },
+    "/api/v1/knowledge/items/simple-list": {
+      "get": {
+        "tags": ["KnowledgeItem"],
+        "summary": "知识条目精简列表",
+        "description": "返回所有启用条目的精简字段（id/type/name/dynasty/start_year/end_year），可按 `type` 过滤，用于下拉选择器。",
+        "operationId": "knowledgeItemSimpleList",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "type", "in": "query", "description": "按 type 过滤。", "required": false, "schema": { "type": "string", "enum": ["person", "book", "event", "dynasty"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "查询成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/KnowledgeItemSimple" } } } }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      }
+    },
+    "/api/v1/knowledge/items/{id}": {
+      "get": {
+        "tags": ["KnowledgeItem"],
+        "summary": "知识条目详情",
+        "description": "按 id 获取单条知识条目。",
+        "operationId": "showKnowledgeItem",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/ItemId" }],
+        "responses": {
+          "200": {
+            "description": "查询成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/KnowledgeItemResource" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      },
+      "put": {
+        "tags": ["KnowledgeItem"],
+        "summary": "修改知识条目",
+        "description": "按 id 更新知识条目。`type=dynasty` 时 `start_year`/`end_year` 必填，且 `end_year` 不得早于 `start_year`。",
+        "operationId": "updateKnowledgeItem",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/ItemId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/KnowledgeItemRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessDataEnvelope" },
+                    { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/KnowledgeItemResource" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/Validation" }
+        }
+      },
+      "delete": {
+        "tags": ["KnowledgeItem"],
+        "summary": "删除知识条目",
+        "description": "按 id 软删除知识条目。",
+        "operationId": "deleteKnowledgeItem",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/ItemId" }],
+        "responses": {
+          "200": {
+            "description": "删除成功（code: 0）",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessMessageEnvelope" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT access token。请求头携带 `Authorization: Bearer <token>`。"
+      }
+    },
+    "parameters": {
+      "PerPage": {
+        "name": "per_page",
+        "in": "query",
+        "description": "每页条数，默认 15，上限 100。",
+        "required": false,
+        "schema": { "type": "integer", "default": 15, "minimum": 1 }
+      },
+      "FigureId": {
+        "name": "id",
+        "in": "path",
+        "description": "人物 id。",
+        "required": true,
+        "schema": { "type": "integer" }
+      },
+      "ItemId": {
+        "name": "id",
+        "in": "path",
+        "description": "知识条目 id。",
+        "required": true,
+        "schema": { "type": "integer" }
+      }
+    },
+    "responses": {
+      "Unauthenticated": {
+        "description": "未鉴权（HTTP 401，code: 1）",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string", "example": "Unauthenticated." },
+                "code": { "type": "integer", "example": 1 }
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "资源不存在（HTTP 404，code: 1）",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": false },
+                "message": { "type": "string", "example": "Figure not found" },
+                "code": { "type": "integer", "example": 1 }
+              }
+            }
+          }
+        }
+      },
+      "Validation": {
+        "description": "校验失败（HTTP 200，code: 1；原始 422 被归一为 200）",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "SuccessDataEnvelope": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": { "type": "object" },
+          "code": { "type": "integer", "example": 0 }
+        }
+      },
+      "SuccessMessageEnvelope": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "code": { "type": "integer", "example": 0 }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "The given data was invalid." },
+          "errors": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } }, "example": { "code": ["The code field is required."] } },
+          "code": { "type": "integer", "example": 1 }
+        }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "current_page": { "type": "integer", "example": 1 },
+          "last_page": { "type": "integer", "example": 7 },
+          "per_page": { "type": "integer", "example": 15 },
+          "total": { "type": "integer", "example": 100 },
+          "from": { "type": "integer", "example": 1 },
+          "to": { "type": "integer", "example": 15 }
+        }
+      },
+      "FigureRequest": {
+        "type": "object",
+        "required": ["code", "name"],
+        "properties": {
+          "code": { "type": "string", "maxLength": 64, "description": "人物唯一编码（全表唯一）。", "example": "libai" },
+          "name": { "type": "string", "maxLength": 100, "description": "姓名。", "example": "李白" },
+          "aliases": { "type": "array", "items": { "type": "string" }, "description": "别名/字/号。", "example": ["字太白", "号青莲居士"] },
+          "description": { "type": "string", "maxLength": 2000, "nullable": true, "description": "简介/传记。", "example": "唐代伟大的浪漫主义诗人。" },
+          "dynasty": { "type": "string", "maxLength": 50, "nullable": true, "description": "所属朝代。", "example": "唐朝" },
+          "birth_year": { "type": "integer", "minimum": -3000, "maximum": 3000, "nullable": true, "description": "生年。", "example": 701 },
+          "death_year": { "type": "integer", "minimum": -3000, "maximum": 3000, "nullable": true, "description": "卒年，不得早于 birth_year。", "example": 762 },
+          "occupation": { "type": "string", "maxLength": 100, "nullable": true, "description": "职业/身份。", "example": "诗人" },
+          "birth_place": { "type": "string", "maxLength": 100, "nullable": true, "description": "籍贯/出生地。", "example": "碎叶城" },
+          "attributes": { "type": "object", "nullable": true, "description": "扩展字段。", "example": { "courtesy_name": "太白" } },
+          "tags": { "type": "array", "items": { "type": "string", "maxLength": 50 }, "nullable": true, "description": "标签。", "example": ["诗人", "唐朝"] },
+          "status": { "type": "string", "enum": ["enabled", "disabled"], "nullable": true, "description": "状态，缺省为 enabled。", "example": "enabled" }
+        }
+      },
+      "FigureResource": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "code": { "type": "string", "example": "libai" },
+          "name": { "type": "string", "example": "李白" },
+          "aliases": { "type": "array", "items": { "type": "string" }, "nullable": true, "example": ["字太白"] },
+          "description": { "type": "string", "nullable": true, "example": "唐代伟大的浪漫主义诗人。" },
+          "dynasty": { "type": "string", "nullable": true, "example": "唐朝" },
+          "birthYear": { "type": "integer", "nullable": true, "example": 701 },
+          "deathYear": { "type": "integer", "nullable": true, "example": 762 },
+          "occupation": { "type": "string", "nullable": true, "example": "诗人" },
+          "birthPlace": { "type": "string", "nullable": true, "example": "碎叶城" },
+          "attributes": { "type": "object", "nullable": true },
+          "tags": { "type": "array", "items": { "type": "string" }, "nullable": true, "example": ["诗人", "唐朝"] },
+          "status": { "type": "string", "example": "enabled" },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "FigureSimple": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "code": { "type": "string", "example": "libai" },
+          "name": { "type": "string", "example": "李白" },
+          "dynasty": { "type": "string", "nullable": true, "example": "唐朝" },
+          "birth_year": { "type": "integer", "nullable": true, "example": 701 },
+          "death_year": { "type": "integer", "nullable": true, "example": 762 }
+        }
+      },
+      "FigureImportSummary": {
+        "type": "object",
+        "properties": {
+          "created": { "type": "integer", "description": "新增行数。", "example": 2 },
+          "updated": { "type": "integer", "description": "更新行数（按 code 匹配已存在记录）。", "example": 0 },
+          "skipped": { "type": "integer", "description": "跳过行数（空行或校验失败）。", "example": 0 },
+          "failed": { "type": "integer", "description": "失败行数。", "example": 0 },
+          "errors": {
+            "type": "array",
+            "description": "失败行详情。",
+            "items": {
+              "type": "object",
+              "properties": {
+                "row": { "type": "integer", "description": "Excel 行号（含表头）。", "example": 3 },
+                "attribute": { "type": "string", "example": "name" },
+                "errors": { "type": "array", "items": { "type": "string" }, "example": ["The name field is required."] }
+              }
+            }
+          }
+        }
+      },
+      "KnowledgeItemRequest": {
+        "type": "object",
+        "required": ["type", "name"],
+        "properties": {
+          "type": { "type": "string", "enum": ["person", "book", "event", "dynasty"], "description": "条目类型。", "example": "person" },
+          "name": { "type": "string", "maxLength": 100, "description": "名称/标题。", "example": "李白" },
+          "description": { "type": "string", "maxLength": 2000, "nullable": true, "example": "唐代诗人。" },
+          "aliases": { "type": "array", "items": { "type": "string" }, "nullable": true, "example": ["字太白"] },
+          "start_year": { "type": "integer", "minimum": -3000, "maximum": 3000, "nullable": true, "description": "起始年（type=dynasty 时必填）。", "example": 701 },
+          "end_year": { "type": "integer", "minimum": -3000, "maximum": 3000, "nullable": true, "description": "结束年（type=dynasty 时必填），不得早于 start_year。", "example": 762 },
+          "dynasty": { "type": "string", "maxLength": 50, "nullable": true, "example": "唐朝" },
+          "attributes": { "type": "object", "nullable": true, "description": "类型专属扩展字段。", "example": { "courtesy_name": "太白", "occupation": "诗人" } },
+          "tags": { "type": "array", "items": { "type": "string", "maxLength": 50 }, "nullable": true, "example": ["诗人", "唐朝"] },
+          "status": { "type": "string", "enum": ["enabled", "disabled"], "nullable": true, "example": "enabled" }
+        }
+      },
+      "KnowledgeItemResource": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "type": { "type": "string", "example": "person" },
+          "typeLabel": { "type": "string", "example": "人物" },
+          "name": { "type": "string", "example": "李白" },
+          "description": { "type": "string", "nullable": true, "example": "唐代诗人。" },
+          "aliases": { "type": "array", "items": { "type": "string" }, "nullable": true, "example": ["字太白"] },
+          "startYear": { "type": "integer", "nullable": true, "example": 701 },
+          "endYear": { "type": "integer", "nullable": true, "example": 762 },
+          "dynasty": { "type": "string", "nullable": true, "example": "唐朝" },
+          "attributes": { "type": "object", "nullable": true },
+          "tags": { "type": "array", "items": { "type": "string" }, "nullable": true, "example": ["诗人", "唐朝"] },
+          "status": { "type": "string", "example": "enabled" },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "KnowledgeItemSimple": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "type": { "type": "string", "example": "person" },
+          "name": { "type": "string", "example": "李白" },
+          "dynasty": { "type": "string", "nullable": true, "example": "唐朝" },
+          "start_year": { "type": "integer", "nullable": true, "example": 701 },
+          "end_year": { "type": "integer", "nullable": true, "example": 762 }
+        }
+      }
+    }
+  }
+}

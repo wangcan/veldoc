@@ -1,0 +1,6 @@
+
+
+忽略以下所有需求描述
+
+需求2：
+需求执行结果，记录到文件：.requirements/develop/permission.md

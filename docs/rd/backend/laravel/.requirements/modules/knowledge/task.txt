@@ -1,0 +1,20 @@
+所有功能归到知识库模块Knowledge；
+知识库模块使用PostgreSQL类型的数据库job_knowledge；
+
+需求3：
+为knowledge模块的所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/modules/knowledge/api.json
+
+
+忽略以下所有需求描述
+
+需求1：
+用nwidart/laravel-modules新增一个知识库模块 Knowledge。
+知识库主要管理维护诸如 人物、书籍、事件、朝代等原信息；
+知识库主要使用基于PostgreSQL类型的数据库 job_knowledge；
+
+需求2：
+1. 新增一个人物数据表figure；figure数据表有一个唯一标识一个人物的code字段，其他字段由ai自主设计；
+2. 可以通过后台管理维护人物，对人物记录的操作写入项目后台操作菜单表： 数据库 job_passport 表 system_menu；
+3. 可以通过excel批量导入人物；
+4. 后台基于人物的相关菜单操作，完成对人物的管理维护；
+

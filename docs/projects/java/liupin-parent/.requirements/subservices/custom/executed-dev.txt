@@ -1,6 +1,16 @@
 custom业务模块开发
 模块地址：liupin-service/liupin-custom-service/
 
+开发需求1：
+为当前接口 /api/admin/setting/customerDetail 创建一个镜像接口 /api/taobaoCustom/setting/customerDetail 新接口的功能跟原接口的功能完全一样；
+为当前接口 /api/recommendProductCategory/listWithProducts 创建一个镜像接口 /api/taobaoCustom/listWithProducts 新接口的功能跟原接口的功能完全一样；
+为当前接口 /api/recommendProduct/detail 创建一个镜像接口 /api/taobaoCustom/detail 新接口的功能跟原接口的功能完全一样；
+为当前接口 /api/recommendProduct/userFocusNumIncrease 创建一个镜像接口 /api/taobaoCustom/userFocusNumIncrease 新接口的功能跟原接口的功能完全一样；
+
+开发需求2：
+分析一下系统是如何处理和使用 Headers参数 authorization 和 system；结果保存在 .requirements/subservices/custom/deal-headers.md
+需要修复一个401问题：新增的淘宝接口system为maobiCustom时，请求正常，system设置为custokmTaobao 报401，
+
 开发需求6：
 1. 接口 /api/recommendProductCategory/listWithProducts 分类的产品信息 productList 增加一个过滤条件，产品的penPointStock和penPointStock 都为true时，产品数据返回，否则这个产品数据不返回；
 
@@ -28,7 +38,3 @@ custom业务模块开发
 8. 接口 /api/admin/recommendProductCategory/insert 参数name的值不能为空；
 9. 接口 /api/admin/recommendProductCategory/update 如果调整name值的话，name值不能为空；
 
-开发需求5：
-1. 分析一下接口/api/admin/recommendProduct/excelImport功能，当前这个接口处理十余条记录的excel，都要十几秒，分析一下性能瓶颈，以及优化方案，结果保存在 .requirements/subservices/custom/emport-product.md 
-2. 接口 /api/recommendProductCategory/listWithProducts 分类的产品信息 productList数组中，即便当前产品的库存为0，也要把penPointAndHolderPrice都要计算出来。 异常场景： /api/admin/recommendProduct/list?pageSize=10&pageNum=1&categoryId=14 返回值 id=135 的记录 penPointAndHolderPrice只是lptbgk007201的单价，没有把lptbtk1216的单价加上
-3. 接口 /api/recommendProduct/detail?id=139 id 139 的信息删除后，请求接口报错，需要修复为提示信息不存在下
