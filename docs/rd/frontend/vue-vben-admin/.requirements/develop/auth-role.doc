@@ -1,0 +1,4863 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+    xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:w="urn:schemas-microsoft-com:office:word"
+    xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta http-equiv=Content-Type content="text/html; charset=utf-8">
+    <style type="text/css">
+        table  
+        {  
+            border-collapse: collapse;
+            border: none;  
+            width: 100%;  
+        }  
+        td,tr  
+        {  
+            border: solid #CCC 1px;
+            padding:3px;
+            font-size:9pt;
+        } 
+        .codestyle{
+            word-break: break-all;
+            mso-highlight:rgb(252, 252, 252);
+            padding-left: 5px; background-color: rgb(252, 252, 252); border: 1px solid rgb(225, 225, 232);
+        }
+        img {
+            width:100;
+        }
+    </style>
+    <meta name=ProgId content=Word.Document>
+    <meta name=Generator content="Microsoft Word 11">
+    <meta name=Originator content="Microsoft Word 11">
+    <xml><w:WordDocument><w:View>Print</w:View></xml></head>
+    <body><h1>全局Header参数</h1><div style="margin-left:20px;"><table><thead><tr><th>参数名</th><th>值</th><th>是否启用</th><th>备注</th></tr></thead><tbody><tr><td>authorization</td><td>{{token}}</td><td>否</td><td></td></tr></tbody></table></div><h1>2、Auth</h1><div style="margin-left:0px;"><h2>2.1、Login with account/phone and password</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Authenticate a user with an account name, email, or phone number plus a password. Returns a JWT access token and the authenticated user summary.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/auth/login</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "login": "test1",
+    "password": "111111"
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">login</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>Account name, email, or phone number.</td>
+</tr>
+<tr>
+<td style="text-align: left;">password</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>User password.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vNDkuMjM1LjUzLjUzOjkwMDEvYXBpL3YxL3VzZXItY2VudGVyL2F1dGgvbG9naW4iLCJpYXQiOjE3ODkzNjY4NTQsImV4cCI6MTc5MTk1ODg1NCwibmJmIjoxNzg5MzY2ODU0LCJqdGkiOiI3ZnpncGRmdzNPZnYzbkh4Iiwic3ViIjoiMSIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.04EH1_QOwVRxVM_d2LhgN777HDkflr1WIAXmJ5lw4hA",
+        "token_type": "bearer",
+        "expires_in": 2592000,
+        "user": {
+            "id": 1,
+            "name": "superadmin",
+            "email": "superadmin@example.com",
+            "phone": "13811974106",
+            "status": "active",
+            "roles": [
+                "super_admin"
+            ],
+            "permissions": [
+                "system:user:list",
+                "system:role:list",
+                "system:menu:list",
+                "system:user:query",
+                "system:user:create",
+                "system:user:update",
+                "system:user:delete",
+                "system:user:update-password",
+                "system:role:query",
+                "system:role:create",
+                "system:role:update",
+                "system:role:delete",
+                "system:permission:assign-role-menu",
+                "system:permission:assign-role-data-scope",
+                "system:permission:assign-user-role",
+                "system:menu:query",
+                "system:menu:create",
+                "system:menu:update",
+                "system:menu:delete"
+            ]
+        }
+    },
+    "code": 0
+}
+</code></pre></table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "Invalid credentials",
+    "errors": {
+        "credentials": [
+            "Invalid credentials"
+        ]
+    },
+    "code": 1
+}
+</code></pre></table></div><h2>2.2、Login with phone and SMS verification code</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Authenticate a user with a mainland-China phone number and a 6-digit SMS verification code. If no user exists for the phone, one is created automatically. Returns a JWT access token and the authenticated user summary.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/auth/login-phone</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "phone": "string",
+    "code": "string"
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">phone</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>Mainland China phone number (11 digits).</td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>6-digit SMS verification code.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>[]
+</code></pre></table></div><h2>2.3、Register a new user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Register a new user. At least one identifier (email or phone) is expected; the <code>user</code> role is assigned by default. Returns a JWT access token and the authenticated user summary.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/auth/register</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "name": "string",
+    "email": "string",
+    "phone": "string",
+    "password": "string",
+    "password_confirmation": "string"
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Display name (auto-generated if omitted).</td>
+</tr>
+<tr>
+<td style="text-align: left;">email</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Email (must be unique if provided).</td>
+</tr>
+<tr>
+<td style="text-align: left;">phone</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Mainland China phone number (must be unique if provided).</td>
+</tr>
+<tr>
+<td style="text-align: left;">password</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>Password.</td>
+</tr>
+<tr>
+<td style="text-align: left;">password_confirmation</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Must match <code>password</code>.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>[]
+</code></pre></table></div><h2>2.4、Get the authenticated user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns the full authenticated user model (with roles and permissions loaded).</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/auth/me</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "superadmin",
+        "nickname": null,
+        "email": "superadmin@example.com",
+        "phone": "13811974106",
+        "email_verified_at": null,
+        "phone_verified_at": "2026-09-09T07:22:04.000000Z",
+        "status": "active",
+        "avatar": null,
+        "created_at": "2026-09-09T07:22:04.000000Z",
+        "updated_at": "2026-09-09T07:22:04.000000Z"
+    },
+    "code": 0
+}
+</code></pre></table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "Unauthenticated.",
+    "code": 1
+}
+</code></pre></table></div><h2>2.5、Get permission info for the logged-in user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns the authenticated user's basic profile, role codes, permission identifiers, and menu tree (filtered by the menus assigned to their roles). Used by the ruoyi-vue-pro frontend to build the admin sidebar and guard buttons.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/auth/permission-info</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "user": {
+            "id": 1,
+            "name": "superadmin",
+            "nickname": null,
+            "avatar": null
+        },
+        "roles": [
+            "super_admin"
+        ],
+        "permissions": [
+            "*"
+        ],
+        "menus": [
+            {
+                "id": 1,
+                "name": "系统管理",
+                "parentId": 0,
+                "type": 1,
+                "sort": 10,
+                "path": "\/system",
+                "icon": "ep:tools",
+                "component": "",
+                "componentName": null,
+                "permission": "",
+                "visible": true,
+                "keepAlive": true,
+                "alwaysShow": true,
+                "children": [
+                    {
+                        "id": 100,
+                        "name": "用户管理",
+                        "parentId": 1,
+                        "type": 2,
+                        "sort": 1,
+                        "path": "user",
+                        "icon": "ep:avatar",
+                        "component": "system\/user\/index",
+                        "componentName": "SystemUser",
+                        "permission": "system:user:list",
+                        "visible": true,
+                        "keepAlive": true,
+                        "alwaysShow": true,
+                        "children": [
+                            {
+                                "id": 1001,
+                                "name": "用户查询",
+                                "parentId": 100,
+                                "type": 3,
+                                "sort": 1,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:user:query",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1002,
+                                "name": "用户新增",
+                                "parentId": 100,
+                                "type": 3,
+                                "sort": 2,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:user:create",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1003,
+                                "name": "用户修改",
+                                "parentId": 100,
+                                "type": 3,
+                                "sort": 3,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:user:update",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1004,
+                                "name": "用户删除",
+                                "parentId": 100,
+                                "type": 3,
+                                "sort": 4,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:user:delete",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1005,
+                                "name": "重置密码",
+                                "parentId": 100,
+                                "type": 3,
+                                "sort": 5,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:user:update-password",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "id": 101,
+                        "name": "角色管理",
+                        "parentId": 1,
+                        "type": 2,
+                        "sort": 2,
+                        "path": "role",
+                        "icon": "ep:user",
+                        "component": "system\/role\/index",
+                        "componentName": "SystemRole",
+                        "permission": "system:role:list",
+                        "visible": true,
+                        "keepAlive": true,
+                        "alwaysShow": true,
+                        "children": [
+                            {
+                                "id": 1008,
+                                "name": "角色查询",
+                                "parentId": 101,
+                                "type": 3,
+                                "sort": 1,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:role:query",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1009,
+                                "name": "角色新增",
+                                "parentId": 101,
+                                "type": 3,
+                                "sort": 2,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:role:create",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1010,
+                                "name": "角色修改",
+                                "parentId": 101,
+                                "type": 3,
+                                "sort": 3,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:role:update",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1011,
+                                "name": "角色删除",
+                                "parentId": 101,
+                                "type": 3,
+                                "sort": 4,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:role:delete",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1012,
+                                "name": "角色菜单分配",
+                                "parentId": 101,
+                                "type": 3,
+                                "sort": 5,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:permission:assign-role-menu",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1013,
+                                "name": "角色数据权限",
+                                "parentId": 101,
+                                "type": 3,
+                                "sort": 6,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:permission:assign-role-data-scope",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1014,
+                                "name": "用户角色分配",
+                                "parentId": 101,
+                                "type": 3,
+                                "sort": 7,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:permission:assign-user-role",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "id": 102,
+                        "name": "菜单管理",
+                        "parentId": 1,
+                        "type": 2,
+                        "sort": 3,
+                        "path": "menu",
+                        "icon": "ep:menu",
+                        "component": "system\/menu\/index",
+                        "componentName": "SystemMenu",
+                        "permission": "system:menu:list",
+                        "visible": true,
+                        "keepAlive": true,
+                        "alwaysShow": true,
+                        "children": [
+                            {
+                                "id": 1015,
+                                "name": "菜单查询",
+                                "parentId": 102,
+                                "type": 3,
+                                "sort": 1,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:menu:query",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1016,
+                                "name": "菜单新增",
+                                "parentId": 102,
+                                "type": 3,
+                                "sort": 2,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:menu:create",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1017,
+                                "name": "菜单修改",
+                                "parentId": 102,
+                                "type": 3,
+                                "sort": 3,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:menu:update",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            },
+                            {
+                                "id": 1018,
+                                "name": "菜单删除",
+                                "parentId": 102,
+                                "type": 3,
+                                "sort": 4,
+                                "path": "",
+                                "icon": "",
+                                "component": null,
+                                "componentName": null,
+                                "permission": "system:menu:delete",
+                                "visible": true,
+                                "keepAlive": true,
+                                "alwaysShow": true,
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "code": 0
+}
+</code></pre></table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "Unauthenticated.",
+    "code": 1
+}
+</code></pre></table></div><h2>2.6、Logout</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Invalidates the current JWT token (blacklists it).</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/auth/logout</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "message": "Successfully logged out",
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">message</td>
+<td style="text-align: left;">string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "Unauthenticated.",
+    "code": 1
+}
+</code></pre></table></div><h2>2.7、Refresh token</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Blacklists the current token and issues a new JWT. The new token must be used for subsequent requests.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/auth/refresh</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vNDkuMjM1LjUzLjUzOjkwMDEvYXBpL3YxL3VzZXItY2VudGVyL2F1dGgvcmVmcmVzaCIsImlhdCI6MTc4OTM2Njg1NCwiZXhwIjoxNzkyMDI4NTkwLCJuYmYiOjE3ODk0MzY1OTAsImp0aSI6Ikc5VzVWOE5wc1F1Q21RNnEiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.hc8CuR3wZCa0hGeL62JRp1Dw_dpnKpxY00kBsXTqfAs",
+        "token_type": "bearer",
+        "expires_in": 2592000,
+        "user": {
+            "id": 1,
+            "name": "superadmin",
+            "email": "superadmin@example.com",
+            "phone": "13811974106",
+            "status": "active",
+            "roles": [
+                "super_admin"
+            ],
+            "permissions": [
+                "system:user:list",
+                "system:role:list",
+                "system:menu:list",
+                "system:user:query",
+                "system:user:create",
+                "system:user:update",
+                "system:user:delete",
+                "system:user:update-password",
+                "system:role:query",
+                "system:role:create",
+                "system:role:update",
+                "system:role:delete",
+                "system:permission:assign-role-menu",
+                "system:permission:assign-role-data-scope",
+                "system:permission:assign-user-role",
+                "system:menu:query",
+                "system:menu:create",
+                "system:menu:update",
+                "system:menu:delete"
+            ]
+        }
+    },
+    "code": 0
+}
+</code></pre></table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "Unauthenticated.",
+    "code": 1
+}
+</code></pre></table></div></div><h1>3、User</h1><div style="margin-left:0px;"><h2>3.1、Get current user profile</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns the authenticated user's own profile (full User model).</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/profile</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "superadmin",
+        "nickname": null,
+        "email": "superadmin@example.com",
+        "phone": "13811974106",
+        "email_verified_at": null,
+        "phone_verified_at": "2026-09-09T07:22:04.000000Z",
+        "status": "active",
+        "avatar": null,
+        "created_at": "2026-09-09T07:22:04.000000Z",
+        "updated_at": "2026-09-09T07:22:04.000000Z"
+    },
+    "code": 0
+}
+</code></pre></table></div><h2>3.2、Update current user profile</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Updates the authenticated user's own profile fields (name, nickname, avatar). Password and roles cannot be changed here.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/profile</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>put</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "name": "",
+    "nickname": "hh",
+    "avatar": "string"
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">nickname</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">avatar</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "superadmin",
+        "nickname": "hh",
+        "email": "superadmin@example.com",
+        "phone": "13811974106",
+        "email_verified_at": null,
+        "phone_verified_at": "2026-09-09T07:22:04.000000Z",
+        "status": "active",
+        "avatar": "string",
+        "created_at": "2026-09-09T07:22:04.000000Z",
+        "updated_at": "2026-09-22T09:23:47.000000Z"
+    },
+    "code": 0
+}
+</code></pre></table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "The name field must be a string.",
+    "errors": {
+        "name": [
+            "The name field must be a string."
+        ]
+    },
+    "code": 1
+}
+</code></pre></table></div><h2>3.3、Change current user password</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Changes the authenticated user's password. Requires the current password to match. All existing tokens remain valid unless explicitly invalidated.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/change-password</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "current_password": "string",
+    "password": "string",
+    "password_confirmation": "string"
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">current_password</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>The user's current password.</td>
+</tr>
+<tr>
+<td style="text-align: left;">password</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>New password.</td>
+</tr>
+<tr>
+<td style="text-align: left;">password_confirmation</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Must match <code>password</code>.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "message": "string",
+    "code": "integer"
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">message</td>
+<td style="text-align: left;">string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td></td>
+</tr>
+</tbody>
+</table></div><h2>3.4、List users (paginated)</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns a paginated list of users with roles and permissions loaded. Requires the <code>manage-users</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>请求Query参数</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">示例值</th>
+<th>必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">per_page</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Number of items per page. The default differs by endpoint: the users index defaults to 15, the roles index defaults to 10.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Filter by user status.</td>
+</tr>
+<tr>
+<td style="text-align: left;">search</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Free-text search across name, email, and phone (LIKE match).</td>
+</tr>
+<tr>
+<td style="text-align: left;">role</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Filter by role code/name.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 5,
+                "name": "test2",
+                "nickname": "string",
+                "email": null,
+                "phone": "13811974103",
+                "email_verified_at": null,
+                "phone_verified_at": null,
+                "status": "active",
+                "is_deleted": false,
+                "token_version": 0,
+                "avatar": "string",
+                "created_at": "2026-09-23T09:05:05.000000Z",
+                "updated_at": "2026-09-23T09:05:05.000000Z",
+                "roles": [
+                    {
+                        "id": 2,
+                        "name": "admin",
+                        "display_name": null,
+                        "sort": 0,
+                        "status": 0,
+                        "type": 2,
+                        "remark": null,
+                        "data_scope": 1,
+                        "data_scope_dept_ids": null,
+                        "guard_name": "web",
+                        "created_at": "2026-08-26T06:31:26.000000Z",
+                        "updated_at": "2026-08-26T06:31:26.000000Z",
+                        "pivot": {
+                            "model_type": "App\\Models\\User",
+                            "model_id": 5,
+                            "role_id": 2
+                        }
+                    }
+                ],
+                "permissions": []
+            },
+            {
+                "id": 4,
+                "name": "test1",
+                "nickname": "string",
+                "email": "d@b.com",
+                "phone": "13811974102",
+                "email_verified_at": null,
+                "phone_verified_at": null,
+                "status": "active",
+                "is_deleted": false,
+                "token_version": 0,
+                "avatar": "string",
+                "created_at": "2026-09-23T09:04:37.000000Z",
+                "updated_at": "2026-09-23T09:04:37.000000Z",
+                "roles": [
+                    {
+                        "id": 2,
+                        "name": "admin",
+                        "display_name": null,
+                        "sort": 0,
+                        "status": 0,
+                        "type": 2,
+                        "remark": null,
+                        "data_scope": 1,
+                        "data_scope_dept_ids": null,
+                        "guard_name": "web",
+                        "created_at": "2026-08-26T06:31:26.000000Z",
+                        "updated_at": "2026-08-26T06:31:26.000000Z",
+                        "pivot": {
+                            "model_type": "App\\Models\\User",
+                            "model_id": 4,
+                            "role_id": 2
+                        }
+                    }
+                ],
+                "permissions": []
+            },
+            {
+                "id": 3,
+                "name": "test",
+                "nickname": "string",
+                "email": "b@b.com",
+                "phone": "13811974011",
+                "email_verified_at": null,
+                "phone_verified_at": null,
+                "status": "active",
+                "is_deleted": false,
+                "token_version": 0,
+                "avatar": "string",
+                "created_at": "2026-09-23T05:44:25.000000Z",
+                "updated_at": "2026-09-23T08:24:29.000000Z",
+                "roles": [
+                    {
+                        "id": 2,
+                        "name": "admin",
+                        "display_name": null,
+                        "sort": 0,
+                        "status": 0,
+                        "type": 2,
+                        "remark": null,
+                        "data_scope": 1,
+                        "data_scope_dept_ids": null,
+                        "guard_name": "web",
+                        "created_at": "2026-08-26T06:31:26.000000Z",
+                        "updated_at": "2026-08-26T06:31:26.000000Z",
+                        "pivot": {
+                            "model_type": "App\\Models\\User",
+                            "model_id": 3,
+                            "role_id": 2
+                        }
+                    }
+                ],
+                "permissions": []
+            },
+            {
+                "id": 2,
+                "name": "commonuser",
+                "nickname": "string",
+                "email": "a@b.com",
+                "phone": "13811974100",
+                "email_verified_at": null,
+                "phone_verified_at": null,
+                "status": "active",
+                "is_deleted": false,
+                "token_version": 0,
+                "avatar": "string",
+                "created_at": "2026-09-23T05:38:28.000000Z",
+                "updated_at": "2026-09-23T05:38:28.000000Z",
+                "roles": [],
+                "permissions": []
+            },
+            {
+                "id": 1,
+                "name": "superadmin",
+                "nickname": null,
+                "email": "superadmin@example.com",
+                "phone": "13811974106",
+                "email_verified_at": null,
+                "phone_verified_at": "2026-09-09T07:22:04.000000Z",
+                "status": "active",
+                "is_deleted": false,
+                "token_version": 0,
+                "avatar": null,
+                "created_at": "2026-09-09T07:22:04.000000Z",
+                "updated_at": "2026-09-09T07:22:04.000000Z",
+                "roles": [
+                    {
+                        "id": 5,
+                        "name": "super_admin",
+                        "display_name": "超级管理员",
+                        "sort": 1,
+                        "status": 0,
+                        "type": 1,
+                        "remark": null,
+                        "data_scope": 1,
+                        "data_scope_dept_ids": null,
+                        "guard_name": "web",
+                        "created_at": "2026-09-09T02:56:37.000000Z",
+                        "updated_at": "2026-09-09T02:56:37.000000Z",
+                        "pivot": {
+                            "model_type": "App\\Models\\User",
+                            "model_id": 1,
+                            "role_id": 5
+                        }
+                    }
+                ],
+                "permissions": []
+            }
+        ],
+        "first_page_url": "http:\/\/49.235.53.53:9001\/api\/v1\/user-center\/users?page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http:\/\/49.235.53.53:9001\/api\/v1\/user-center\/users?page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "page": null,
+                "active": false
+            },
+            {
+                "url": "http:\/\/49.235.53.53:9001\/api\/v1\/user-center\/users?page=1",
+                "label": "1",
+                "page": 1,
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "page": null,
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http:\/\/49.235.53.53:9001\/api\/v1\/user-center\/users",
+        "per_page": 15,
+        "prev_page_url": null,
+        "to": 5,
+        "total": 5
+    },
+    "code": 0
+}
+</code></pre></table></div><h2>3.5、Create a user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Creates a new user and optionally assigns roles. Requires the <code>manage-users</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "name": "test2",
+    "email": "",
+    "phone": "13811974103",
+    "password": "111111",
+    "status": "active",
+    "nickname": "string",
+    "avatar": "string",
+    "roles": [
+        "admin"
+    ]
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">email</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Must be unique.</td>
+</tr>
+<tr>
+<td style="text-align: left;">phone</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>Must be unique.</td>
+</tr>
+<tr>
+<td style="text-align: left;">password</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>User account status.</td>
+</tr>
+<tr>
+<td style="text-align: left;">nickname</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">avatar</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Avatar URL.</td>
+</tr>
+<tr>
+<td style="text-align: left;">roles</td>
+<td style="text-align: left;">否</td>
+<td>array</td>
+<td>Role codes to assign. Each must exist in <code>roles.name</code>.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "name": "test",
+        "email": "b@b.com",
+        "phone": "13811974101",
+        "status": "active",
+        "nickname": "string",
+        "avatar": "string",
+        "updated_at": "2026-09-22T09:39:20.000000Z",
+        "created_at": "2026-09-22T09:39:20.000000Z",
+        "id": 404
+    },
+    "code": 0
+}
+</code></pre></table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "The selected status is invalid. (and 1 more error)",
+    "errors": {
+        "status": [
+            "The selected status is invalid."
+        ],
+        "roles.0": [
+            "The roles.0 field must be a string."
+        ]
+    },
+    "code": 1
+}
+</code></pre></table></div><h2>3.6、Get user details</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns a single user with roles and permissions loaded. Requires the <code>manage-users</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/{{id}}</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "superadmin",
+        "nickname": "hh",
+        "email": "superadmin@example.com",
+        "phone": "13811974106",
+        "email_verified_at": null,
+        "phone_verified_at": "2026-09-09T07:22:04.000000Z",
+        "status": "active",
+        "avatar": "string",
+        "created_at": "2026-09-09T07:22:04.000000Z",
+        "updated_at": "2026-09-22T09:23:47.000000Z",
+        "roles": [
+            {
+                "id": 5,
+                "name": "super_admin",
+                "display_name": "超级管理员",
+                "sort": 1,
+                "status": 0,
+                "type": 1,
+                "remark": null,
+                "data_scope": 1,
+                "data_scope_dept_ids": null,
+                "guard_name": "web",
+                "created_at": "2026-09-09T02:56:37.000000Z",
+                "updated_at": "2026-09-09T02:56:37.000000Z",
+                "pivot": {
+                    "model_type": "App\\Models\\User",
+                    "model_id": 1,
+                    "role_id": 5
+                }
+            }
+        ],
+        "permissions": []
+    },
+    "code": 0
+}
+</code></pre></table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "User not found",
+    "code": 1
+}
+</code></pre></table></div><h2>3.7、Update user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Updates an existing user. All fields are optional (partial update). Requires the <code>manage-users</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/{{id}}</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>put</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "name": "test",
+    "email": "b@b.com",
+    "phone": "13811974011",
+    "password": "123456",
+    "status": "active",
+    "nickname": "string",
+    "avatar": "string",
+    "roles": [
+        "admin"
+    ]
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">email</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Must be unique (excluding this user).</td>
+</tr>
+<tr>
+<td style="text-align: left;">phone</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Must be unique (excluding this user).</td>
+</tr>
+<tr>
+<td style="text-align: left;">password</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>New password (optional).</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>User account status.</td>
+</tr>
+<tr>
+<td style="text-align: left;">nickname</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">avatar</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">roles</td>
+<td style="text-align: left;">否</td>
+<td>array</td>
+<td>Role codes to sync (replaces existing roles).</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "id": 3,
+        "name": "aaa",
+        "nickname": "string",
+        "email": "b@b.com",
+        "phone": "13811974101",
+        "email_verified_at": null,
+        "phone_verified_at": null,
+        "status": "active",
+        "avatar": "string",
+        "created_at": "2026-09-23T05:44:25.000000Z",
+        "updated_at": "2026-09-23T08:19:54.000000Z",
+        "permissions": [],
+        "roles": [
+            {
+                "id": 2,
+                "name": "admin",
+                "display_name": null,
+                "sort": 0,
+                "status": 0,
+                "type": 2,
+                "remark": null,
+                "data_scope": 1,
+                "data_scope_dept_ids": null,
+                "guard_name": "web",
+                "created_at": "2026-08-26T06:31:26.000000Z",
+                "updated_at": "2026-08-26T06:31:26.000000Z",
+                "pivot": {
+                    "model_type": "App\\Models\\User",
+                    "model_id": 3,
+                    "role_id": 2
+                }
+            }
+        ]
+    },
+    "code": 0
+}
+</code></pre></table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "The phone field format is invalid.",
+    "errors": {
+        "phone": [
+            "The phone field format is invalid."
+        ]
+    },
+    "code": 1
+}
+</code></pre></table></div><h2>3.8、Delete user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Deletes a user. Requires the <code>manage-users</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/{{id}}</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>delete</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "message": "User deleted successfully",
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">message</td>
+<td style="text-align: left;">string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "User not found",
+    "code": 1
+}
+</code></pre></table></div><h2>3.9、Activate user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Sets the user status to <code>active</code>. Requires the <code>manage-users</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/{{id}}/activate</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "message": "User activated successfully",
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">message</td>
+<td style="text-align: left;">string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "User not found",
+    "code": 1
+}
+</code></pre></table></div><h2>3.10、Deactivate user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Sets the user status to <code>inactive</code>. Requires the <code>manage-users</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/{{id}}/deactivate</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "message": "User deactivated successfully",
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">message</td>
+<td style="text-align: left;">string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "User not found",
+    "code": 1
+}
+</code></pre></table></div><h2>3.11、Ban user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Sets the user status to <code>banned</code>. Requires the <code>manage-users</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/{{id}}/ban</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "message": "User banned successfully",
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">message</td>
+<td style="text-align: left;">string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td></td>
+</tr>
+</tbody>
+</table></div><h2>3.12、Assign roles to user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Assigns the given role codes to a user (additive — existing roles are kept). Requires the <code>manage-users</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/{{id}}/roles</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "roles": [
+        "manager",
+        "user"
+    ]
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">roles</td>
+<td style="text-align: left;">是</td>
+<td>array</td>
+<td>Role codes to assign. Each must exist in <code>roles.name</code>.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "message": "Roles synced successfully",
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">message</td>
+<td style="text-align: left;">string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "The selected roles.0 is invalid.",
+    "errors": {
+        "roles.0": [
+            "The selected roles.0 is invalid."
+        ]
+    },
+    "code": 1
+}
+</code></pre></table></div><h2>3.13、Grant permissions to user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Grants the given permission names directly to a user (additive). Requires the <code>manage-users</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/users/{{id}}/permissions</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "permissions": [
+        "manage-roles"
+    ]
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">permissions</td>
+<td style="text-align: left;">是</td>
+<td>array</td>
+<td>Permission names to grant. Each must exist in <code>permissions.name</code>.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "message": "Permissions synced successfully",
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">message</td>
+<td style="text-align: left;">string</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "The permissions.0 field must be a string.",
+    "errors": {
+        "permissions.0": [
+            "The permissions.0 field must be a string."
+        ]
+    },
+    "code": 1
+}
+</code></pre></table></div></div><h1>4、Menu</h1><div style="margin-left:0px;"><h2>4.1、List menus</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns the menu list (flat) for menu management. Requires the <code>system:menu:query</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/menus</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>请求Query参数</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">示例值</th>
+<th>必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Filter by menu name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Filter by status (0=enabled, 1=disabled).</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": [
+        {
+            "id": 100,
+            "name": "用户管理",
+            "permission": "system:user:list",
+            "type": 2,
+            "sort": 1,
+            "parentId": 1,
+            "path": "user",
+            "icon": "ep:avatar",
+            "component": "system\/user\/index",
+            "componentName": "SystemUser",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 3001,
+            "name": "店铺查询",
+            "permission": "jushuitan:shop:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 301,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3006,
+            "name": "仓库查询",
+            "permission": "jushuitan:warehouse:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 302,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 2001,
+            "name": "人物查询",
+            "permission": "knowledge:figure:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 201,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-16T03:39:21+00:00"
+        },
+        {
+            "id": 3011,
+            "name": "供应商查询",
+            "permission": "jushuitan:supplier:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 303,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1015,
+            "name": "菜单查询",
+            "permission": "system:menu:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 102,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 3016,
+            "name": "订单查询",
+            "permission": "jushuitan:order:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 304,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1008,
+            "name": "角色查询",
+            "permission": "system:role:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 101,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 3021,
+            "name": "商品查询",
+            "permission": "jushuitan:product:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 305,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1001,
+            "name": "用户查询",
+            "permission": "system:user:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 100,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 3026,
+            "name": "库存查询",
+            "permission": "jushuitan:inventory:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 306,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3031,
+            "name": "采购查询",
+            "permission": "jushuitan:purchase:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 307,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 201,
+            "name": "人物管理",
+            "permission": "knowledge:figure:list",
+            "type": 2,
+            "sort": 1,
+            "parentId": 200,
+            "path": "figure",
+            "icon": "ep:user",
+            "component": "knowledge\/figure\/index",
+            "componentName": "KnowledgeFigure",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-16T03:39:21+00:00"
+        },
+        {
+            "id": 3036,
+            "name": "物流查询",
+            "permission": "jushuitan:logistics:query",
+            "type": 3,
+            "sort": 1,
+            "parentId": 308,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 301,
+            "name": "店铺管理",
+            "permission": "jushuitan:shop:list",
+            "type": 2,
+            "sort": 1,
+            "parentId": 300,
+            "path": "shop",
+            "icon": "ep:shop",
+            "component": "jushuitan\/shop\/index",
+            "componentName": "JushuitanShop",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1009,
+            "name": "角色新增",
+            "permission": "system:role:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 101,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 3037,
+            "name": "物流新增",
+            "permission": "jushuitan:logistics:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 308,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1016,
+            "name": "菜单新增",
+            "permission": "system:menu:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 102,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 3012,
+            "name": "供应商新增",
+            "permission": "jushuitan:supplier:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 303,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 2002,
+            "name": "人物新增",
+            "permission": "knowledge:figure:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 201,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-16T03:39:21+00:00"
+        },
+        {
+            "id": 3017,
+            "name": "订单新增",
+            "permission": "jushuitan:order:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 304,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3007,
+            "name": "仓库新增",
+            "permission": "jushuitan:warehouse:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 302,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 302,
+            "name": "仓库管理",
+            "permission": "jushuitan:warehouse:list",
+            "type": 2,
+            "sort": 2,
+            "parentId": 300,
+            "path": "warehouse",
+            "icon": "ep:house",
+            "component": "jushuitan\/warehouse\/index",
+            "componentName": "JushuitanWarehouse",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3022,
+            "name": "商品新增",
+            "permission": "jushuitan:product:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 305,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 101,
+            "name": "角色管理",
+            "permission": "system:role:list",
+            "type": 2,
+            "sort": 2,
+            "parentId": 1,
+            "path": "role",
+            "icon": "ep:user",
+            "component": "system\/role\/index",
+            "componentName": "SystemRole",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 1002,
+            "name": "用户新增",
+            "permission": "system:user:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 100,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 3002,
+            "name": "店铺新增",
+            "permission": "jushuitan:shop:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 301,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3032,
+            "name": "采购新增",
+            "permission": "jushuitan:purchase:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 307,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3027,
+            "name": "库存新增",
+            "permission": "jushuitan:inventory:create",
+            "type": 3,
+            "sort": 2,
+            "parentId": 306,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3003,
+            "name": "店铺修改",
+            "permission": "jushuitan:shop:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 301,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3038,
+            "name": "物流修改",
+            "permission": "jushuitan:logistics:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 308,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3008,
+            "name": "仓库修改",
+            "permission": "jushuitan:warehouse:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 302,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3013,
+            "name": "供应商修改",
+            "permission": "jushuitan:supplier:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 303,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3018,
+            "name": "订单修改",
+            "permission": "jushuitan:order:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 304,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3023,
+            "name": "商品修改",
+            "permission": "jushuitan:product:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 305,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3033,
+            "name": "采购修改",
+            "permission": "jushuitan:purchase:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 307,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3028,
+            "name": "库存修改",
+            "permission": "jushuitan:inventory:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 306,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1003,
+            "name": "用户修改",
+            "permission": "system:user:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 100,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 2003,
+            "name": "人物修改",
+            "permission": "knowledge:figure:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 201,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-16T03:39:21+00:00"
+        },
+        {
+            "id": 1010,
+            "name": "角色修改",
+            "permission": "system:role:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 101,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 102,
+            "name": "菜单管理",
+            "permission": "system:menu:list",
+            "type": 2,
+            "sort": 3,
+            "parentId": 1,
+            "path": "menu",
+            "icon": "ep:menu",
+            "component": "system\/menu\/index",
+            "componentName": "SystemMenu",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 1017,
+            "name": "菜单修改",
+            "permission": "system:menu:update",
+            "type": 3,
+            "sort": 3,
+            "parentId": 102,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 303,
+            "name": "供应商管理",
+            "permission": "jushuitan:supplier:list",
+            "type": 2,
+            "sort": 3,
+            "parentId": 300,
+            "path": "supplier",
+            "icon": "ep:user-filled",
+            "component": "jushuitan\/supplier\/index",
+            "componentName": "JushuitanSupplier",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3014,
+            "name": "供应商删除",
+            "permission": "jushuitan:supplier:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 303,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3029,
+            "name": "库存删除",
+            "permission": "jushuitan:inventory:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 306,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3024,
+            "name": "商品删除",
+            "permission": "jushuitan:product:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 305,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1004,
+            "name": "用户删除",
+            "permission": "system:user:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 100,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 3019,
+            "name": "订单删除",
+            "permission": "jushuitan:order:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 304,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1011,
+            "name": "角色删除",
+            "permission": "system:role:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 101,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 304,
+            "name": "订单管理",
+            "permission": "jushuitan:order:list",
+            "type": 2,
+            "sort": 4,
+            "parentId": 300,
+            "path": "order",
+            "icon": "ep:document",
+            "component": "jushuitan\/order\/index",
+            "componentName": "JushuitanOrder",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3034,
+            "name": "采购删除",
+            "permission": "jushuitan:purchase:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 307,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3009,
+            "name": "仓库删除",
+            "permission": "jushuitan:warehouse:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 302,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1018,
+            "name": "菜单删除",
+            "permission": "system:menu:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 102,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 2004,
+            "name": "人物删除",
+            "permission": "knowledge:figure:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 201,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-16T03:39:21+00:00"
+        },
+        {
+            "id": 3039,
+            "name": "物流删除",
+            "permission": "jushuitan:logistics:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 308,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3004,
+            "name": "店铺删除",
+            "permission": "jushuitan:shop:delete",
+            "type": 3,
+            "sort": 4,
+            "parentId": 301,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1005,
+            "name": "重置密码",
+            "permission": "system:user:update-password",
+            "type": 3,
+            "sort": 5,
+            "parentId": 100,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 3035,
+            "name": "采购同步",
+            "permission": "jushuitan:purchase:sync",
+            "type": 3,
+            "sort": 5,
+            "parentId": 307,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 305,
+            "name": "商品管理",
+            "permission": "jushuitan:product:list",
+            "type": 2,
+            "sort": 5,
+            "parentId": 300,
+            "path": "product",
+            "icon": "ep:box",
+            "component": "jushuitan\/product\/index",
+            "componentName": "JushuitanProduct",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3030,
+            "name": "库存同步",
+            "permission": "jushuitan:inventory:sync",
+            "type": 3,
+            "sort": 5,
+            "parentId": 306,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3040,
+            "name": "物流同步",
+            "permission": "jushuitan:logistics:sync",
+            "type": 3,
+            "sort": 5,
+            "parentId": 308,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3025,
+            "name": "商品同步",
+            "permission": "jushuitan:product:sync",
+            "type": 3,
+            "sort": 5,
+            "parentId": 305,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 2005,
+            "name": "人物导入",
+            "permission": "knowledge:figure:import",
+            "type": 3,
+            "sort": 5,
+            "parentId": 201,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-16T03:39:21+00:00"
+        },
+        {
+            "id": 3020,
+            "name": "订单同步",
+            "permission": "jushuitan:order:sync",
+            "type": 3,
+            "sort": 5,
+            "parentId": 304,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1012,
+            "name": "角色菜单分配",
+            "permission": "system:permission:assign-role-menu",
+            "type": 3,
+            "sort": 5,
+            "parentId": 101,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 3015,
+            "name": "供应商同步",
+            "permission": "jushuitan:supplier:sync",
+            "type": 3,
+            "sort": 5,
+            "parentId": 303,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3010,
+            "name": "仓库同步",
+            "permission": "jushuitan:warehouse:sync",
+            "type": 3,
+            "sort": 5,
+            "parentId": 302,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 3005,
+            "name": "店铺同步",
+            "permission": "jushuitan:shop:sync",
+            "type": 3,
+            "sort": 5,
+            "parentId": 301,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 306,
+            "name": "库存管理",
+            "permission": "jushuitan:inventory:list",
+            "type": 2,
+            "sort": 6,
+            "parentId": 300,
+            "path": "inventory",
+            "icon": "ep:files",
+            "component": "jushuitan\/inventory\/index",
+            "componentName": "JushuitanInventory",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1013,
+            "name": "角色数据权限",
+            "permission": "system:permission:assign-role-data-scope",
+            "type": 3,
+            "sort": 6,
+            "parentId": 101,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 307,
+            "name": "采购管理",
+            "permission": "jushuitan:purchase:list",
+            "type": 2,
+            "sort": 7,
+            "parentId": 300,
+            "path": "purchase",
+            "icon": "ep:shopping-cart",
+            "component": "jushuitan\/purchase\/index",
+            "componentName": "JushuitanPurchase",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1014,
+            "name": "用户角色分配",
+            "permission": "system:permission:assign-user-role",
+            "type": 3,
+            "sort": 7,
+            "parentId": 101,
+            "path": "",
+            "icon": "",
+            "component": null,
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 308,
+            "name": "物流管理",
+            "permission": "jushuitan:logistics:list",
+            "type": 2,
+            "sort": 8,
+            "parentId": 300,
+            "path": "logistics",
+            "icon": "ep:van",
+            "component": "jushuitan\/logistics\/index",
+            "componentName": "JushuitanLogistics",
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        },
+        {
+            "id": 1,
+            "name": "系统管理",
+            "permission": "",
+            "type": 1,
+            "sort": 10,
+            "parentId": 0,
+            "path": "\/system",
+            "icon": "ep:tools",
+            "component": "",
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 200,
+            "name": "知识库",
+            "permission": "",
+            "type": 1,
+            "sort": 20,
+            "parentId": 0,
+            "path": "\/knowledge",
+            "icon": "ep:collection",
+            "component": "",
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-16T03:39:21+00:00"
+        },
+        {
+            "id": 300,
+            "name": "聚水潭",
+            "permission": "",
+            "type": 1,
+            "sort": 30,
+            "parentId": 0,
+            "path": "\/jushuitan",
+            "icon": "ep:goods",
+            "component": "",
+            "componentName": null,
+            "status": 0,
+            "visible": true,
+            "keepAlive": true,
+            "alwaysShow": true,
+            "createdAt": "2026-09-17T02:29:31+00:00"
+        }
+    ],
+    "code": 0
+}
+</code></pre></table></div><h2>4.2、Create menu</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Creates a new menu, menu item, or button. Requires the <code>system:menu:create</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/menus</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "name": "用户管理1",
+    "permission": "system:user:list",
+    "type": 2,
+    "sort": 1,
+    "parent_id": 1,
+    "path": "user",
+    "icon": "ep:avatar",
+    "component": "system\/user\/index",
+    "component_name": "SystemUser",
+    "status": 0,
+    "visible": true,
+    "keep_alive": true,
+    "always_show": true
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>Menu display name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">permission</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Permission identifier (e.g. <code>system:user:query</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Menu type (1 = Directory, 2 = Menu, 3 = Button).</td>
+</tr>
+<tr>
+<td style="text-align: left;">sort</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Display sort order.</td>
+</tr>
+<tr>
+<td style="text-align: left;">parent_id</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Parent menu id; 0 for root.</td>
+</tr>
+<tr>
+<td style="text-align: left;">path</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Route path.</td>
+</tr>
+<tr>
+<td style="text-align: left;">icon</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Icon identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">component</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Frontend component path.</td>
+</tr>
+<tr>
+<td style="text-align: left;">component_name</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Frontend component name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Common enable/disable status (0 = enabled, 1 = disabled).</td>
+</tr>
+<tr>
+<td style="text-align: left;">visible</td>
+<td style="text-align: left;">否</td>
+<td>boolean</td>
+<td>Whether the menu is visible.</td>
+</tr>
+<tr>
+<td style="text-align: left;">keep_alive</td>
+<td style="text-align: left;">否</td>
+<td>boolean</td>
+<td>Whether to keep the component alive.</td>
+</tr>
+<tr>
+<td style="text-align: left;">always_show</td>
+<td style="text-align: left;">否</td>
+<td>boolean</td>
+<td>Always show the root menu even with one child.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": 3041,
+    "code": 0
+}
+</code></pre></table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "message": "The parent id field is required.",
+    "errors": {
+        "parent_id": [
+            "The parent id field is required."
+        ]
+    },
+    "code": 1
+}
+</code></pre></table></div><h2>4.3、Simple menu list</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns a simplified menu list (id, name, parentId, type) for role-menu assignment dropdown options. Authenticated users only; no special permission required.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/menus/simple-list</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": [
+        {
+            "id": 100,
+            "name": "用户管理",
+            "parentId": 1,
+            "type": 2
+        },
+        {
+            "id": 3001,
+            "name": "店铺查询",
+            "parentId": 301,
+            "type": 3
+        },
+        {
+            "id": 3006,
+            "name": "仓库查询",
+            "parentId": 302,
+            "type": 3
+        },
+        {
+            "id": 2001,
+            "name": "人物查询",
+            "parentId": 201,
+            "type": 3
+        },
+        {
+            "id": 3011,
+            "name": "供应商查询",
+            "parentId": 303,
+            "type": 3
+        },
+        {
+            "id": 1015,
+            "name": "菜单查询",
+            "parentId": 102,
+            "type": 3
+        },
+        {
+            "id": 3016,
+            "name": "订单查询",
+            "parentId": 304,
+            "type": 3
+        },
+        {
+            "id": 1008,
+            "name": "角色查询",
+            "parentId": 101,
+            "type": 3
+        },
+        {
+            "id": 3021,
+            "name": "商品查询",
+            "parentId": 305,
+            "type": 3
+        },
+        {
+            "id": 1001,
+            "name": "用户查询",
+            "parentId": 100,
+            "type": 3
+        },
+        {
+            "id": 3026,
+            "name": "库存查询",
+            "parentId": 306,
+            "type": 3
+        },
+        {
+            "id": 3031,
+            "name": "采购查询",
+            "parentId": 307,
+            "type": 3
+        },
+        {
+            "id": 201,
+            "name": "人物管理",
+            "parentId": 200,
+            "type": 2
+        },
+        {
+            "id": 3036,
+            "name": "物流查询",
+            "parentId": 308,
+            "type": 3
+        },
+        {
+            "id": 301,
+            "name": "店铺管理",
+            "parentId": 300,
+            "type": 2
+        },
+        {
+            "id": 1009,
+            "name": "角色新增",
+            "parentId": 101,
+            "type": 3
+        },
+        {
+            "id": 3037,
+            "name": "物流新增",
+            "parentId": 308,
+            "type": 3
+        },
+        {
+            "id": 1016,
+            "name": "菜单新增",
+            "parentId": 102,
+            "type": 3
+        },
+        {
+            "id": 3012,
+            "name": "供应商新增",
+            "parentId": 303,
+            "type": 3
+        },
+        {
+            "id": 2002,
+            "name": "人物新增",
+            "parentId": 201,
+            "type": 3
+        },
+        {
+            "id": 3017,
+            "name": "订单新增",
+            "parentId": 304,
+            "type": 3
+        },
+        {
+            "id": 3007,
+            "name": "仓库新增",
+            "parentId": 302,
+            "type": 3
+        },
+        {
+            "id": 302,
+            "name": "仓库管理",
+            "parentId": 300,
+            "type": 2
+        },
+        {
+            "id": 3022,
+            "name": "商品新增",
+            "parentId": 305,
+            "type": 3
+        },
+        {
+            "id": 101,
+            "name": "角色管理",
+            "parentId": 1,
+            "type": 2
+        },
+        {
+            "id": 1002,
+            "name": "用户新增",
+            "parentId": 100,
+            "type": 3
+        },
+        {
+            "id": 3002,
+            "name": "店铺新增",
+            "parentId": 301,
+            "type": 3
+        },
+        {
+            "id": 3032,
+            "name": "采购新增",
+            "parentId": 307,
+            "type": 3
+        },
+        {
+            "id": 3027,
+            "name": "库存新增",
+            "parentId": 306,
+            "type": 3
+        },
+        {
+            "id": 3003,
+            "name": "店铺修改",
+            "parentId": 301,
+            "type": 3
+        },
+        {
+            "id": 3038,
+            "name": "物流修改",
+            "parentId": 308,
+            "type": 3
+        },
+        {
+            "id": 3008,
+            "name": "仓库修改",
+            "parentId": 302,
+            "type": 3
+        },
+        {
+            "id": 3013,
+            "name": "供应商修改",
+            "parentId": 303,
+            "type": 3
+        },
+        {
+            "id": 3018,
+            "name": "订单修改",
+            "parentId": 304,
+            "type": 3
+        },
+        {
+            "id": 3023,
+            "name": "商品修改",
+            "parentId": 305,
+            "type": 3
+        },
+        {
+            "id": 3033,
+            "name": "采购修改",
+            "parentId": 307,
+            "type": 3
+        },
+        {
+            "id": 3028,
+            "name": "库存修改",
+            "parentId": 306,
+            "type": 3
+        },
+        {
+            "id": 1003,
+            "name": "用户修改",
+            "parentId": 100,
+            "type": 3
+        },
+        {
+            "id": 2003,
+            "name": "人物修改",
+            "parentId": 201,
+            "type": 3
+        },
+        {
+            "id": 1010,
+            "name": "角色修改",
+            "parentId": 101,
+            "type": 3
+        },
+        {
+            "id": 102,
+            "name": "菜单管理",
+            "parentId": 1,
+            "type": 2
+        },
+        {
+            "id": 1017,
+            "name": "菜单修改",
+            "parentId": 102,
+            "type": 3
+        },
+        {
+            "id": 303,
+            "name": "供应商管理",
+            "parentId": 300,
+            "type": 2
+        },
+        {
+            "id": 3014,
+            "name": "供应商删除",
+            "parentId": 303,
+            "type": 3
+        },
+        {
+            "id": 3029,
+            "name": "库存删除",
+            "parentId": 306,
+            "type": 3
+        },
+        {
+            "id": 3024,
+            "name": "商品删除",
+            "parentId": 305,
+            "type": 3
+        },
+        {
+            "id": 1004,
+            "name": "用户删除",
+            "parentId": 100,
+            "type": 3
+        },
+        {
+            "id": 3019,
+            "name": "订单删除",
+            "parentId": 304,
+            "type": 3
+        },
+        {
+            "id": 1011,
+            "name": "角色删除",
+            "parentId": 101,
+            "type": 3
+        },
+        {
+            "id": 304,
+            "name": "订单管理",
+            "parentId": 300,
+            "type": 2
+        },
+        {
+            "id": 3034,
+            "name": "采购删除",
+            "parentId": 307,
+            "type": 3
+        },
+        {
+            "id": 3009,
+            "name": "仓库删除",
+            "parentId": 302,
+            "type": 3
+        },
+        {
+            "id": 1018,
+            "name": "菜单删除",
+            "parentId": 102,
+            "type": 3
+        },
+        {
+            "id": 2004,
+            "name": "人物删除",
+            "parentId": 201,
+            "type": 3
+        },
+        {
+            "id": 3039,
+            "name": "物流删除",
+            "parentId": 308,
+            "type": 3
+        },
+        {
+            "id": 3004,
+            "name": "店铺删除",
+            "parentId": 301,
+            "type": 3
+        },
+        {
+            "id": 1005,
+            "name": "重置密码",
+            "parentId": 100,
+            "type": 3
+        },
+        {
+            "id": 3035,
+            "name": "采购同步",
+            "parentId": 307,
+            "type": 3
+        },
+        {
+            "id": 305,
+            "name": "商品管理",
+            "parentId": 300,
+            "type": 2
+        },
+        {
+            "id": 3030,
+            "name": "库存同步",
+            "parentId": 306,
+            "type": 3
+        },
+        {
+            "id": 3040,
+            "name": "物流同步",
+            "parentId": 308,
+            "type": 3
+        },
+        {
+            "id": 3025,
+            "name": "商品同步",
+            "parentId": 305,
+            "type": 3
+        },
+        {
+            "id": 2005,
+            "name": "人物导入",
+            "parentId": 201,
+            "type": 3
+        },
+        {
+            "id": 3020,
+            "name": "订单同步",
+            "parentId": 304,
+            "type": 3
+        },
+        {
+            "id": 1012,
+            "name": "角色菜单分配",
+            "parentId": 101,
+            "type": 3
+        },
+        {
+            "id": 3015,
+            "name": "供应商同步",
+            "parentId": 303,
+            "type": 3
+        },
+        {
+            "id": 3010,
+            "name": "仓库同步",
+            "parentId": 302,
+            "type": 3
+        },
+        {
+            "id": 3005,
+            "name": "店铺同步",
+            "parentId": 301,
+            "type": 3
+        },
+        {
+            "id": 306,
+            "name": "库存管理",
+            "parentId": 300,
+            "type": 2
+        },
+        {
+            "id": 1013,
+            "name": "角色数据权限",
+            "parentId": 101,
+            "type": 3
+        },
+        {
+            "id": 307,
+            "name": "采购管理",
+            "parentId": 300,
+            "type": 2
+        },
+        {
+            "id": 1014,
+            "name": "用户角色分配",
+            "parentId": 101,
+            "type": 3
+        },
+        {
+            "id": 308,
+            "name": "物流管理",
+            "parentId": 300,
+            "type": 2
+        },
+        {
+            "id": 1,
+            "name": "系统管理",
+            "parentId": 0,
+            "type": 1
+        },
+        {
+            "id": 200,
+            "name": "知识库",
+            "parentId": 0,
+            "type": 1
+        },
+        {
+            "id": 300,
+            "name": "聚水潭",
+            "parentId": 0,
+            "type": 1
+        }
+    ],
+    "code": 0
+}
+</code></pre></table></div><h2>4.4、Get menu details</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns a single menu. Requires the <code>system:menu:query</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/menus/{{menu_id}}</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "系统管理",
+        "permission": "",
+        "type": 1,
+        "sort": 10,
+        "parentId": 0,
+        "path": "\/system",
+        "icon": "ep:tools",
+        "component": "",
+        "componentName": null,
+        "status": 0,
+        "visible": true,
+        "keepAlive": true,
+        "alwaysShow": true,
+        "createdAt": "2026-09-09T02:56:37+00:00"
+    },
+    "code": 0
+}
+</code></pre></table></div><h2>4.5、Update menu</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Updates an existing menu. Requires the <code>system:menu:update</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/menus/{{menu_id}}</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>put</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "name": "用户管理",
+    "permission": "system:user:list",
+    "type": 2,
+    "sort": 1,
+    "parent_id": 1,
+    "path": "user",
+    "icon": "ep:avatar",
+    "component": "system\/user\/index",
+    "component_name": "SystemUser",
+    "status": 0,
+    "visible": true,
+    "keep_alive": true,
+    "always_show": true
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>Menu display name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">permission</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Permission identifier (e.g. <code>system:user:query</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;">type</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Menu type (1 = Directory, 2 = Menu, 3 = Button).</td>
+</tr>
+<tr>
+<td style="text-align: left;">sort</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Display sort order.</td>
+</tr>
+<tr>
+<td style="text-align: left;">parent_id</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Parent menu id; 0 for root.</td>
+</tr>
+<tr>
+<td style="text-align: left;">path</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Route path.</td>
+</tr>
+<tr>
+<td style="text-align: left;">icon</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Icon identifier.</td>
+</tr>
+<tr>
+<td style="text-align: left;">component</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Frontend component path.</td>
+</tr>
+<tr>
+<td style="text-align: left;">component_name</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Frontend component name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Common enable/disable status (0 = enabled, 1 = disabled).</td>
+</tr>
+<tr>
+<td style="text-align: left;">visible</td>
+<td style="text-align: left;">否</td>
+<td>boolean</td>
+<td>Whether the menu is visible.</td>
+</tr>
+<tr>
+<td style="text-align: left;">keep_alive</td>
+<td style="text-align: left;">否</td>
+<td>boolean</td>
+<td>Whether to keep the component alive.</td>
+</tr>
+<tr>
+<td style="text-align: left;">always_show</td>
+<td style="text-align: left;">否</td>
+<td>boolean</td>
+<td>Always show the root menu even with one child.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td>Business code (0 = success).</td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "Menu with the same name already exists under this parent",
+    "code": 1
+}
+</code></pre></table></div><h2>4.6、Delete menu</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Deletes a menu. Requires the <code>system:menu:delete</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/menus/{{menu_id}}</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>delete</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td>Business code (0 = success).</td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "Menu does not exist",
+    "code": 1
+}
+</code></pre></table></div></div><h1>5、Role</h1><div style="margin-left:0px;"><h2>5.1、List roles (paginated)</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns a paginated role list. Requires the <code>system:role:query</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/roles</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>请求Query参数</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">示例值</th>
+<th>必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">per_page</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Number of items per page. The default differs by endpoint: the users index defaults to 15, the roles index defaults to 10.</td>
+</tr>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Filter by role display name/code.</td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Filter by role code (identifier stored in Spatie's name column).</td>
+</tr>
+<tr>
+<td style="text-align: left;">status</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Filter by status (0=enabled, 1=disabled).</td>
+</tr>
+<tr>
+<td style="text-align: left;">start_time</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Created-at lower bound (inclusive).</td>
+</tr>
+<tr>
+<td style="text-align: left;">end_time</td>
+<td style="text-align: left;"></td>
+<td>否</td>
+<td>string</td>
+<td>Created-at upper bound (inclusive).</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": [
+        {
+            "id": 6,
+            "name": "普通角色",
+            "code": "common",
+            "sort": 2,
+            "status": 0,
+            "type": 1,
+            "remark": null,
+            "dataScope": 1,
+            "dataScopeDeptIds": [],
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 5,
+            "name": "超级管理员",
+            "code": "super_admin",
+            "sort": 1,
+            "status": 0,
+            "type": 1,
+            "remark": null,
+            "dataScope": 1,
+            "dataScopeDeptIds": [],
+            "createdAt": "2026-09-09T02:56:37+00:00"
+        },
+        {
+            "id": 4,
+            "name": "user",
+            "code": "user",
+            "sort": 0,
+            "status": 0,
+            "type": 2,
+            "remark": null,
+            "dataScope": 1,
+            "dataScopeDeptIds": [],
+            "createdAt": "2026-08-26T06:31:26+00:00"
+        },
+        {
+            "id": 3,
+            "name": "manager",
+            "code": "manager",
+            "sort": 0,
+            "status": 0,
+            "type": 2,
+            "remark": null,
+            "dataScope": 1,
+            "dataScopeDeptIds": [],
+            "createdAt": "2026-08-26T06:31:26+00:00"
+        },
+        {
+            "id": 2,
+            "name": "admin",
+            "code": "admin",
+            "sort": 0,
+            "status": 0,
+            "type": 2,
+            "remark": null,
+            "dataScope": 1,
+            "dataScopeDeptIds": [],
+            "createdAt": "2026-08-26T06:31:26+00:00"
+        },
+        {
+            "id": 1,
+            "name": "super-admin",
+            "code": "super-admin",
+            "sort": 0,
+            "status": 0,
+            "type": 2,
+            "remark": null,
+            "dataScope": 1,
+            "dataScopeDeptIds": [],
+            "createdAt": "2026-08-26T06:31:26+00:00"
+        }
+    ],
+    "meta": {
+        "current_page": 1,
+        "last_page": 1,
+        "per_page": 15,
+        "total": 6
+    },
+    "code": 0
+}
+</code></pre></table></div><h2>5.2、Create role</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Creates a new custom role. Requires the <code>system:role:create</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/roles</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "name": "测试角色1",
+    "code": "testrole",
+    "sort": "1",
+    "remark": "测试"
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>Role display name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>Role code / identifier (stored in Spatie's <code>name</code> column; must be unique).</td>
+</tr>
+<tr>
+<td style="text-align: left;">sort</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Display sort order.</td>
+</tr>
+<tr>
+<td style="text-align: left;">remark</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Remark.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": 136,
+    "code": 0
+}
+</code></pre></table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "Role code already exists",
+    "code": 1
+}
+</code></pre></table></div><h2>5.3、Simple role list</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns a simplified enabled-role list (id, name, code) for dropdown options. Authenticated users only; no special permission required.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/roles/simple-list</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": [
+        {
+            "id": 1,
+            "name": "super-admin",
+            "code": "super-admin"
+        },
+        {
+            "id": 2,
+            "name": "admin",
+            "code": "admin"
+        },
+        {
+            "id": 3,
+            "name": "manager",
+            "code": "manager"
+        },
+        {
+            "id": 4,
+            "name": "user",
+            "code": "user"
+        },
+        {
+            "id": 5,
+            "name": "超级管理员",
+            "code": "super_admin"
+        },
+        {
+            "id": 6,
+            "name": "普通角色",
+            "code": "common"
+        }
+    ],
+    "code": 0
+}
+</code></pre></table></div><h2>5.4、Get role details</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns a single role. Requires the <code>system:role:query</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/roles/{{id}}</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": {
+        "id": 3,
+        "name": "manager",
+        "code": "manager",
+        "sort": 0,
+        "status": 0,
+        "type": 2,
+        "remark": null,
+        "dataScope": 1,
+        "dataScopeDeptIds": [],
+        "createdAt": "2026-08-26T06:31:26+00:00"
+    },
+    "code": 0
+}
+</code></pre></table></div><h2>5.5、Update role</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Updates an existing role. All fields are optional (partial update). Requires the <code>system:role:update</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/roles/{{role_id}}</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>put</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "name": "测试角色12",
+    "code": "test",
+    "sort": "1",
+    "remark": "测试"
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">name</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>Role display name.</td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">是</td>
+<td>string</td>
+<td>Role code / identifier (stored in Spatie's <code>name</code> column; must be unique).</td>
+</tr>
+<tr>
+<td style="text-align: left;">sort</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Display sort order.</td>
+</tr>
+<tr>
+<td style="text-align: left;">remark</td>
+<td style="text-align: left;">否</td>
+<td>string</td>
+<td>Remark.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td>Business code (0 = success).</td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "Role name already exists",
+    "code": 1
+}
+</code></pre></table></div><h2>5.6、Delete role</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Deletes a custom role. Built-in (<code>System</code>) roles cannot be deleted. Requires the <code>system:role:delete</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/roles/{{role_id}}</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>delete</li>
+</ul>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td>Business code (0 = success).</td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "Role does not exist",
+    "code": 1
+}
+</code></pre></table></div></div><h1>6、Permission</h1><div style="margin-left:0px;"><h2>6.1、Get menu ids assigned to a role</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns the list of menu ids assigned to the given role. Requires the <code>system:permission:assign-role-menu</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/permissions/role-menus</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>请求Query参数</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">示例值</th>
+<th>必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">roleId</td>
+<td style="text-align: left;">1</td>
+<td>是</td>
+<td>string</td>
+<td>Role id.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": [
+        100,
+        3001,
+        3006,
+        2001,
+        3011,
+        1015,
+        3016,
+        1008,
+        3021,
+        1001,
+        3026,
+        3031,
+        201,
+        3036,
+        301,
+        1009,
+        3037,
+        1016,
+        3012,
+        2002,
+        3017,
+        3007,
+        302,
+        3022,
+        101,
+        1002,
+        3002,
+        3032,
+        3027,
+        3003,
+        3038,
+        3008,
+        3013,
+        3018,
+        3023,
+        3033,
+        3028,
+        1003,
+        2003,
+        1010,
+        102,
+        1017,
+        303,
+        3014,
+        3029,
+        3024,
+        1004,
+        3019,
+        1011,
+        304,
+        3034,
+        3009,
+        1018,
+        2004,
+        3039,
+        3004,
+        1005,
+        3035,
+        305,
+        3030,
+        3040,
+        3025,
+        2005,
+        3020,
+        1012,
+        3015,
+        3010,
+        3005,
+        306,
+        1013,
+        307,
+        1014,
+        308,
+        1,
+        200,
+        300
+    ],
+    "code": 0
+}
+</code></pre></table></div><h2>6.2、Assign menus to a role</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Replaces the set of menus assigned to a role (full sync — omitted/empty <code>menu_ids</code> clears the assignment). Requires the <code>system:permission:assign-role-menu</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/permissions/assign-role-menu</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "role_id": "1",
+    "menu_ids": [
+        1,
+        200000
+    ]
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">role_id</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Role id.</td>
+</tr>
+<tr>
+<td style="text-align: left;">menu_ids</td>
+<td style="text-align: left;">否</td>
+<td>array</td>
+<td>Menu ids to assign (full sync). Omit or send empty to clear.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td>Business code (0 = success).</td>
+</tr>
+</tbody>
+</table></div><h2>6.3、Assign data scope to a role</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Sets the data-scope (data-level permission) for a role, optionally with a custom set of department ids. Requires the <code>system:permission:assign-role-data-scope</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/permissions/assign-role-data-scope</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "role_id": "4",
+    "data_scope": "2",
+    "data_scope_dept_ids": [
+        1,
+        2
+    ]
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">role_id</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Role id.</td>
+</tr>
+<tr>
+<td style="text-align: left;">data_scope</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>Data scope (1 = All, 2 = DeptCustom, 3 = DeptOnly, 4 = DeptAndChild, 5 = Self).</td>
+</tr>
+<tr>
+<td style="text-align: left;">data_scope_dept_ids</td>
+<td style="text-align: left;">否</td>
+<td>array</td>
+<td>Custom department ids. Required only when <code>data_scope</code> is <code>2</code> (DeptCustom).</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td>Business code (0 = success).</td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "Built-in system roles cannot be modified or deleted",
+    "code": 1
+}
+</code></pre></table></div><h2>6.4、Get role ids assigned to a user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Returns the list of role ids assigned to the given user. Requires the <code>system:permission:assign-user-role</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/permissions/user-roles</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>get</li>
+</ul>
+<h5>请求Query参数</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">示例值</th>
+<th>必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">userId</td>
+<td style="text-align: left;">4</td>
+<td>是</td>
+<td>string</td>
+<td>User id.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "data": [
+        1,
+        2
+    ],
+    "code": 0
+}
+</code></pre></table></div><h2>6.5、Assign roles to a user</h2><div style="margin-left:20px;"><h5>简要描述</h5>
+<ul>
+<li>Replaces the set of roles assigned to a user (full sync — omitted/empty <code>role_ids</code> clears the assignment). Requires the <code>system:permission:assign-user-role</code> permission.</li>
+</ul>
+<h5>请求URL</h5>
+<ul>
+<li><code>{{host}}/api/v1/user-center/permissions/assign-user-role</code> </li>
+</ul>
+<h5>请求方式</h5>
+<ul>
+<li>post</li>
+</ul>
+<h5>请求参数示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "user_id": "40",
+    "role_ids": [
+        1,
+        2
+    ]
+}
+</code></pre></table>
+<h5>json字段说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">字段名</th>
+<th style="text-align: left;">必选</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">user_id</td>
+<td style="text-align: left;">是</td>
+<td>integer</td>
+<td>User id.</td>
+</tr>
+<tr>
+<td style="text-align: left;">role_ids</td>
+<td style="text-align: left;">否</td>
+<td>array</td>
+<td>Role ids to assign (full sync). Omit or send empty to clear.</td>
+</tr>
+</tbody>
+</table>
+<h5>成功返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": true,
+    "code": 0
+}
+</code></pre></table>
+<h5>成功返回示例的参数说明</h5>
+<table>
+<thead><tr style='background-color: rgb(0, 136, 204); color: rgb(255, 255, 255);'>
+<th style="text-align: left;">参数名</th>
+<th style="text-align: left;">类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">success</td>
+<td style="text-align: left;">boolean</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">code</td>
+<td style="text-align: left;">integer</td>
+<td>Business code (0 = success).</td>
+</tr>
+</tbody>
+</table>
+<h5>失败返回示例</h5>
+<table width='100%' class='codestyle'><pre><code>{
+    "success": false,
+    "message": "User does not exist",
+    "code": 1
+}
+</code></pre></table></div></div></body></html>

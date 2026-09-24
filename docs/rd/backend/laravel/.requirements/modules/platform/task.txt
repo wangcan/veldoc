@@ -1,0 +1,20 @@
+所有功能归到第三方平台模块Platform；
+第三方平台模块使用MySQL类型的数据库job_platform；
+
+需求1：
+1. 用nwidart/laravel-modules新增一个第三方平台模块模块 Platform。
+2. 接入第三方支付，微信支付、支付宝支付、苹果支付；
+3. 接入微信公众号、微信小程序、淘宝小程序、抖音小程序；
+4. 自行选择最优的sdk引入系统；
+5. 完成模块所需的数据表结构；
+
+忽略以下所有需求描述
+
+需求2：
+1. 新增一个人物数据表table；table数据表有一个唯一标识一个人物的code字段，其他字段由ai自主设计；
+2. 可以通过后台管理维护人物，对人物记录的操作写入项目后台操作菜单表： 数据库 job_passport 表 system_menu；
+3. 可以通过excel批量导入人物；
+4. 后台基于人物的相关菜单操作，完成对人物的管理维护；
+
+需求3：
+为platform模块的所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/modules/platform/api.json

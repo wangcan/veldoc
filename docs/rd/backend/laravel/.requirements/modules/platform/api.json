@@ -1,0 +1,1982 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Platform 模块 API",
+    "version": "1.0.0",
+    "description": "Platform 第三方平台对接模块接口文档。\n\n涵盖：第三方支付（微信支付 / 支付宝 / Apple Pay）的渠道配置、下单、关单、查询、退款与异步回调；微信公众号、微信小程序、淘宝小程序、抖音小程序的完整业务调用；以及平台应用、平台用户绑定、支付/消息日志的管理接口。\n\n## 鉴权\n除支付异步回调 `POST /payments/notify/{provider}` 为公开接口（第三方服务器调用，无鉴权）外，所有接口均需在请求头携带 JWT Bearer Token：`Authorization: Bearer <token>`。\n\n## 统一响应契约\n全局 `NormalizeApiResponse` 中间件对所有 JSON 响应统一处理：\n- 注入业务码 `code`：`0` 表示成功（原 HTTP 2xx），`1` 表示失败（原 4xx/5xx）。\n- 归一化 HTTP 状态：200/401/404/500 保留；201/400/422 折叠为 200；其余 5xx 折叠为 500。\n\n因此成功响应统一为 `{success:true, data:<...>, code:0}`；业务错误统一为 `{success:false, message:\"...\", code:1}`（HTTP 200）；校验错误为 `{message:\"...\", errors:{...}, code:1}`（HTTP 200，无 success 键）；未找到为 `{success:false, message:\"...\", code:1}`（HTTP 404）。\n\n## 异步回调特例\n`POST /payments/notify/{provider}` 显式 opt-out 归一化，返回固定 ACK 契约（`{\"code\":\"SUCCESS\"}` / `{\"code\":\"FAIL\"}`），不套用上述统一信封。"
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "相对地址，拼接实际部署域名"
+    }
+  ],
+  "tags": [
+    { "name": "支付渠道配置", "description": "支付渠道（商户）配置管理" },
+    { "name": "支付下单", "description": "发起支付、关单、向第三方查询订单" },
+    { "name": "支付订单管理", "description": "支付订单管理视图（列表/详情）" },
+    { "name": "退款", "description": "发起退款、退款详情、向第三方查询退款" },
+    { "name": "支付日志", "description": "支付交互/回调日志查询" },
+    { "name": "异步回调", "description": "第三方支付异步通知（公开，无鉴权）" },
+    { "name": "平台应用", "description": "第三方平台应用配置管理" },
+    { "name": "平台用户绑定", "description": "平台用户（openid/unionid）与系统用户的绑定" },
+    { "name": "平台消息日志", "description": "公众号/小程序消息日志查询" },
+    { "name": "微信公众号", "description": "微信公众号业务调用（菜单/模板/粉丝/二维码/客服/JSSDK）" },
+    { "name": "微信小程序", "description": "微信小程序业务调用（登录/手机号/订阅/客服/小程序码/内容安全）" },
+    { "name": "淘宝小程序", "description": "淘宝小程序业务调用（登录/token/受控代理）" },
+    { "name": "抖音小程序", "description": "抖音小程序业务调用（登录/token/受控代理）" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Bearer Token，请求头：Authorization: Bearer <token>"
+      }
+    },
+    "parameters": {
+      "PerPage": {
+        "name": "per_page",
+        "in": "query",
+        "description": "每页条数，默认 15，上限受 platform.max_per_page（默认 100）限制",
+        "required": false,
+        "schema": { "type": "integer", "minimum": 1, "default": 15 }
+      },
+      "Page": {
+        "name": "page",
+        "in": "query",
+        "description": "页码，从 1 开始",
+        "required": false,
+        "schema": { "type": "integer", "minimum": 1, "default": 1 }
+      },
+      "IdPath": {
+        "name": "id",
+        "in": "path",
+        "description": "记录主键 ID",
+        "required": true,
+        "schema": { "type": "integer" }
+      },
+      "AppPath": {
+        "name": "app",
+        "in": "path",
+        "description": "平台应用 platform_apps.id（路由模型绑定）",
+        "required": true,
+        "schema": { "type": "integer" }
+      },
+      "ProviderPath": {
+        "name": "provider",
+        "in": "path",
+        "description": "支付提供方",
+        "required": true,
+        "schema": { "type": "string", "enum": ["wechatpay", "alipay", "applepay"] }
+      },
+      "OpenidPath": {
+        "name": "openid",
+        "in": "path",
+        "description": "微信用户 openid",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "未认证（缺少/无效 JWT）",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/UnauthorizedResponse" },
+            "example": { "message": "Unauthenticated.", "code": 1 }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "PaginationLink": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "nullable": true },
+          "label": { "type": "string" },
+          "active": { "type": "boolean" }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "data": { "type": "object", "description": "业务数据载荷（具体结构见各接口）" },
+          "code": { "type": "integer", "example": 0, "description": "业务码：0=成功" }
+        },
+        "required": ["success", "code"]
+      },
+      "SuccessNoDataResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "code": { "type": "integer", "example": 0 }
+        },
+        "required": ["success", "code"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "编码已存在" },
+          "code": { "type": "integer", "example": 1, "description": "业务码：1=失败" }
+        },
+        "required": ["success", "message", "code"]
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "The given data was invalid." },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "description": "字段级校验错误信息"
+          },
+          "code": { "type": "integer", "example": 1 }
+        },
+        "required": ["message", "errors", "code"]
+      },
+      "UnauthorizedResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "Unauthenticated." },
+          "code": { "type": "integer", "example": 1 }
+        },
+        "required": ["message", "code"]
+      },
+      "NotifyAck": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "example": "SUCCESS", "description": "固定 ACK 标识" },
+          "message": { "type": "string", "example": "成功" }
+        },
+        "required": ["code", "message"]
+      },
+      "NotifyFail": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "example": "FAIL" },
+          "message": { "type": "string", "example": "回调处理失败" }
+        },
+        "required": ["code", "message"]
+      },
+      "PaymentChannel": {
+        "type": "object",
+        "description": "支付渠道资源",
+        "properties": {
+          "id": { "type": "integer" },
+          "code": { "type": "string", "description": "渠道编码（业务唯一）", "example": "WX-PAY-001" },
+          "name": { "type": "string", "example": "微信支付主商户" },
+          "provider": { "$ref": "#/components/schemas/PaymentProvider" },
+          "providerLabel": { "type": "string", "example": "微信支付" },
+          "config": { "type": "object", "nullable": true, "description": "商户配置（mch_id/证书路径等，敏感）" },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "sort": { "type": "integer" },
+          "remarks": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["id", "code", "name", "provider", "status"]
+      },
+      "PaymentChannelSimple": {
+        "type": "object",
+        "description": "支付渠道精简项（下拉用）",
+        "properties": {
+          "id": { "type": "integer" },
+          "code": { "type": "string" },
+          "name": { "type": "string" },
+          "provider": { "$ref": "#/components/schemas/PaymentProvider" },
+          "status": { "$ref": "#/components/schemas/CommonStatus" }
+        },
+        "required": ["id", "code", "name"]
+      },
+      "PaymentChannelCreateRequest": {
+        "type": "object",
+        "required": ["code", "name", "provider"],
+        "properties": {
+          "code": { "type": "string", "maxLength": 64, "example": "WX-PAY-001" },
+          "name": { "type": "string", "maxLength": 100, "example": "微信支付主商户" },
+          "provider": { "$ref": "#/components/schemas/PaymentProvider" },
+          "config": { "type": "object", "nullable": true, "description": "商户配置" },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "sort": { "type": "integer", "nullable": true },
+          "remarks": { "type": "string", "maxLength": 255, "nullable": true }
+        }
+      },
+      "PaymentChannelUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "maxLength": 64 },
+          "name": { "type": "string", "maxLength": 100 },
+          "provider": { "$ref": "#/components/schemas/PaymentProvider" },
+          "config": { "type": "object", "nullable": true },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "sort": { "type": "integer", "nullable": true },
+          "remarks": { "type": "string", "maxLength": 255, "nullable": true }
+        }
+      },
+      "PaymentOrder": {
+        "type": "object",
+        "description": "支付订单资源",
+        "properties": {
+          "id": { "type": "integer" },
+          "orderNo": { "type": "string", "description": "业务订单号（系统生成，唯一）", "example": "PF202609171200001234" },
+          "channelId": { "type": "integer", "nullable": true },
+          "provider": { "$ref": "#/components/schemas/PaymentProvider" },
+          "providerLabel": { "type": "string", "example": "微信支付" },
+          "outTradeNo": { "type": "string", "nullable": true, "description": "商户原单号" },
+          "subject": { "type": "string", "example": "测试订单" },
+          "body": { "type": "string", "nullable": true },
+          "amountTotal": { "type": "integer", "description": "金额（分）", "example": 9900 },
+          "currency": { "type": "string", "nullable": true, "example": "CNY" },
+          "payerOpenid": { "type": "string", "nullable": true },
+          "payerUid": { "type": "string", "nullable": true },
+          "status": { "$ref": "#/components/schemas/PaymentStatus" },
+          "statusLabel": { "type": "string", "example": "待支付" },
+          "paidAt": { "type": "string", "format": "date-time", "nullable": true },
+          "transactionId": { "type": "string", "nullable": true, "description": "第三方流水号" },
+          "prepayId": { "type": "string", "nullable": true },
+          "raw": { "type": "object", "nullable": true, "description": "回调/预支付原文" },
+          "expiresAt": { "type": "string", "format": "date-time", "nullable": true },
+          "remark": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["id", "orderNo", "provider", "subject", "amountTotal", "status"]
+      },
+      "PaymentOrderSimple": {
+        "type": "object",
+        "description": "支付订单精简项",
+        "properties": {
+          "id": { "type": "integer" },
+          "order_no": { "type": "string" },
+          "subject": { "type": "string" },
+          "amount_total": { "type": "integer" },
+          "status": { "$ref": "#/components/schemas/PaymentStatus" },
+          "provider": { "$ref": "#/components/schemas/PaymentProvider" }
+        },
+        "required": ["id", "order_no"]
+      },
+      "PaymentOrderCreateRequest": {
+        "type": "object",
+        "required": ["provider", "subject", "amount_total"],
+        "properties": {
+          "channel_id": { "type": "integer", "nullable": true },
+          "provider": { "$ref": "#/components/schemas/PaymentProvider" },
+          "out_trade_no": { "type": "string", "maxLength": 64, "nullable": true },
+          "subject": { "type": "string", "maxLength": 200, "example": "测试订单" },
+          "body": { "type": "string", "maxLength": 500, "nullable": true },
+          "amount_total": { "type": "integer", "minimum": 1, "description": "金额（分）", "example": 9900 },
+          "currency": { "type": "string", "maxLength": 8, "nullable": true },
+          "payer_openid": { "type": "string", "maxLength": 128, "nullable": true },
+          "payer_uid": { "type": "string", "maxLength": 128, "nullable": true },
+          "pay_scene": { "type": "string", "enum": ["mp", "mini", "h5", "scan", "web", "wap", "app"], "nullable": true, "description": "支付场景（决定调用哪个支付快捷方式）" },
+          "remark": { "type": "string", "maxLength": 255, "nullable": true }
+        }
+      },
+      "PaymentOrderCreateResponse": {
+        "type": "object",
+        "description": "下单响应数据",
+        "properties": {
+          "order": { "$ref": "#/components/schemas/PaymentOrder" },
+          "pay": { "type": "object", "description": "第三方预支付参数（如 prepay_id/sign/timeStamp 等，随 provider 与场景变化）", "example": { "prepay_id": "wx_prepay_123", "sign": "abc" } }
+        },
+        "required": ["order", "pay"]
+      },
+      "PaymentQueryResponse": {
+        "type": "object",
+        "properties": {
+          "order": { "$ref": "#/components/schemas/PaymentOrder" },
+          "remote": { "type": "object", "description": "第三方查询返回原文" }
+        },
+        "required": ["order", "remote"]
+      },
+      "Refund": {
+        "type": "object",
+        "description": "退款资源",
+        "properties": {
+          "id": { "type": "integer" },
+          "orderId": { "type": "integer" },
+          "refundNo": { "type": "string", "description": "退款单号（系统生成，唯一）", "example": "RF202609171200001234" },
+          "outRefundNo": { "type": "string", "nullable": true },
+          "amountTotal": { "type": "integer", "description": "原订单金额（分）" },
+          "amountRefund": { "type": "integer", "description": "退款金额（分）", "example": 9900 },
+          "reason": { "type": "string", "nullable": true },
+          "status": { "$ref": "#/components/schemas/RefundStatus" },
+          "statusLabel": { "type": "string", "example": "退款中" },
+          "refundedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "raw": { "type": "object", "nullable": true, "description": "退款回调原文" },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["id", "orderId", "refundNo", "amountRefund", "status"]
+      },
+      "RefundCreateRequest": {
+        "type": "object",
+        "required": ["order_id", "amount_refund"],
+        "properties": {
+          "order_id": { "type": "integer", "description": "待退款的支付订单 ID" },
+          "amount_refund": { "type": "integer", "minimum": 1, "description": "退款金额（分）", "example": 9900 },
+          "reason": { "type": "string", "maxLength": 255, "nullable": true }
+        }
+      },
+      "RefundQueryResponse": {
+        "type": "object",
+        "properties": {
+          "refund": { "$ref": "#/components/schemas/Refund" },
+          "remote": { "type": "object", "description": "第三方退款查询返回原文" }
+        },
+        "required": ["refund", "remote"]
+      },
+      "PaymentLog": {
+        "type": "object",
+        "description": "支付日志资源",
+        "properties": {
+          "id": { "type": "integer" },
+          "orderId": { "type": "integer", "nullable": true },
+          "channelId": { "type": "integer", "nullable": true },
+          "provider": { "$ref": "#/components/schemas/PaymentProvider" },
+          "event": { "$ref": "#/components/schemas/PaymentLogEvent" },
+          "direction": { "type": "string", "description": "方向（值为枚举，此处直接输出枚举值）", "enum": ["in", "out"] },
+          "payload": { "type": "object", "nullable": true },
+          "result": { "type": "object", "nullable": true },
+          "ip": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["id", "provider", "event"]
+      },
+      "PlatformApp": {
+        "type": "object",
+        "description": "平台应用资源（app_secret 加密存储，响应仅返回掩码，不暴露明文）",
+        "properties": {
+          "id": { "type": "integer" },
+          "code": { "type": "string", "description": "应用编码（业务唯一）", "example": "WX-MP-001" },
+          "name": { "type": "string", "example": "微信小程序主应用" },
+          "platform": { "$ref": "#/components/schemas/PlatformType" },
+          "platformLabel": { "type": "string", "example": "微信小程序" },
+          "appId": { "type": "string", "description": "第三方应用 ID", "example": "wx1234567890abcdef" },
+          "appSecretSet": { "type": "boolean", "description": "是否已设置 app_secret" },
+          "appSecretMasked": { "type": "string", "nullable": true, "description": "app_secret 掩码（已设置时为 '******'，未设置为 null）", "example": "******" },
+          "token": { "type": "string", "nullable": true, "description": "消息校验 token" },
+          "aesKey": { "type": "string", "nullable": true, "description": "消息加解密密钥掩码（已设置时为 '******'）" },
+          "rawConfig": { "type": "object", "nullable": true },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "sort": { "type": "integer" },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["id", "code", "name", "platform", "appId", "appSecretSet"]
+      },
+      "PlatformAppSimple": {
+        "type": "object",
+        "description": "平台应用精简项",
+        "properties": {
+          "id": { "type": "integer" },
+          "code": { "type": "string" },
+          "name": { "type": "string" },
+          "platform": { "$ref": "#/components/schemas/PlatformType" },
+          "app_id": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/CommonStatus" }
+        },
+        "required": ["id", "code", "name"]
+      },
+      "PlatformAppCreateRequest": {
+        "type": "object",
+        "required": ["code", "name", "platform", "app_id"],
+        "properties": {
+          "code": { "type": "string", "maxLength": 64, "example": "WX-MP-001" },
+          "name": { "type": "string", "maxLength": 100 },
+          "platform": { "$ref": "#/components/schemas/PlatformType" },
+          "app_id": { "type": "string", "maxLength": 128, "example": "wx1234567890abcdef" },
+          "app_secret": { "type": "string", "maxLength": 255, "nullable": true, "description": "应用密钥（提交明文，服务端 encrypted cast 加密存储）" },
+          "token": { "type": "string", "maxLength": 128, "nullable": true },
+          "aes_key": { "type": "string", "maxLength": 255, "nullable": true },
+          "raw_config": { "type": "object", "nullable": true },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "sort": { "type": "integer", "nullable": true }
+        }
+      },
+      "PlatformAppUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "maxLength": 64 },
+          "name": { "type": "string", "maxLength": 100 },
+          "platform": { "$ref": "#/components/schemas/PlatformType" },
+          "app_id": { "type": "string", "maxLength": 128 },
+          "app_secret": { "type": "string", "maxLength": 255, "nullable": true },
+          "token": { "type": "string", "maxLength": 128, "nullable": true },
+          "aes_key": { "type": "string", "maxLength": 255, "nullable": true },
+          "raw_config": { "type": "object", "nullable": true },
+          "status": { "$ref": "#/components/schemas/CommonStatus" },
+          "sort": { "type": "integer", "nullable": true }
+        }
+      },
+      "PlatformAppUser": {
+        "type": "object",
+        "description": "平台用户绑定资源",
+        "properties": {
+          "id": { "type": "integer" },
+          "appId": { "type": "integer" },
+          "platform": { "$ref": "#/components/schemas/PlatformType" },
+          "openid": { "type": "string" },
+          "unionid": { "type": "string", "nullable": true },
+          "userId": { "type": "integer", "nullable": true, "description": "绑定的系统 User ID" },
+          "nickname": { "type": "string", "nullable": true },
+          "avatar": { "type": "string", "nullable": true },
+          "mobile": { "type": "string", "nullable": true },
+          "raw": { "type": "object", "nullable": true },
+          "subscribed": { "type": "boolean" },
+          "subscribedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "lastActiveAt": { "type": "string", "format": "date-time", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["id", "appId", "openid"]
+      },
+      "PlatformAppUserSimple": {
+        "type": "object",
+        "description": "平台用户精简项",
+        "properties": {
+          "id": { "type": "integer" },
+          "app_id": { "type": "integer" },
+          "openid": { "type": "string" },
+          "unionid": { "type": "string", "nullable": true },
+          "nickname": { "type": "string", "nullable": true },
+          "platform": { "$ref": "#/components/schemas/PlatformType" }
+        },
+        "required": ["id", "app_id", "openid"]
+      },
+      "PlatformAppUserCreateRequest": {
+        "type": "object",
+        "required": ["app_id", "openid"],
+        "properties": {
+          "app_id": { "type": "integer" },
+          "platform": { "$ref": "#/components/schemas/PlatformType" },
+          "openid": { "type": "string", "maxLength": 128 },
+          "unionid": { "type": "string", "maxLength": 128, "nullable": true },
+          "session_key": { "type": "string", "maxLength": 255, "nullable": true },
+          "user_id": { "type": "integer", "nullable": true },
+          "nickname": { "type": "string", "maxLength": 100, "nullable": true },
+          "avatar": { "type": "string", "maxLength": 500, "nullable": true },
+          "mobile": { "type": "string", "maxLength": 20, "nullable": true },
+          "raw": { "type": "object", "nullable": true },
+          "subscribed": { "type": "boolean", "nullable": true }
+        }
+      },
+      "PlatformAppUserUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "app_id": { "type": "integer" },
+          "platform": { "$ref": "#/components/schemas/PlatformType" },
+          "openid": { "type": "string", "maxLength": 128 },
+          "unionid": { "type": "string", "maxLength": 128, "nullable": true },
+          "session_key": { "type": "string", "maxLength": 255, "nullable": true },
+          "user_id": { "type": "integer", "nullable": true },
+          "nickname": { "type": "string", "maxLength": 100, "nullable": true },
+          "avatar": { "type": "string", "maxLength": 500, "nullable": true },
+          "mobile": { "type": "string", "maxLength": 20, "nullable": true },
+          "raw": { "type": "object", "nullable": true },
+          "subscribed": { "type": "boolean", "nullable": true }
+        }
+      },
+      "PlatformMessageLog": {
+        "type": "object",
+        "description": "平台消息日志资源",
+        "properties": {
+          "id": { "type": "integer" },
+          "appId": { "type": "integer" },
+          "platform": { "$ref": "#/components/schemas/PlatformType" },
+          "msgId": { "type": "string", "nullable": true },
+          "msgType": { "$ref": "#/components/schemas/MessageType" },
+          "fromUser": { "type": "string", "nullable": true },
+          "toUser": { "type": "string", "nullable": true },
+          "content": { "type": "string", "nullable": true },
+          "event": { "type": "string", "nullable": true },
+          "raw": { "type": "object", "nullable": true },
+          "direction": { "$ref": "#/components/schemas/MessageDirection" },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["id", "appId", "msgType", "direction"]
+      },
+      "PaginatedPaymentChannels": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PaginationEnvelope" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "array", "items": { "$ref": "#/components/schemas/PaymentChannel" } }
+            }
+          }
+        ]
+      },
+      "PaginatedPaymentOrders": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PaginationEnvelope" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "array", "items": { "$ref": "#/components/schemas/PaymentOrder" } }
+            }
+          }
+        ]
+      },
+      "PaginatedPaymentLogs": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PaginationEnvelope" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "array", "items": { "$ref": "#/components/schemas/PaymentLog" } }
+            }
+          }
+        ]
+      },
+      "PaginatedPlatformApps": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PaginationEnvelope" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "array", "items": { "$ref": "#/components/schemas/PlatformApp" } }
+            }
+          }
+        ]
+      },
+      "PaginatedPlatformAppUsers": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PaginationEnvelope" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "array", "items": { "$ref": "#/components/schemas/PlatformAppUser" } }
+            }
+          }
+        ]
+      },
+      "PaginatedPlatformMessageLogs": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PaginationEnvelope" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "array", "items": { "$ref": "#/components/schemas/PlatformMessageLog" } }
+            }
+          }
+        ]
+      },
+      "PaginationEnvelope": {
+        "type": "object",
+        "description": "Laravel LengthAwarePaginator 分页结构（作为 data 字段嵌入统一信封）",
+        "properties": {
+          "current_page": { "type": "integer" },
+          "last_page": { "type": "integer" },
+          "per_page": { "type": "integer" },
+          "total": { "type": "integer" },
+          "from": { "type": "integer", "nullable": true },
+          "to": { "type": "integer", "nullable": true },
+          "first_page_url": { "type": "string", "nullable": true },
+          "last_page_url": { "type": "string", "nullable": true },
+          "next_page_url": { "type": "string", "nullable": true },
+          "prev_page_url": { "type": "string", "nullable": true },
+          "path": { "type": "string" },
+          "links": { "type": "array", "items": { "$ref": "#/components/schemas/PaginationLink" } }
+        },
+        "required": ["current_page", "last_page", "per_page", "total"]
+      },
+      "WechatMenuSyncRequest": {
+        "type": "object",
+        "required": ["buttons"],
+        "properties": {
+          "buttons": {
+            "type": "array",
+            "description": "自定义菜单按钮结构（按微信公众号菜单协议）",
+            "items": { "type": "object" }
+          }
+        }
+      },
+      "WechatTemplateSendRequest": {
+        "type": "object",
+        "required": ["openid", "template_id", "data"],
+        "properties": {
+          "openid": { "type": "string", "maxLength": 128 },
+          "template_id": { "type": "string", "maxLength": 100 },
+          "data": { "type": "object", "description": "模板变量键值" },
+          "url": { "type": "string", "maxLength": 500, "nullable": true },
+          "miniprogram": { "type": "string", "maxLength": 100, "nullable": true, "description": "跳转小程序appid" }
+        }
+      },
+      "WechatQrcodeRequest": {
+        "type": "object",
+        "required": ["scene"],
+        "properties": {
+          "scene": { "type": "string", "maxLength": 64, "description": "场景值" },
+          "expire_seconds": { "type": "integer", "minimum": 0, "nullable": true, "description": "临时二维码过期秒数；为 0/缺省为永久二维码" }
+        }
+      },
+      "WechatCustomerServiceRequest": {
+        "type": "object",
+        "required": ["openid", "message"],
+        "properties": {
+          "openid": { "type": "string", "maxLength": 128 },
+          "message": { "type": "object", "description": "客服消息体（按微信协议）" }
+        }
+      },
+      "WechatJsSdkConfigRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": { "type": "string", "maxLength": 500, "description": "需要签名的页面 URL" }
+        }
+      },
+      "WechatCode2SessionRequest": {
+        "type": "object",
+        "required": ["code"],
+        "properties": {
+          "code": { "type": "string", "maxLength": 200, "description": "wx.login() 获取的临时登录凭证" }
+        }
+      },
+      "WechatCode2SessionResponse": {
+        "type": "object",
+        "description": "code2session 返回（透传微信）",
+        "properties": {
+          "openid": { "type": "string" },
+          "session_key": { "type": "string" },
+          "unionid": { "type": "string", "nullable": true }
+        }
+      },
+      "WechatPhoneNumberRequest": {
+        "type": "object",
+        "required": ["code"],
+        "properties": {
+          "code": { "type": "string", "maxLength": 200, "description": "getPhoneNumber 事件回调 code" }
+        }
+      },
+      "WechatSubscribeSendRequest": {
+        "type": "object",
+        "required": ["openid", "template_id", "data"],
+        "properties": {
+          "openid": { "type": "string", "maxLength": 128 },
+          "template_id": { "type": "string", "maxLength": 100 },
+          "data": { "type": "object" },
+          "page": { "type": "string", "maxLength": 200, "nullable": true }
+        }
+      },
+      "WechatMiniQrcodeRequest": {
+        "type": "object",
+        "required": ["scene", "page"],
+        "properties": {
+          "scene": { "type": "string", "maxLength": 64 },
+          "page": { "type": "string", "maxLength": 100 },
+          "width": { "type": "integer", "minimum": 280, "maximum": 1280, "nullable": true, "description": "默认 430" }
+        }
+      },
+      "WechatMsgSecCheckRequest": {
+        "type": "object",
+        "required": ["content", "openid"],
+        "properties": {
+          "content": { "type": "string", "maxLength": 2000 },
+          "openid": { "type": "string", "maxLength": 128 }
+        }
+      },
+      "MiniLoginRequest": {
+        "type": "object",
+        "required": ["code"],
+        "properties": {
+          "code": { "type": "string", "maxLength": 200, "description": "小程序登录凭证" }
+        }
+      },
+      "OpenApiProxyRequest": {
+        "type": "object",
+        "required": ["method"],
+        "properties": {
+          "method": { "type": "string", "maxLength": 100, "description": "开放平台 API 方法名" },
+          "params": { "type": "object", "nullable": true, "description": "API 入参" }
+        }
+      },
+      "PaymentProvider": {
+        "type": "string",
+        "enum": ["wechatpay", "alipay", "applepay"],
+        "description": "支付提供方"
+      },
+      "PaymentStatus": {
+        "type": "string",
+        "enum": ["pending", "paid", "closed", "refunded", "failed"],
+        "description": "支付订单状态"
+      },
+      "RefundStatus": {
+        "type": "string",
+        "enum": ["pending", "success", "closed", "failed"],
+        "description": "退款状态"
+      },
+      "PaymentLogEvent": {
+        "type": "string",
+        "enum": ["callback", "notify", "query", "refund_callback"],
+        "description": "支付日志事件"
+      },
+      "PlatformType": {
+        "type": "string",
+        "enum": ["wechat_official_account", "wechat_mini_program", "taobao_mini_program", "douyin_mini_program"],
+        "description": "第三方平台类型"
+      },
+      "MessageDirection": {
+        "type": "string",
+        "enum": ["in", "out"],
+        "description": "消息方向"
+      },
+      "MessageType": {
+        "type": "string",
+        "enum": ["text", "image", "event", "news", "video", "voice", "link"],
+        "description": "消息类型"
+      },
+      "CommonStatus": {
+        "type": "string",
+        "enum": ["enabled", "disabled"],
+        "description": "通用启停状态"
+      }
+    }
+  },
+  "paths": {
+    "/v1/platform/payments/notify/{provider}": {
+      "post": {
+        "tags": ["异步回调"],
+        "summary": "第三方支付异步回调",
+        "description": "第三方支付平台（微信支付/支付宝/Apple Pay）异步通知入口。**公开接口，无需鉴权**。控制器验签 → 落库 → 回 ACK。\n\n本接口 opt-out 归一化中间件，返回**固定 ACK 契约**（不套用统一 success/code 信封）：成功 `{\"code\":\"SUCCESS\",\"message\":\"成功\"}`；业务失败 `{\"code\":\"FAIL\",\"message\":\"<原因>\"}`（HTTP 400）；服务器错误 `{\"code\":\"FAIL\",\"message\":\"回调处理失败\"}`（HTTP 500）。",
+        "operationId": "paymentNotify",
+        "security": [],
+        "parameters": [
+          { "$ref": "#/components/parameters/ProviderPath" }
+        ],
+        "requestBody": {
+          "description": "第三方回调报文（结构随 provider 变化，整体作为 payload 落库）",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "additionalProperties": true, "description": "第三方回调原始报文" },
+              "example": { "out_trade_no": "PF202609171200001234", "transaction_id": "wx_txn_001", "trade_state": "SUCCESS" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "处理成功 ACK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NotifyAck" } } }
+          },
+          "400": {
+            "description": "业务失败 ACK（如验签失败/订单不存在）",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NotifyFail" } } }
+          },
+          "500": {
+            "description": "服务器错误 ACK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NotifyFail" } } }
+          }
+        }
+      }
+    },
+    "/v1/platform/payment-channels": {
+      "get": {
+        "tags": ["支付渠道配置"],
+        "summary": "支付渠道分页列表",
+        "operationId": "paymentChannelsIndex",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "code", "in": "query", "schema": { "type": "string" } },
+          { "name": "name", "in": "query", "schema": { "type": "string" } },
+          { "name": "provider", "in": "query", "schema": { "$ref": "#/components/schemas/PaymentProvider" } },
+          { "name": "status", "in": "query", "schema": { "$ref": "#/components/schemas/CommonStatus" } },
+          { "$ref": "#/components/parameters/PerPage" },
+          { "$ref": "#/components/parameters/Page" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaginatedPaymentChannels" } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["支付渠道配置"],
+        "summary": "新建支付渠道",
+        "description": "成功返回渠道资源（原 201 经归一化为 200）。code 重复等业务冲突返回 `{success:false, message, code:1}`（HTTP 200）。",
+        "operationId": "paymentChannelsStore",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaymentChannelCreateRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "创建成功（或业务冲突，见 data/success 区分）",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaymentChannel" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败（经归一化为 HTTP 200、code 1，响应体为 ValidationError）",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/payment-channels/simple-list": {
+      "get": {
+        "tags": ["支付渠道配置"],
+        "summary": "支付渠道精简列表（下拉用）",
+        "operationId": "paymentChannelsSimpleList",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/PaymentChannelSimple" } } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/payment-channels/{id}": {
+      "get": {
+        "tags": ["支付渠道配置"],
+        "summary": "支付渠道详情",
+        "operationId": "paymentChannelsShow",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaymentChannel" } } }
+            ] } } }
+          },
+          "404": {
+            "description": "渠道不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "put": {
+        "tags": ["支付渠道配置"],
+        "summary": "修改支付渠道",
+        "operationId": "paymentChannelsUpdate",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaymentChannelUpdateRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "修改成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaymentChannel" } } }
+            ] } } }
+          },
+          "404": {
+            "description": "渠道不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "delete": {
+        "tags": ["支付渠道配置"],
+        "summary": "删除支付渠道（软删除）",
+        "operationId": "paymentChannelsDestroy",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "responses": {
+          "200": {
+            "description": "删除成功",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessNoDataResponse" } } }
+          },
+          "404": {
+            "description": "渠道不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/payments/orders": {
+      "post": {
+        "tags": ["支付下单"],
+        "summary": "创建支付订单并发起支付",
+        "description": "生成业务订单号 → 落库 → 解析渠道 → 调起第三方支付，返回订单与预支付参数（原 201 经归一化为 200）。",
+        "operationId": "paymentCreateOrder",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaymentOrderCreateRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "下单成功（或业务/通道错误，见 success 区分）",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaymentOrderCreateResponse" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/payments/orders/{id}/close": {
+      "post": {
+        "tags": ["支付下单"],
+        "summary": "关闭订单",
+        "description": "先关闭本地订单，再向第三方发起关单（仅当订单绑定渠道时）。无请求体。",
+        "operationId": "paymentCloseOrder",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "responses": {
+          "200": {
+            "description": "关闭成功（或业务错误，见 success 区分）",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "$ref": "#/components/schemas/SuccessNoDataResponse" },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "404": {
+            "description": "订单不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/payments/orders/{id}/query": {
+      "get": {
+        "tags": ["支付下单"],
+        "summary": "向第三方主动查询订单状态",
+        "operationId": "paymentQueryOrder",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "responses": {
+          "200": {
+            "description": "查询成功（或通道错误，见 success 区分）",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaymentQueryResponse" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "404": {
+            "description": "订单不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/orders": {
+      "get": {
+        "tags": ["支付订单管理"],
+        "summary": "支付订单管理分页列表",
+        "operationId": "ordersIndex",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "order_no", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "$ref": "#/components/schemas/PaymentStatus" } },
+          { "name": "provider", "in": "query", "schema": { "$ref": "#/components/schemas/PaymentProvider" } },
+          { "name": "channel_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "keyword", "in": "query", "schema": { "type": "string" } },
+          { "$ref": "#/components/parameters/PerPage" },
+          { "$ref": "#/components/parameters/Page" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaginatedPaymentOrders" } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/orders/{id}": {
+      "get": {
+        "tags": ["支付订单管理"],
+        "summary": "支付订单详情",
+        "operationId": "ordersShow",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaymentOrder" } } }
+            ] } } }
+          },
+          "404": {
+            "description": "订单不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/refunds": {
+      "post": {
+        "tags": ["退款"],
+        "summary": "发起退款",
+        "description": "按订单发起退款，生成退款单并向第三方发起退款（仅当订单绑定渠道）。成功返回退款资源（原 201 归一化为 200）。",
+        "operationId": "refundsStore",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RefundCreateRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "退款发起成功（或业务/通道错误，见 success 区分）",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Refund" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/refunds/{id}": {
+      "get": {
+        "tags": ["退款"],
+        "summary": "退款详情",
+        "operationId": "refundsShow",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/Refund" } } }
+            ] } } }
+          },
+          "404": {
+            "description": "退款单不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/refunds/{id}/query": {
+      "get": {
+        "tags": ["退款"],
+        "summary": "向第三方查询退款状态",
+        "operationId": "refundsQuery",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "responses": {
+          "200": {
+            "description": "查询成功（或业务错误，见 success 区分）",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/RefundQueryResponse" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "404": {
+            "description": "退款单不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/payment-logs": {
+      "get": {
+        "tags": ["支付日志"],
+        "summary": "支付日志分页列表",
+        "operationId": "paymentLogsIndex",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "order_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "channel_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "provider", "in": "query", "schema": { "$ref": "#/components/schemas/PaymentProvider" } },
+          { "name": "event", "in": "query", "schema": { "$ref": "#/components/schemas/PaymentLogEvent" } },
+          { "$ref": "#/components/parameters/PerPage" },
+          { "$ref": "#/components/parameters/Page" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaginatedPaymentLogs" } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/apps": {
+      "get": {
+        "tags": ["平台应用"],
+        "summary": "平台应用分页列表",
+        "operationId": "appsIndex",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "code", "in": "query", "schema": { "type": "string" } },
+          { "name": "name", "in": "query", "schema": { "type": "string" } },
+          { "name": "platform", "in": "query", "schema": { "$ref": "#/components/schemas/PlatformType" } },
+          { "name": "status", "in": "query", "schema": { "$ref": "#/components/schemas/CommonStatus" } },
+          { "$ref": "#/components/parameters/PerPage" },
+          { "$ref": "#/components/parameters/Page" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaginatedPlatformApps" } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["平台应用"],
+        "summary": "新建平台应用",
+        "description": "app_secret 提交明文，服务端以 encrypted cast 加密存储；响应仅返回掩码。code 重复等业务冲突返回错误信封。",
+        "operationId": "appsStore",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlatformAppCreateRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "创建成功（或业务冲突，见 success 区分）",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PlatformApp" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/apps/simple-list": {
+      "get": {
+        "tags": ["平台应用"],
+        "summary": "平台应用精简列表（下拉用）",
+        "operationId": "appsSimpleList",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/PlatformAppSimple" } } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/apps/{app}": {
+      "get": {
+        "tags": ["平台应用"],
+        "summary": "平台应用详情",
+        "operationId": "appsShow",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PlatformApp" } } }
+            ] } } }
+          },
+          "404": {
+            "description": "应用不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "put": {
+        "tags": ["平台应用"],
+        "summary": "修改平台应用",
+        "operationId": "appsUpdate",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlatformAppUpdateRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "修改成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PlatformApp" } } }
+            ] } } }
+          },
+          "404": {
+            "description": "应用不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "delete": {
+        "tags": ["平台应用"],
+        "summary": "删除平台应用（软删除）",
+        "operationId": "appsDestroy",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "responses": {
+          "200": {
+            "description": "删除成功",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessNoDataResponse" } } }
+          },
+          "404": {
+            "description": "应用不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/app-users": {
+      "get": {
+        "tags": ["平台用户绑定"],
+        "summary": "平台用户绑定分页列表",
+        "operationId": "appUsersIndex",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "app_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "openid", "in": "query", "schema": { "type": "string" } },
+          { "name": "unionid", "in": "query", "schema": { "type": "string" } },
+          { "name": "platform", "in": "query", "schema": { "$ref": "#/components/schemas/PlatformType" } },
+          { "name": "user_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "keyword", "in": "query", "schema": { "type": "string" } },
+          { "$ref": "#/components/parameters/PerPage" },
+          { "$ref": "#/components/parameters/Page" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaginatedPlatformAppUsers" } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["平台用户绑定"],
+        "summary": "新建平台用户绑定",
+        "operationId": "appUsersStore",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlatformAppUserCreateRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "创建成功（或业务冲突，见 success 区分）",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PlatformAppUser" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/app-users/simple-list": {
+      "get": {
+        "tags": ["平台用户绑定"],
+        "summary": "平台用户精简列表（下拉用）",
+        "operationId": "appUsersSimpleList",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/PlatformAppUserSimple" } } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/app-users/{id}": {
+      "get": {
+        "tags": ["平台用户绑定"],
+        "summary": "平台用户绑定详情",
+        "operationId": "appUsersShow",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PlatformAppUser" } } }
+            ] } } }
+          },
+          "404": {
+            "description": "平台用户不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "put": {
+        "tags": ["平台用户绑定"],
+        "summary": "修改平台用户绑定",
+        "operationId": "appUsersUpdate",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlatformAppUserUpdateRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "修改成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PlatformAppUser" } } }
+            ] } } }
+          },
+          "404": {
+            "description": "平台用户不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "delete": {
+        "tags": ["平台用户绑定"],
+        "summary": "删除平台用户绑定（软删除）",
+        "operationId": "appUsersDestroy",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "responses": {
+          "200": {
+            "description": "删除成功",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SuccessNoDataResponse" } } }
+          },
+          "404": {
+            "description": "平台用户不存在",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/message-logs": {
+      "get": {
+        "tags": ["平台消息日志"],
+        "summary": "平台消息日志分页列表",
+        "operationId": "messageLogsIndex",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "app_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "platform", "in": "query", "schema": { "$ref": "#/components/schemas/PlatformType" } },
+          { "name": "msg_type", "in": "query", "schema": { "$ref": "#/components/schemas/MessageType" } },
+          { "name": "direction", "in": "query", "schema": { "$ref": "#/components/schemas/MessageDirection" } },
+          { "name": "from_user", "in": "query", "schema": { "type": "string" } },
+          { "$ref": "#/components/parameters/PerPage" },
+          { "$ref": "#/components/parameters/Page" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/PaginatedPlatformMessageLogs" } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/official-accounts/{app}/menu/sync": {
+      "post": {
+        "tags": ["微信公众号"],
+        "summary": "同步公众号自定义菜单",
+        "operationId": "wechatOaSyncMenu",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WechatMenuSyncRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 为微信返回结果。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object", "description": "微信接口返回" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/official-accounts/{app}/template/send": {
+      "post": {
+        "tags": ["微信公众号"],
+        "summary": "发送模板消息",
+        "operationId": "wechatOaSendTemplate",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WechatTemplateSendRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 为微信 msgid 等。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/official-accounts/{app}/users/{openid}": {
+      "get": {
+        "tags": ["微信公众号"],
+        "summary": "获取粉丝用户信息",
+        "operationId": "wechatOaUserInfo",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/AppPath" },
+          { "$ref": "#/components/parameters/OpenidPath" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 为微信用户信息（nickname/headimgurl/subscribe 等）。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/official-accounts/{app}/qrcode": {
+      "post": {
+        "tags": ["微信公众号"],
+        "summary": "创建带参数二维码",
+        "operationId": "wechatOaCreateQrcode",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WechatQrcodeRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 含 ticket/url 等。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/official-accounts/{app}/customer-service/send": {
+      "post": {
+        "tags": ["微信公众号"],
+        "summary": "发送客服消息",
+        "operationId": "wechatOaSendCustomerService",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WechatCustomerServiceRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/official-accounts/{app}/jssdk-config": {
+      "get": {
+        "tags": ["微信公众号"],
+        "summary": "生成 JSSDK 签名配置",
+        "operationId": "wechatOaJsSdkConfig",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/AppPath" },
+          { "name": "url", "in": "query", "required": true, "description": "需要签名的页面 URL", "schema": { "type": "string", "maxLength": 500 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 含 appId/timestamp/nonceStr/signature/jsApiList。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败（url 必填）",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/mini-programs/{app}/code2session": {
+      "post": {
+        "tags": ["微信小程序"],
+        "summary": "code 换 session（小程序登录）",
+        "operationId": "wechatMpCode2session",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WechatCode2SessionRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/WechatCode2SessionResponse" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/mini-programs/{app}/phone-number": {
+      "post": {
+        "tags": ["微信小程序"],
+        "summary": "获取手机号",
+        "operationId": "wechatMpPhoneNumber",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WechatPhoneNumberRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 含 phoneNumber 等。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/mini-programs/{app}/subscribe/send": {
+      "post": {
+        "tags": ["微信小程序"],
+        "summary": "发送订阅消息",
+        "operationId": "wechatMpSendSubscribe",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WechatSubscribeSendRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/mini-programs/{app}/customer-service/send": {
+      "post": {
+        "tags": ["微信小程序"],
+        "summary": "发送客服消息",
+        "operationId": "wechatMpSendCustomerService",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WechatCustomerServiceRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/mini-programs/{app}/qrcode": {
+      "post": {
+        "tags": ["微信小程序"],
+        "summary": "生成小程序码",
+        "operationId": "wechatMpCreateQrcode",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WechatMiniQrcodeRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 含小程序码图片二进制/base64 等。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/wechat/mini-programs/{app}/msg-sec-check": {
+      "post": {
+        "tags": ["微信小程序"],
+        "summary": "文本内容安全检测",
+        "operationId": "wechatMpMsgSecCheck",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WechatMsgSecCheckRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 含检测结果 suggest/label 等。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/taobao/mini-programs/{app}/login": {
+      "post": {
+        "tags": ["淘宝小程序"],
+        "summary": "淘宝小程序登录（code 换 session）",
+        "operationId": "taobaoMpLogin",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MiniLoginRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 含 access_token/open_id 等。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/taobao/mini-programs/{app}/token": {
+      "get": {
+        "tags": ["淘宝小程序"],
+        "summary": "查询 access_token 状态",
+        "operationId": "taobaoMpToken",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "responses": {
+          "200": {
+            "description": "成功。data 含 access_token 状态/过期时间等。",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "type": "object" } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/taobao/mini-programs/{app}/api": {
+      "post": {
+        "tags": ["淘宝小程序"],
+        "summary": "受控开放平台 API 代理",
+        "operationId": "taobaoMpProxy",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OpenApiProxyRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 为淘宝开放平台返回。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/douyin/mini-programs/{app}/login": {
+      "post": {
+        "tags": ["抖音小程序"],
+        "summary": "抖音小程序登录（code 换 session）",
+        "operationId": "douyinMpLogin",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MiniLoginRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 含 session_key/openid 等。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/douyin/mini-programs/{app}/token": {
+      "get": {
+        "tags": ["抖音小程序"],
+        "summary": "查询 access_token 状态",
+        "operationId": "douyinMpToken",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "responses": {
+          "200": {
+            "description": "成功。data 含 access_token 状态/过期时间等。",
+            "content": { "application/json": { "schema": { "allOf": [
+              { "$ref": "#/components/schemas/SuccessResponse" },
+              { "type": "object", "properties": { "data": { "type": "object" } } }
+            ] } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/platform/douyin/mini-programs/{app}/api": {
+      "post": {
+        "tags": ["抖音小程序"],
+        "summary": "受控开放平台 API 代理",
+        "operationId": "douyinMpProxy",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/AppPath" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OpenApiProxyRequest" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "成功（或业务错误，见 success 区分）。data 为抖音开放平台返回。",
+            "content": { "application/json": { "schema": { "oneOf": [
+              { "allOf": [
+                { "$ref": "#/components/schemas/SuccessResponse" },
+                { "type": "object", "properties": { "data": { "type": "object" } } }
+              ] },
+              { "$ref": "#/components/schemas/ErrorResponse" }
+            ] } } }
+          },
+          "422": {
+            "description": "校验失败",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    }
+  }
+}

@@ -27,5 +27,24 @@
 基于当前模块的菜单、角色、角色权限，将ruoyi-vue-pro（https://github.com/YunaiV/ruoyi-vue-pro）后台角色权限模块，ruoyi-vue-pro项目代码部署在当前服务器目录/data/java/ruoyi-vue-pro/
 需求执行结果，记录到文件：.requirements/develop/ruoyi-permission.md
 
-需求5：
-1. 当前系统认证失败后，默认跳转到一个不存在的路由login。修复成：认证失败后，以接口方式返回，返回状态码为401。
+需求3：
+1. 为userCenter模块的所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/modules/usercenter/api.json
+
+需求4：
+1. 给用户分配和收回角色合并成一个接口，先收回当前用户全部角色，再把提交的角色分配给用户，允许提交的roles为空，为空时，意味着用户没有任何角色。
+2. 给用户分配和收回权限合并成一个接口，先收回当前用户全部权限，再把提交的权限分配给用户，允许提交的permissions为空，为空时，意味着用户没有任何权限。
+
+需求-用户表结构调整：
+用户表字段属性调整：
+1. name字段设置为Unique索引，name+password可以用来登录；
+2. email字段取消Unique索引，允许emai字段为空，不为空时，要做唯一行验证，非空的email值全表唯一；
+
+需求-删除用户功能调整：
+1. user表新增一个删除标记位，删除标记位为1时，用户不能登录，用户状态、角色、权限保留；
+2. 用户被标记为删除时，name、非空的email、phone字段，在唯一性的同时，通过加后缀做特殊标记；
+
+需求-token版本管理：
+1. 在用户数据中增加字段：token_version（整数，默认 0）；
+2. 签发 JWT 时：将当前用户的 token_version 写入 Payload；
+3. 验证 JWT 时：除了验证签名和过期时间，还要比对 Token 中的版本号与当前用户数据是否一致。如果不一致，直接拒绝。
+4. 当用户改密码时，将token_version 加1；

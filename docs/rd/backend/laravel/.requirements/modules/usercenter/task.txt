@@ -2,7 +2,7 @@
 所有功能归到用户中心模块UserCenter；
 角色权限基于spatie/laravel-permission；
 
-需求3：
-2. 为userCenter模块的所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/modules/usercenter/api.json
+需求-产品功能分析：
+全面分析UserCenter模块，结合当前模块相关的数据表、相关的接口，反向整理出一份需求文档，文档写入文件：.requirements/modules/usercenter/product.md
 
 忽略以下所有需求描述

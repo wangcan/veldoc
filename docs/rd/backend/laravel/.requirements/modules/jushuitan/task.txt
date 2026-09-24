@@ -1,0 +1,20 @@
+所有功能归到聚水潭模块Jushuitan；
+聚水潭模块使用MySQL类型的数据库job_jushuitan；
+
+需求1：
+1. 用nwidart/laravel-modules新增一个聚水潭模块模块 Jushuitan。
+2. 模块能够完成对接聚水潭官方API清单罗列的接口，API清单地址：https://openweb.jushuitan.com/doc?docId=113
+3. 完成模块所需的数据表结构；
+4. 支持基础数据（店铺、仓库、供应商）、订单、商品、库存、采购、物流等数据的自动化同步；
+5. 模块提供对基础数据（店铺、仓库、供应商）、订单、商品、库存、采购、物流等数据的管理维护功能；
+6. 数据的管理维护（增删改查，从聚水潭同步数据）等操作，写入项目后台操作菜单表： 数据库 job_passport 表 system_menu；
+
+
+忽略以下所有需求描述
+
+需求2：
+1. 新增一个人物数据表table；table数据表有一个唯一标识一个人物的code字段，其他字段由ai自主设计；
+3. 可以通过excel批量导入；
+
+需求3：
+为jushuitan模块的所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/modules/jushuitan/api.json

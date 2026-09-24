@@ -1,0 +1,83 @@
+
+需求1：
+用nwidart/laravel-modules新增一个知识库模块 Knowledge。
+知识库主要管理维护诸如 人物、书籍、事件、朝代等原信息；
+知识库主要使用基于PostgreSQL类型的数据库 job_knowledge；
+
+需求2：
+1. 新增一个人物数据表figure；figure数据表有一个唯一标识一个人物的code字段，其他字段由ai自主设计；
+2. 可以通过后台管理维护人物，对人物记录的操作写入项目后台操作菜单表： 数据库 job_passport 表 system_menu；
+3. 可以通过excel批量导入人物；
+4. 后台基于人物的相关菜单操作，完成对人物的管理维护；
+
+需求3：
+为knowledge模块的所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/modules/knowledge/api.json
+
+需求4：
+文件.requirements/modules/knowledge/book.sql 是书籍相关的mysql数据表结构，包括：
+1. wp_book 书籍；
+2. wp_chapter 书籍章节；
+3. wp_book_catalog 丛书；
+4. wp_book_volume 丛书卷别；
+5. wp_book_listing 丛书卷别包含的书籍列表；
+6. wp_figure_listing 人物关联信息列表；type=author时，表的figure_code、book_code代表的是作者-书籍关系；
+
+在以上数据表结构的基础上，重新设计基于PostgreSQL类型的相关数据表：
+1. 针对可以在线阅读的书籍，章节内容以php文件的形式保存在服务器系统盘上；
+2. 书籍表：a. 应有code字段，为唯一索引；b. 应有book_path字段，字段存储书籍所在的路径，可以基于该路径读取书籍的章节内容；
+3. 可在线阅读的书籍，有四种阅读类型，a. ancient 古籍阅读; b. txt 普通文本在线阅读; c. pdf pdf文件阅读; d. other 其他类型；
+4. 章节保留应有code字段，book_code+code 唯一，定位章节内容对应的php文件；
+5. 以上mysql数据表结构仅供参考，新的数据表的数量、表名、表结构全部重新设计；
+
+需求5：
+文件.requirements/modules/knowledge/_tables.sql 文件包含的mysql数据表结构如下：
+1. wp_country 国家，通过sort（可改用更合适的字段名）标记为: 普通国家,帝国王朝,时代 ；
+2. wp_country_catalog 基于地域或年代划分的国家类目，类目之间有隶属关系；
+3. wp_country_listing 每个国家类目下包含的国家；
+4. wp_century 历史各个世纪（按100年一个世纪）记录；
+5. wp_chronology 年表，公元纪年，每一年一条记录；
+6. wp_period 历史年代，基于不同类型，如王朝、帝王等在位时间、年号，记录到的历史时期；
+7. wp_period_year 指定历史年代所包含的年表；
+8. wp_affair 历史事件、重磅事件记录；
+
+在以上数据表结构的基础上，重新设计基于PostgreSQL类型的相关数据表：
+以上mysql数据表结构仅供参考，新的数据表的数量、表名、表结构全部重新设计；
+
+需求6：
+将 .requirements/modules/knowledge/_knowledge.sql（MySQL/phpMyAdmin 导出，online_knowledge 库，约 8.5 万条数据）中的数据逐表导入 job_knowledge（PostgreSQL，连接 pgsql_knowledge）。
+源 MySQL 表与目标 PG 表表名/列名/类型均不同（需求4/5 已重新设计），无法直接 psql 导入。
+
+实现方式：新增 Artisan 命令 Modules/Knowledge/app/Console/Commands/KnowledgeImportDumpCommand.php
+（signature: knowledge:import-dump {--path=} {--table=} {--dry} {--batch=500}），直接解析 phpMyAdmin 格式 INSERT
+语句（每个值元组独占一行，字符串 \'/\\ 转义），逐表 TRUNCATE ... RESTART IDENTITY CASCADE 后分批 insert，插完
+setval 重置序列。命令已注册于 KnowledgeServiceProvider（$commands 数组 + parent::boot()）。
+
+迁移：Modules/Knowledge/database/migrations/2026_09_22_000001_widen_code_columns_for_import.php
+将 6 个 varchar(64) code 列加宽到 varchar(100)（books.code、book_chapters/book_listings/figure_listings.book_code、
+country_catalogs.code、country_catalogs.parent_code），以容纳源数据中两个超长 code（65/71 字符），保留全部数据不截断。幂等。
+
+15 张表映射（源 → 目标，导入行数均与源行数一致，0 跳过）：
+- wp_affair(681) → affairs：无 code → code='affair_'.id；affair_type='keypoint'→'other'；status
+- wp_book(1270) → books：read_type 由 is_ancientread/is_onlineread/is_otherread 派生（ancient/txt/pdf/other）；
+  publish_at→publish_year；丢弃字段聚合到 attributes(jsonb)
+- wp_book_catalog(19) → book_catalogs：直接映射
+- wp_book_listing(1552) → book_listings：catalog_volume_id→volume_id(0→null)
+- wp_book_volume(216) → book_volumes：extfield→code；status
+- wp_chapter(9758) → book_chapters：200 行空 code → code='ch_'.id（解决 26 个 (book_code,code) 重复）
+- wp_century(32) → centuries：直接映射
+- wp_chronology(3071) → chronologies：orderlist→year（BC1046→-1046）；period_status→is_period_marked
+- wp_country(490) → countries：sort→kind(normal/dynasty)；begin_end 字符串→begin_year/end_year（支持 前/公元前/B 公元前标记、
+  世纪换算，如 前221年-前207年→-221/-207）；duration→duration_years；丢弃字段聚合到 attributes(jsonb)
+- wp_country_catalog(92) → country_catalogs：bigsort→category；path_point→knowledge_path；status
+- wp_country_listing(455) → country_listings：orderlist→serial
+- wp_figure(3979) → figures：native_place→birth_place；大量扩展字段聚合到 attributes(jsonb)；status
+- wp_figure_listing(2608) → figure_listings：直接映射
+- wp_period(3395) → periods：无 code → code='period_'.id；eraname→era_name；period_type 映射(country→dynasty/emperor→reign/eraname→era_name)；
+  start/end_accurate→start/end_accuracy；start_end_detail→span_detail
+- wp_period_year(57144) → period_years：eraname→era_name；period_type 映射同上；show_type_base→is_displayed
+
+跳过：knowledge_items、migrations（无对应源表）；以及 wp_book_0306/wp_dateinfo/wp_muwiki*/wp_resource*/wp_siteaccount/ztmp_* 等无对应 PG 表的源表。
+未动 job_passport（MySQL）数据；TRUNCATE 仅作用于 pgsql_knowledge。
+
+验证：15 张表 SELECT count(*) 与源行数逐一一致；抽查 books/countries/chronologies/periods/affairs.code/periods.code/ch_N 章节编码、
+periods 按 period_type,start_accuracy 分组均正确；序列重置校验 last_value = max(id)+1（7 张表抽查通过）。

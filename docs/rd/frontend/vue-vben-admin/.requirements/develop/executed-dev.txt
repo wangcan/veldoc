@@ -1,5 +1,4 @@
 
-
 需求1：
 用户认证和登录用户信息
 相关后端接口文档：
@@ -12,3 +11,17 @@
 
 结合以上接口，完成用户登录认证，权限分配，菜单渲染，动态路由等操作；完成刷新token和退出登录操作；
 执行结果记录到文件：.requirements/develop/auth-permission.md
+
+需求3：
+知识库人物管理
+相关后端接口文档：
+1. 人物分页列表接口：http://showdoc.canliang.wang/web/#/669266166/297761767
+2. 新建人物接口：http://showdoc.canliang.wang/web/#/669266166/297761768
+3. 下载人物导入模板接口：http://showdoc.canliang.wang/web/#/669266166/297761770
+4. Excel 批量导入人物接口：http://showdoc.canliang.wang/web/#/669266166/297761771
+5. 人物详情接口：http://showdoc.canliang.wang/web/#/669266166/297761772
+6. 修改人物接口：http://showdoc.canliang.wang/web/#/669266166/297761773
+7. 删除人物接口：http://showdoc.canliang.wang/web/#/669266166/297761774
+所有接口文档中 实际的接口前缀为：http://49.235.53.53:9001
+
+结合上述接口，完成动态路由 知识库/人物管理 的后台管理维护功能。
