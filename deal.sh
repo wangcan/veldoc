@@ -30,6 +30,11 @@ case $1 in
   sourcePath="/data/project/frontend/vitesse"
   resources=(.claude CLAUDE.md .requirements README.zh-CN.md)
   ;;
+'nuxt')
+  fullPath="${targetPath}rd/frontend/vitesse-nuxt/"
+  sourcePath="/data/project/frontend/vitesse-nuxt"
+  resources=(.mcp.json .claude CLAUDE.md .requirements README.md)
+  ;;
 'vben')
   fullPath="${targetPath}rd/frontend/vue-vben-admin/"
   sourcePath="/data/project/frontend/vue-vben-admin"
