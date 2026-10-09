@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(mvn clean compile*)",
+      "Bash(mvn clean install*)",
+      "Bash(mvn clean test*)",
+      "Bash(mvn test*)",
+      "Bash(mvn compile*)",
+      "Bash(mvn install*)",
+      "Bash(mvn spring-boot:run*)",
+      "Bash(mvn dependency:tree*)",
+      "Bash(mvn help:effective-pom*)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git branch*)",
+      "Bash(git show*)",
+      "Bash(git blame*)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(tree *)",
+      "Bash(pkill -f yudao-server*)",
+      "Bash(pkill -f spring-boot:run*)",
+      "Bash(java -version*)",
+      "Bash(mvn -version*)",
+      "Bash(python3 --version*)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(rm -fr *)",
+      "Bash(sudo *)",
+      "Bash(mysql *)",
+      "Bash(psql *)",
+      "Bash(mongo *)",
+      "Bash(redis-cli *)",
+      "Bash(sqlplus *)",
+      "Bash(disql *)",
+      "Bash(mvn flyway*)",
+      "Bash(mvn liquibase*)",
+      "Read(.claude/settings.local.json)"
+    ],
+    "ask": [
+      "Bash(git push*)",
+      "Bash(git commit*)",
+      "Bash(git merge*)",
+      "Bash(git rebase*)",
+      "Bash(git reset*)",
+      "Bash(git checkout*)",
+      "Bash(mvn deploy*)",
+      "Bash(mvn release*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/prevent_target_writes.py"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/session_context.py"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {
+    "JAVA_PROJECT_VERSION": "2.0.1-jdk8-snapshot",
+    "YUDAO_JAVA_VERSION": "1.8",
+    "YUDAO_NO_DB_OPS": "true"
+  }
+}

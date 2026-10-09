@@ -10,8 +10,13 @@ case $1 in
   resources=(.claude .requirements CLAUDE.md README.md)
   ;;
 'lptwx')
-  fullPath="${targetPath}projects/java/llpt-wx-platform/"
+  fullPath="${targetPath}projects/java/lpt-wx-platform/"
   sourcePath="/data/java/lpt-wx-platform"
+  resources=(.claude .requirements CLAUDE.md)
+  ;;
+'lptmall')
+  fullPath="${targetPath}projects/java/lpt-mall/"
+  sourcePath="/data/java/ruoyi-vue-pro"
   resources=(.claude .requirements CLAUDE.md)
   ;;
 

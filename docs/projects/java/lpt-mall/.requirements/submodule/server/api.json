@@ -1,0 +1,6808 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "liupin-usercenter-service 用户中心服务接口文档",
+    "description": "由源码静态分析自动生成，覆盖 liupin-usercenter-service 模块全部 HTTP 接口。响应统一使用 ApiResponse 包装。注意: 标注为 @RequestMapping(未限定方法) 的接口依据方法名推断 HTTP 方法(insert/update/delete/register/login 等推断为 POST, 其余为 GET)。",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "服务根路径，实际前缀为 /api/...，端口默认 9096"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ArtController",
+      "description": "ArtController"
+    },
+    {
+      "name": "FuncController",
+      "description": "Description:"
+    },
+    {
+      "name": "InternalController",
+      "description": "Description:"
+    },
+    {
+      "name": "LiuliuController",
+      "description": "LiuliuController"
+    },
+    {
+      "name": "LoginController",
+      "description": "Description:"
+    },
+    {
+      "name": "MenuController",
+      "description": "Description:"
+    },
+    {
+      "name": "SmsController",
+      "description": "Description:"
+    },
+    {
+      "name": "SmsControllerV2",
+      "description": "Description:"
+    },
+    {
+      "name": "SysUserController",
+      "description": "SysUserController"
+    },
+    {
+      "name": "TempController",
+      "description": "TempController"
+    },
+    {
+      "name": "UserBackController",
+      "description": "后台用管理"
+    },
+    {
+      "name": "UserController",
+      "description": "UserController"
+    },
+    {
+      "name": "UserControllerV2",
+      "description": "Description:"
+    },
+    {
+      "name": "UserSyncController",
+      "description": "Description: 碑帖数据同步至用户中心"
+    },
+    {
+      "name": "WeChatController",
+      "description": "Description:"
+    },
+    {
+      "name": "WpUserController",
+      "description": "WpUserController"
+    },
+    {
+      "name": "ZheMeiMoBaoController",
+      "description": "ZheMeiMoBaoController"
+    },
+    {
+      "name": "AdminSysUserBlacklistController",
+      "description": "author myd"
+    },
+    {
+      "name": "AuthController",
+      "description": "author myd"
+    },
+    {
+      "name": "ComponentManagerController",
+      "description": "ComponentManagerController"
+    },
+    {
+      "name": "EvaluationUserController",
+      "description": "EvaluationUserController"
+    },
+    {
+      "name": "RoleManagerController",
+      "description": "RoleManagerController"
+    },
+    {
+      "name": "SysTeacherController",
+      "description": "SysTeacherController"
+    },
+    {
+      "name": "SystemLogController",
+      "description": "日志相关"
+    },
+    {
+      "name": "UserManagerController",
+      "description": "UserManagerController"
+    }
+  ],
+  "paths": {
+    "/api/art/login": {
+      "post": {
+        "tags": [
+          "ArtController"
+        ],
+        "summary": "标准登录只需要uid即可登录",
+        "operationId": "ArtController_login",
+        "description": "标准登录只需要uid即可登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/art/login/phone": {
+      "post": {
+        "tags": [
+          "ArtController"
+        ],
+        "summary": "通过手机号登录",
+        "operationId": "ArtController_phoneLogin",
+        "description": "通过手机号登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/art/auth": {
+      "get": {
+        "tags": [
+          "ArtController"
+        ],
+        "summary": "获取授权，通过appId 跟secret",
+        "operationId": "ArtController_getToken",
+        "description": "获取授权，通过appId 跟secret",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "secret",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: ArtAuthResult",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/art/login/password": {
+      "post": {
+        "tags": [
+          "ArtController"
+        ],
+        "summary": "loginByPassword",
+        "operationId": "ArtController_loginByPassword",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/art/login/phone/password": {
+      "post": {
+        "tags": [
+          "ArtController"
+        ],
+        "summary": "通过手机号，密码登录",
+        "operationId": "ArtController_loginByPhone",
+        "description": "通过手机号，密码登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/art/modifyPassword": {
+      "post": {
+        "tags": [
+          "ArtController"
+        ],
+        "summary": "修改密码",
+        "operationId": "ArtController_modifyPassword",
+        "description": "修改密码",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtAccountParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/art/registerUser": {
+      "post": {
+        "tags": [
+          "ArtController"
+        ],
+        "summary": "注册并登录",
+        "operationId": "ArtController_registerUsers",
+        "description": "注册并登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtAccountParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/art/miniAppLogin": {
+      "post": {
+        "tags": [
+          "ArtController"
+        ],
+        "summary": "小程序登录",
+        "operationId": "ArtController_loginByMiniApp",
+        "description": "小程序登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtMiniAppLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/art/pcScanLogin": {
+      "get": {
+        "tags": [
+          "ArtController"
+        ],
+        "summary": "pcScanLogin",
+        "operationId": "ArtController_pcScanLogin",
+        "description": "",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/func/list": {
+      "get": {
+        "tags": [
+          "FuncController"
+        ],
+        "summary": "userMenuFuncs",
+        "operationId": "FuncController_userMenuFuncs",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/updateUser": {
+      "post": {
+        "tags": [
+          "InternalController"
+        ],
+        "summary": "updateUser",
+        "operationId": "InternalController_updateUser",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysUser"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: TokenInfo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/registeUser": {
+      "post": {
+        "tags": [
+          "InternalController"
+        ],
+        "summary": "registeUser",
+        "operationId": "InternalController_registeUser",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysUser"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: SysUser",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/initUser": {
+      "post": {
+        "tags": [
+          "InternalController"
+        ],
+        "summary": "initUser",
+        "operationId": "InternalController_initUser",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysUserInfo"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: SysUser",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/userInfo": {
+      "post": {
+        "tags": [
+          "InternalController"
+        ],
+        "summary": "userInfo",
+        "operationId": "InternalController_userInfo",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: List<SysUser>",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/users": {
+      "get": {
+        "tags": [
+          "InternalController"
+        ],
+        "summary": "userInfos",
+        "operationId": "InternalController_userInfos",
+        "description": "",
+        "parameters": [
+          {
+            "name": "platId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "userName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/selectUserInfo": {
+      "post": {
+        "tags": [
+          "InternalController"
+        ],
+        "summary": "userInfo",
+        "operationId": "InternalController_userInfo_apiinternalselectUserInf",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemUserQueryParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: List<SysUser>",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/userAuthInfo": {
+      "post": {
+        "tags": [
+          "InternalController"
+        ],
+        "summary": "获取用户授权信息",
+        "operationId": "InternalController_userAuthInfo",
+        "description": "获取用户授权信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysUserAuthLogin"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: List<SysUserAuthLogin>",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/userPage": {
+      "get": {
+        "tags": [
+          "InternalController"
+        ],
+        "summary": "userPages",
+        "operationId": "InternalController_userPages",
+        "description": "",
+        "parameters": [
+          {
+            "name": "queryParams",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SysUserQueryParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/userDetail": {
+      "get": {
+        "tags": [
+          "InternalController"
+        ],
+        "summary": "userDetail",
+        "operationId": "InternalController_userDetail",
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/userList": {
+      "post": {
+        "tags": [
+          "InternalController"
+        ],
+        "summary": "userList",
+        "operationId": "InternalController_userList",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluationUserPageParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/liuliu/user": {
+      "post": {
+        "tags": [
+          "LiuliuController"
+        ],
+        "summary": "addOrUpdateUser",
+        "operationId": "LiuliuController_addOrUpdateUser",
+        "description": "",
+        "parameters": [
+          {
+            "name": "sysUser",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SysUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/backLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "b端用户登录",
+        "operationId": "LoginController_backLogin",
+        "description": "b端用户登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackUserLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/backLoginOut": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "b端用户登录",
+        "operationId": "LoginController_backLoginOut",
+        "description": "b端用户登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackUserLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/backUpdateUserPwd": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "b端 修改用户密码",
+        "operationId": "LoginController_backUpdateUserPwd",
+        "description": "b端 修改用户密码",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/standardLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "用户名密码登录",
+        "operationId": "LoginController_login",
+        "description": "用户名密码登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysUser"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/smsLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "手机验证码登录/注册",
+        "operationId": "LoginController_loginSms",
+        "description": "手机验证码登录/注册",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysUser"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/wxLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "微信/小程序  -> 授权登录/注册接口",
+        "operationId": "LoginController_login_apiv1loginwxLogin",
+        "description": "微信/小程序  -> 授权登录/注册接口",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/sixthProductLogin/wxLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "掌上碑帖 第六宝微信登录配合扫码使用",
+        "operationId": "LoginController_sixthProductLogin",
+        "description": "掌上碑帖 第六宝微信登录配合扫码使用\n如果传手机号走正常登录逻辑 。   不传手机号 且是未注册的unionid， 直接是游客身份 ， 已注册有unionid 直接登录成功",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/sixthProductLogin/wxLoginV2ForPhone": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "第六宝微信小程序直接登录",
+        "operationId": "LoginController_wxLoginV2ForPhone",
+        "description": "第六宝微信小程序直接登录\n必须第一次登录必须授权手机号调用",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/sixthProductLogin/wxLoginV2NonePhone": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "wxLoginV2NonePhone",
+        "operationId": "LoginController_wxLoginV2NonePhone",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/sixthProductLogin/successNotice": {
+      "get": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "php通知",
+        "operationId": "LoginController_successNotice",
+        "description": "php通知",
+        "parameters": [
+          {
+            "name": "sixthProductEncryptionStr",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: Integer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/sixthProductUserToken": {
+      "get": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "第六宝设备循环调用",
+        "operationId": "LoginController_sixthProductUserToken",
+        "description": "第六宝设备循环调用",
+        "parameters": [
+          {
+            "name": "sixthProductEncryptionStr",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: HashMap<String, Object>",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/sixthProductLogin/dyLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "第六宝作为掌碑抖音登录",
+        "operationId": "LoginController_sixthProductDYLogin",
+        "description": "第六宝作为掌碑抖音登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DyLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/umengLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "友盟一键登录/注册",
+        "operationId": "LoginController_umengLogin",
+        "description": "友盟一键登录/注册",
+        "parameters": [
+          {
+            "name": "umToken",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "terminal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "终端类型（1-app 2-小程序 3- h5）"
+          },
+          {
+            "name": "loginTerminalType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "loginFrom",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "loginChannel",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "regChannel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastChannel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userLoginChannel",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/miniProgramPhoneLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "小程序手机号登录/注册",
+        "operationId": "LoginController_miniProgramPhoneLogin",
+        "description": "小程序手机号登录/注册",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/miniProgramPhoneLoginForBack": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "miniProgramPhoneLoginForBack",
+        "operationId": "LoginController_miniProgramPhoneLoginForBack",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/externalLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "externalLogin",
+        "operationId": "LoginController_externalLogin",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysUser"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/scanCodeLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "scanCodeLogin",
+        "operationId": "LoginController_scanCodeLogin",
+        "description": "",
+        "parameters": [
+          {
+            "name": "system",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanCodeLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/refresh": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "token 刷新",
+        "operationId": "LoginController_refresh",
+        "description": "token 刷新",
+        "parameters": [
+          {
+            "name": "system",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refreshToken",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: TokenInfo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/parseLoginToken": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "解析token返回用户信息",
+        "operationId": "LoginController_parseLoginToken",
+        "description": "解析token返回用户信息",
+        "parameters": [
+          {
+            "name": "system",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/refreshV2": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "refreshv2",
+        "operationId": "LoginController_refreshv2",
+        "description": "",
+        "parameters": [
+          {
+            "name": "system",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: TokenInfo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/anonymousLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "只给碑帖用，游客登录",
+        "operationId": "LoginController_anonymousLogin",
+        "description": "只给碑帖用，游客登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TabletAnonymousLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/wxLogin/v2": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "只给碑帖用 带合并手机号功能",
+        "operationId": "LoginController_wxLoginV2",
+        "description": "只给碑帖用 带合并手机号功能",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/wxAndPhone/register": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "只给碑帖用",
+        "operationId": "LoginController_wxAndPhoneRegister",
+        "description": "只给碑帖用",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WxAndPhoneParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/appleLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "只给碑帖用，苹果账号登录",
+        "operationId": "LoginController_appleLogin",
+        "description": "只给碑帖用，苹果账号登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppleLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/appleRegisterOrBind": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "苹果注册or绑定",
+        "operationId": "LoginController_appleRegisterOrBind",
+        "description": "苹果注册or绑定",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppleLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/wxAuthPhoneLogin": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "微信授权手机登录",
+        "operationId": "LoginController_wxAuthPhoneLogin",
+        "description": "微信授权手机登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WxAuthPhoneLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login/tabletApp/logout": {
+      "post": {
+        "tags": [
+          "LoginController"
+        ],
+        "summary": "碑帖退出",
+        "operationId": "LoginController_logout",
+        "description": "碑帖退出",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserDevices"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/menu/tree": {
+      "get": {
+        "tags": [
+          "MenuController"
+        ],
+        "summary": "menuTree",
+        "operationId": "MenuController_menuTree",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: List<SysBackMenuVO>",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sms/send": {
+      "post": {
+        "tags": [
+          "SmsController"
+        ],
+        "summary": "发送短信验证码",
+        "operationId": "SmsController_send",
+        "description": "发送短信验证码",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SmsParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sms/verifyImg": {
+      "get": {
+        "tags": [
+          "SmsController"
+        ],
+        "summary": "生成图文验证信息",
+        "operationId": "SmsController_verifyImg",
+        "description": "生成图文验证信息",
+        "parameters": [
+          {
+            "name": "width",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "height",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: JSONObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sms/check": {
+      "get": {
+        "tags": [
+          "SmsController"
+        ],
+        "summary": "check",
+        "operationId": "SmsController_check",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SmsParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/sms/send": {
+      "post": {
+        "tags": [
+          "SmsControllerV2"
+        ],
+        "summary": "短信验证码发送",
+        "operationId": "SmsControllerV2_send",
+        "description": "短信验证码发送",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SmsParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sysUser/openIds": {
+      "get": {
+        "tags": [
+          "SysUserController"
+        ],
+        "summary": "openIds",
+        "operationId": "SysUserController_openIds",
+        "description": "",
+        "parameters": [
+          {
+            "name": "userIds",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sysUser/tablet/deregister/{userId}": {
+      "put": {
+        "tags": [
+          "SysUserController"
+        ],
+        "summary": "注销碑帖用户",
+        "operationId": "SysUserController_deregisterTabletUser",
+        "description": "注销碑帖用户",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sysUser/tablet/recover": {
+      "put": {
+        "tags": [
+          "SysUserController"
+        ],
+        "summary": "recoverTabletUser",
+        "operationId": "SysUserController_recoverTabletUser",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TabletUserReCoverParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sysUser/tablet/merge": {
+      "post": {
+        "tags": [
+          "SysUserController"
+        ],
+        "summary": "mergeTabletUser",
+        "operationId": "SysUserController_mergeTabletUser",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeTabletUserParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sysUser/tablet/view/progress": {
+      "get": {
+        "tags": [
+          "SysUserController"
+        ],
+        "summary": "viewProgress",
+        "operationId": "SysUserController_viewProgress",
+        "description": "",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MergeTabletUserParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sysUser/userInfos": {
+      "get": {
+        "tags": [
+          "SysUserController"
+        ],
+        "summary": "getUserInfos",
+        "operationId": "SysUserController_getUserInfos",
+        "description": "",
+        "parameters": [
+          {
+            "name": "openIds",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: List<SysUserAuthLoginVO>",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sysUser/tablet/phone": {
+      "post": {
+        "tags": [
+          "SysUserController"
+        ],
+        "summary": "updateTabletPhone",
+        "operationId": "SysUserController_updateTabletPhone",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TabletUserPhoneUpdate"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sysUser/modifyPassword": {
+      "post": {
+        "tags": [
+          "SysUserController"
+        ],
+        "summary": "updatePassword",
+        "operationId": "SysUserController_updatePassword",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysUser"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/temp/upload": {
+      "post": {
+        "tags": [
+          "TempController"
+        ],
+        "summary": "upload",
+        "operationId": "TempController_upload",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/userBack/addUser": {
+      "post": {
+        "tags": [
+          "UserBackController"
+        ],
+        "summary": "添加",
+        "operationId": "UserBackController_addUser",
+        "description": "添加",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysBackUserParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/userBack/updateUser": {
+      "post": {
+        "tags": [
+          "UserBackController"
+        ],
+        "summary": "修改",
+        "operationId": "UserBackController_updateUser",
+        "description": "修改",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysBackUserParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/userBack/getRoleDetail": {
+      "post": {
+        "tags": [
+          "UserBackController"
+        ],
+        "summary": "根据条件查询当前用户角色信息",
+        "operationId": "UserBackController_getRoleDetail",
+        "description": "根据条件查询当前用户角色信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: List<SysBackUser>",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/userBack/getUserDetail": {
+      "post": {
+        "tags": [
+          "UserBackController"
+        ],
+        "summary": "根据手机号查询用户信息",
+        "operationId": "UserBackController_getUserDetail",
+        "description": "根据手机号查询用户信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: SysBackUser",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/userBack/getUserDetailsByIds": {
+      "post": {
+        "tags": [
+          "UserBackController"
+        ],
+        "summary": "getUserDetailsByIds",
+        "operationId": "UserBackController_getUserDetailsByIds",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: List<SysBackUser>",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/userBack/password": {
+      "put": {
+        "tags": [
+          "UserBackController"
+        ],
+        "summary": "updatePassword",
+        "operationId": "UserBackController_updatePassword",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordUpdateParam"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/bindPhoneByMiniPrograms": {
+      "post": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "获取小程序授权手机号并绑定",
+        "operationId": "UserController_bindPhoneByMiniPrograms",
+        "description": "获取小程序授权手机号并绑定",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/modifyByMiniPrograms": {
+      "post": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "小程序微信授权基本信息 更新",
+        "operationId": "UserController_modifyByMiniPrograms",
+        "description": "小程序微信授权基本信息 更新",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: JSONObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/modifyUserInfo": {
+      "post": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "修改用户信息",
+        "operationId": "UserController_modify",
+        "description": "修改用户信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInfoModifyParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: JSONObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/info": {
+      "get": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "获取用户基本信息",
+        "operationId": "UserController_info",
+        "description": "获取用户基本信息",
+        "parameters": [
+          {
+            "name": "userType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "1- C端用户 2-B端用户"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: SysUser",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/infoByUid": {
+      "get": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "infoByUid",
+        "operationId": "UserController_infoByUid",
+        "description": "",
+        "parameters": [
+          {
+            "name": "userType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: SysUser",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/getUserById": {
+      "get": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "根据用户id查询用户信息",
+        "operationId": "UserController_getUserById",
+        "description": "根据用户id查询用户信息",
+        "parameters": [
+          {
+            "name": "userType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: SysUser",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/phoneBind": {
+      "post": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "绑定手机号",
+        "operationId": "UserController_phoneBind",
+        "description": "绑定手机号",
+        "parameters": [
+          {
+            "name": "bindParams",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PhoneBindParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: LoginInfoVo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/tabletPlatExchangeToken": {
+      "get": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "exchangeToken",
+        "operationId": "UserController_exchangeToken",
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "sign",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: TokenInfo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/getPhoneByUserWxCodeAndEncryptedDataAndIV": {
+      "post": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "getPhoneByUserWxCodeAndEncryptedDataAndIV",
+        "operationId": "UserController_getPhoneByUserWxCodeAndEncryptedDataAndIV",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/getOpenIdByUserWxCode": {
+      "post": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "毛笔定制用户获取openid 用于支付",
+        "operationId": "UserController_getOpenIdByUserId",
+        "description": "毛笔定制用户获取openid 用于支付",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/getUnionIdByUserId": {
+      "get": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "getUnionIdByUserId",
+        "operationId": "UserController_getUnionIdByUserId",
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "miniProgramName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/checkVerifyCode": {
+      "post": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "验证码校验",
+        "operationId": "UserController_checkVerifyCode",
+        "description": "验证码校验",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SmsParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/loggedOff": {
+      "post": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "loggedOffUser",
+        "operationId": "UserController_loggedOffUser",
+        "description": "",
+        "parameters": [
+          {
+            "name": "loginTerminalType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/checkUserFirstLogin": {
+      "get": {
+        "tags": [
+          "UserController"
+        ],
+        "summary": "checkUserFirstLogin",
+        "operationId": "UserController_checkUserFirstLogin",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/user/phoneBind": {
+      "post": {
+        "tags": [
+          "UserControllerV2"
+        ],
+        "summary": "phoneBind",
+        "operationId": "UserControllerV2_phoneBind",
+        "description": "",
+        "parameters": [
+          {
+            "name": "bindParams",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PhoneBindParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: String",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/user/tablet/wxBind": {
+      "get": {
+        "tags": [
+          "UserControllerV2"
+        ],
+        "summary": "checkWxBind",
+        "operationId": "UserControllerV2_checkWxBind",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "UserControllerV2"
+        ],
+        "summary": "checkWxBind",
+        "operationId": "UserControllerV2_checkWxBind_apiv2usertabletwxBind",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TabletWxBindParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/user/tablet/phoneBind": {
+      "post": {
+        "tags": [
+          "UserControllerV2"
+        ],
+        "summary": "phoneBind",
+        "operationId": "UserControllerV2_phoneBind_apiv2usertabletphoneBind",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TabletPhoneBindParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/userSync/userInfo": {
+      "post": {
+        "tags": [
+          "UserSyncController"
+        ],
+        "summary": "tabletUserSync",
+        "operationId": "UserSyncController_tabletUserSync",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSyncParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/userSync/backUser": {
+      "post": {
+        "tags": [
+          "UserSyncController"
+        ],
+        "summary": "syncUser",
+        "operationId": "UserSyncController_syncUser",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysBackUserSyncParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/accessToken": {
+      "get": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "getAccessToken",
+        "operationId": "WeChatController_getAccessToken",
+        "description": "",
+        "parameters": [
+          {
+            "name": "weChatApplicationType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "configKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "defaultAccessType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/accessTokenForOpen": {
+      "get": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "需要鉴权带token",
+        "operationId": "WeChatController_getAccessTokenForOpen",
+        "description": "需要鉴权带token",
+        "parameters": [
+          {
+            "name": "weChatApplicationType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "configKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "defaultAccessType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/callback": {
+      "get": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "wxCallback",
+        "operationId": "WeChatController_wxCallback",
+        "description": "",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/WechatCallbackParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/sharedConfig": {
+      "post": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "获取微信分享配置",
+        "operationId": "WeChatController_sharedConfig",
+        "description": "获取微信分享配置",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: WechatSharedConfigInfo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/getWxAcodeUnlimit": {
+      "post": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "获取小程序指定页面二维码",
+        "operationId": "WeChatController_getWxAcodeUnlimit",
+        "description": "获取小程序指定页面二维码",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MiniProgramQRCodeParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: String",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/getGenerateUrllink": {
+      "post": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "在微信内或者安卓手机打开 URL Link 时，默认会先跳转官方 H5 中间页，如果需要定制 H5 内容，可以使用云开发静态网站",
+        "operationId": "WeChatController_getGenerateUrllink",
+        "description": "在微信内或者安卓手机打开 URL Link 时，默认会先跳转官方 H5 中间页，如果需要定制 H5 内容，可以使用云开发静态网站\nhttps://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/qrcode-link/url-link/generateUrlLink.html",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateUrllinkParam"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/getGenerateUrllink2": {
+      "post": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "跳转不带中间页",
+        "operationId": "WeChatController_getGenerateUrllink2",
+        "description": "跳转不带中间页\nhttps://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/qrcode-link/url-scheme/generateScheme.html    适用于短信、邮件、外部网页、微信内等拉起小程序的业务场景",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateUrllinkParam2"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/getQueryUrllink": {
+      "get": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "getQueryUrllink",
+        "operationId": "WeChatController_getQueryUrllink",
+        "description": "",
+        "parameters": [
+          {
+            "name": "configKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "urlLink",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "queryType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "defaultAccessType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/miniProgramsMsgSend": {
+      "post": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "小程序模板消息推送",
+        "operationId": "WeChatController_miniProgramsMsgSend",
+        "description": "小程序模板消息推送",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MiniProgramsMsgParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/saveTmpMsgAllow": {
+      "post": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "记录用户模板消息授权状态",
+        "operationId": "WeChatController_saveTmpMsgAllow",
+        "description": "记录用户模板消息授权状态",
+        "parameters": [
+          {
+            "name": "tmpId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "模板id"
+          },
+          {
+            "name": "customKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "data",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/tmpMsgAllow": {
+      "get": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "查询用户模板消息授权状态",
+        "operationId": "WeChatController_tmpMsgAllow",
+        "description": "查询用户模板消息授权状态",
+        "parameters": [
+          {
+            "name": "tmpId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wechat/wechatUserInfo": {
+      "post": {
+        "tags": [
+          "WeChatController"
+        ],
+        "summary": "wechatUserInfo",
+        "operationId": "WeChatController_wechatUserInfo",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WechatParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: WechatUserInfo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/wp/login": {
+      "post": {
+        "tags": [
+          "WpUserController"
+        ],
+        "summary": "login",
+        "operationId": "WpUserController_login",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WpLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/zheMeiMoBao/miniAppLogin": {
+      "post": {
+        "tags": [
+          "ZheMeiMoBaoController"
+        ],
+        "summary": "小程序登录",
+        "operationId": "ZheMeiMoBaoController_loginByMiniApp",
+        "description": "小程序登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZheMeiMoBaoLoginParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/blacklist/del/{userId}": {
+      "get": {
+        "tags": [
+          "AdminSysUserBlacklistController"
+        ],
+        "summary": "delete",
+        "operationId": "AdminSysUserBlacklistController_delete",
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/blacklist/insert": {
+      "post": {
+        "tags": [
+          "AdminSysUserBlacklistController"
+        ],
+        "summary": "修改",
+        "operationId": "AdminSysUserBlacklistController_insert",
+        "description": "修改",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/auth/token": {
+      "post": {
+        "tags": [
+          "AuthController"
+        ],
+        "summary": "key :   table_user_blacklist   添加黑名单业务",
+        "operationId": "AuthController_auth",
+        "description": "key :   table_user_blacklist   添加黑名单业务",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: HashMap<String, Object>",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/component/category/tree": {
+      "get": {
+        "tags": [
+          "ComponentManagerController"
+        ],
+        "summary": "componentTree",
+        "operationId": "ComponentManagerController_componentTree",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/component": {
+      "post": {
+        "tags": [
+          "ComponentManagerController"
+        ],
+        "summary": "addComponent",
+        "operationId": "ComponentManagerController_addComponent",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ComponentManagerController"
+        ],
+        "summary": "updateComponent",
+        "operationId": "ComponentManagerController_updateComponent",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentUpdateParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ComponentManagerController"
+        ],
+        "summary": "delete",
+        "operationId": "ComponentManagerController_delete",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/component/system": {
+      "get": {
+        "tags": [
+          "ComponentManagerController"
+        ],
+        "summary": "systems",
+        "operationId": "ComponentManagerController_systems",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/component/plats": {
+      "get": {
+        "tags": [
+          "ComponentManagerController"
+        ],
+        "summary": "plats",
+        "operationId": "ComponentManagerController_plats",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/component/system/tree/{system}": {
+      "get": {
+        "tags": [
+          "ComponentManagerController"
+        ],
+        "summary": "componentTree",
+        "operationId": "ComponentManagerController_componentTree_apiv1admincomponentsyste",
+        "description": "",
+        "parameters": [
+          {
+            "name": "system",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SystemEnum"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/component/status": {
+      "put": {
+        "tags": [
+          "ComponentManagerController"
+        ],
+        "summary": "changeStatus",
+        "operationId": "ComponentManagerController_changeStatus",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentStatusParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/evaluationUser/page": {
+      "get": {
+        "tags": [
+          "EvaluationUserController"
+        ],
+        "summary": "查询所有记录",
+        "operationId": "EvaluationUserController_page",
+        "description": "查询所有记录",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EvaluationUserPageParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/evaluationUser/list": {
+      "get": {
+        "tags": [
+          "EvaluationUserController"
+        ],
+        "summary": "list",
+        "operationId": "EvaluationUserController_list",
+        "description": "",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EvaluationUserPageParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/evaluationUser/update": {
+      "post": {
+        "tags": [
+          "EvaluationUserController"
+        ],
+        "summary": "修改",
+        "operationId": "EvaluationUserController_update",
+        "description": "修改",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluationUserPageParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/role": {
+      "post": {
+        "tags": [
+          "RoleManagerController"
+        ],
+        "summary": "addRole",
+        "operationId": "RoleManagerController_addRole",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "RoleManagerController"
+        ],
+        "summary": "updateRole",
+        "operationId": "RoleManagerController_updateRole",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleUpdateParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/role/list": {
+      "get": {
+        "tags": [
+          "RoleManagerController"
+        ],
+        "summary": "rolePageList",
+        "operationId": "RoleManagerController_rolePageList",
+        "description": "",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RoleQueryParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/role/status": {
+      "put": {
+        "tags": [
+          "RoleManagerController"
+        ],
+        "summary": "changeRoleStatus",
+        "operationId": "RoleManagerController_changeRoleStatus",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleStatusParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/role/assign": {
+      "post": {
+        "tags": [
+          "RoleManagerController"
+        ],
+        "summary": "assignRoleComponent",
+        "operationId": "RoleManagerController_assignRoleComponent",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoleComponentParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/role/component": {
+      "get": {
+        "tags": [
+          "RoleManagerController"
+        ],
+        "summary": "roleComponents",
+        "operationId": "RoleManagerController_roleComponents",
+        "description": "",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RoleComponentParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher/list": {
+      "get": {
+        "tags": [
+          "SysTeacherController"
+        ],
+        "summary": "查询所有记录",
+        "operationId": "SysTeacherController_selectAll",
+        "description": "查询所有记录",
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher/getById": {
+      "get": {
+        "tags": [
+          "SysTeacherController"
+        ],
+        "summary": "根据主键查询",
+        "operationId": "SysTeacherController_getById",
+        "description": "根据主键查询",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "主键"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher/insert": {
+      "post": {
+        "tags": [
+          "SysTeacherController"
+        ],
+        "summary": "新增",
+        "operationId": "SysTeacherController_insert",
+        "description": "新增",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysTeacherParam"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher/update": {
+      "post": {
+        "tags": [
+          "SysTeacherController"
+        ],
+        "summary": "修改",
+        "operationId": "SysTeacherController_update",
+        "description": "修改",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysTeacherParam"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teacher/delete": {
+      "post": {
+        "tags": [
+          "SysTeacherController"
+        ],
+        "summary": "删除记录",
+        "operationId": "SysTeacherController_delete",
+        "description": "删除记录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysTeacher"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/log/selectUserLogList": {
+      "post": {
+        "tags": [
+          "SystemLogController"
+        ],
+        "summary": "用户日志列表",
+        "operationId": "SystemLogController_selectUserLogList",
+        "description": "用户日志列表",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogParam"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/log/selectSystemLogList": {
+      "post": {
+        "tags": [
+          "SystemLogController"
+        ],
+        "summary": "系统日志列表",
+        "operationId": "SystemLogController_selectSystemLogList",
+        "description": "系统日志列表",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemLogParam"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/selectUserList": {
+      "post": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "用户列表",
+        "operationId": "UserManagerController_selectUserList",
+        "description": "用户列表",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackAdminUserParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/getUserDetailByUserId": {
+      "get": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "查询用户详情",
+        "operationId": "UserManagerController_getUserDetailByUserId",
+        "description": "查询用户详情",
+        "parameters": [
+          {
+            "name": "backUserId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse，data 字段类型: SysBackUser",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/addUser": {
+      "post": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "添加用户",
+        "operationId": "UserManagerController_addUser",
+        "description": "添加用户",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysBackUserParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/updateUser": {
+      "post": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "修改用户",
+        "operationId": "UserManagerController_updateUser",
+        "description": "修改用户",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SysBackUserParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/resetPassword": {
+      "post": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "批量重置密码",
+        "operationId": "UserManagerController_resetPassword",
+        "description": "批量重置密码",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserOperateParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/cancel": {
+      "post": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "批量注销",
+        "operationId": "UserManagerController_cancel",
+        "description": "批量注销",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserOperateParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/freeze": {
+      "post": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "冻结",
+        "operationId": "UserManagerController_freeze",
+        "description": "冻结",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserOperateParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/unfreeze": {
+      "post": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "解冻",
+        "operationId": "UserManagerController_unfreeze",
+        "description": "解冻",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserOperateParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/assign/role": {
+      "post": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "assignRoles",
+        "operationId": "UserManagerController_assignRoles",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoleParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/assign/component": {
+      "post": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "assignComponents",
+        "operationId": "UserManagerController_assignComponents",
+        "description": "",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignComponentParams"
+              }
+            }
+          },
+          "description": "请求体"
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/roleList": {
+      "get": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "roleList",
+        "operationId": "UserManagerController_roleList",
+        "description": "",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RoleQueryParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/component": {
+      "get": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "component",
+        "operationId": "UserManagerController_component",
+        "description": "",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserComponentsParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/systems/{userId}": {
+      "get": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "system",
+        "operationId": "UserManagerController_system",
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sysBackUser/optionRoles": {
+      "get": {
+        "tags": [
+          "UserManagerController"
+        ],
+        "summary": "optionRoles",
+        "operationId": "UserManagerController_optionRoles",
+        "description": "",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/OptionRolesQueryParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回 ApiResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "description": "统一响应包装类 ApiResponse<T>。status=0 表示成功，其他为错误码。",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "响应码: 0=成功, 其他=错误"
+          },
+          "msg": {
+            "type": "string",
+            "description": "响应消息"
+          },
+          "data": {
+            "description": "业务数据，具体类型见各接口说明",
+            "nullable": true
+          },
+          "totalNum": {
+            "type": "integer",
+            "description": "总记录数(分页)",
+            "nullable": true
+          },
+          "pageIndex": {
+            "type": "integer",
+            "description": "当前页码(分页)",
+            "nullable": true
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "每页条数(分页)",
+            "nullable": true
+          },
+          "totalPage": {
+            "type": "integer",
+            "description": "总页数(分页)",
+            "nullable": true
+          }
+        }
+      },
+      "ArtLoginParams": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "uid": {
+            "type": "integer"
+          },
+          "regChannel": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2023-02-06 09:40"
+      },
+      "ArtAuthResult": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "expire": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "@author: Jack\n@create: 2023-03-17 09:57"
+      },
+      "ArtAccountParams": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "challengeCode": {
+            "type": "string"
+          },
+          "challenge": {
+            "type": "string"
+          },
+          "oldPassword": {
+            "type": "string"
+          },
+          "verifyCode": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2023-05-08 13:27"
+      },
+      "ArtMiniAppLoginParams": {
+        "type": "object",
+        "properties": {
+          "encryptedData": {
+            "type": "string",
+            "description": "小程序用户信息密文数据"
+          },
+          "iv": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2023-06-06 14:27"
+      },
+      "SysUser": {
+        "type": "object",
+        "properties": {
+          "PLAT_TABLET": {
+            "type": "integer"
+          },
+          "PLAT_TRAINING": {
+            "type": "integer"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "platId": {
+            "type": "integer",
+            "description": "所属系统（1-碑帖 2-教培 3-在线教育）\n@see com.liupin.common.constant.SystemPlatEnum"
+          },
+          "platId1": {
+            "type": "integer"
+          },
+          "uid": {
+            "type": "integer",
+            "description": "系统uid"
+          },
+          "account": {
+            "type": "string",
+            "description": "登录账户"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码"
+          },
+          "pwSolt": {
+            "type": "string",
+            "description": "密码盐"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机"
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱"
+          },
+          "userName": {
+            "type": "string",
+            "description": "用户名"
+          },
+          "userPic": {
+            "type": "string",
+            "description": "用户头像"
+          },
+          "sex": {
+            "type": "integer",
+            "description": "性别 1：男、2：女"
+          },
+          "userRealName": {
+            "type": "string",
+            "description": "姓名"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "bgPic": {
+            "type": "string",
+            "description": "背景图"
+          },
+          "province": {
+            "type": "integer"
+          },
+          "provinceName": {
+            "type": "string"
+          },
+          "city": {
+            "type": "integer"
+          },
+          "cityName": {
+            "type": "string"
+          },
+          "area": {
+            "type": "integer"
+          },
+          "areaName": {
+            "type": "string"
+          },
+          "loginCount": {
+            "type": "integer",
+            "description": "登录次数"
+          },
+          "lastLoginTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "最后登录时间"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verifyCode": {
+            "type": "string",
+            "description": "验证码"
+          },
+          "orgCode": {
+            "type": "string",
+            "description": "机构编码（教培）"
+          },
+          "terminal": {
+            "type": "integer",
+            "description": "1-app 2-小程序 3- h5 4-web"
+          },
+          "loginTerminalType": {
+            "type": "integer"
+          },
+          "newUser": {
+            "type": "boolean",
+            "description": "是否新用户"
+          },
+          "wxUserInfoAuth": {
+            "type": "integer",
+            "description": "微信用户信息是否授权（1-是 0-否）"
+          },
+          "loginFrom": {
+            "type": "string",
+            "description": "登录版本控制，可实现 同端互斥登录、强制下线等"
+          },
+          "loginChannel": {
+            "type": "string"
+          },
+          "appChannel": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer"
+          },
+          "regChannel": {
+            "type": "string",
+            "description": "注册渠道"
+          },
+          "lastChannel": {
+            "type": "string",
+            "description": "最后使用渠道"
+          },
+          "deviceId": {
+            "type": "string"
+          },
+          "anonymousLoginDeviceId": {
+            "type": "string"
+          },
+          "openId": {
+            "type": "string"
+          },
+          "unionId": {
+            "type": "string"
+          },
+          "platSyncData": {
+            "$ref": "#/components/schemas/PlatSyncData"
+          }
+        },
+        "description": ""
+      },
+      "TokenInfo": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "tokenExpireTime": {
+            "type": "integer"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2020-08-12"
+      },
+      "SysUserInfo": {
+        "type": "object",
+        "description": "(源码未定位: SysUserInfo)"
+      },
+      "SystemUserQueryParams": {
+        "type": "object",
+        "description": "(源码未定位: SystemUserQueryParams)"
+      },
+      "SysUserAuthLogin": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "userId": {
+            "type": "integer"
+          },
+          "unionId": {
+            "type": "string"
+          },
+          "openId": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "integer",
+            "description": "终端类型（1-app 2-小程序 3- h5  4-pc端扫码登录(网站扫码登录 会申请新appid和secret ) ）"
+          },
+          "loginType": {
+            "type": "integer",
+            "description": "授权平台（1-微信 2-qq 3-apple）"
+          },
+          "platId": {
+            "type": "integer",
+            "description": "所属系统（1-碑帖 2-教培 3-在线教育）"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "appSecret": {
+            "type": "string"
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "miniProgramsCode": {
+            "type": "string",
+            "description": "小程序类型"
+          },
+          "dyUser": {
+            "type": "integer"
+          }
+        },
+        "description": ""
+      },
+      "SysUserQueryParams": {
+        "type": "object",
+        "properties": {
+          "platId": {
+            "type": "integer"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-12-13 14:40"
+      },
+      "EvaluationUserPageParams": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "integer"
+          },
+          "platId": {
+            "type": "integer"
+          },
+          "teacherId": {
+            "type": "integer"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "userPic": {
+            "type": "string"
+          },
+          "userRealName": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "teacherName": {
+            "type": "string"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pageIndex": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        },
+        "description": ""
+      },
+      "BackUserLoginParams": {
+        "type": "object",
+        "properties": {
+          "userAccount": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "system": {
+            "$ref": "#/components/schemas/SystemEnum"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-05 17:17"
+      },
+      "LoginInfoVo": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "integer",
+            "description": "老系统uid"
+          },
+          "wxAuthUrl": {
+            "type": "string"
+          },
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "userInfo": {
+            "$ref": "#/components/schemas/SysUser"
+          },
+          "backUserInfo": {
+            "$ref": "#/components/schemas/BackUserInfo"
+          },
+          "sysBackUser": {
+            "$ref": "#/components/schemas/SysBackUser"
+          },
+          "type": {
+            "type": "integer"
+          },
+          "wxUserId": {
+            "type": "integer"
+          },
+          "phoneUserId": {
+            "type": "integer"
+          },
+          "sixthProductLoginStatus": {
+            "type": "integer"
+          },
+          "sixthProductLoginType": {
+            "type": "integer"
+          },
+          "sixthProductLoginAnotherUser": {
+            "$ref": "#/components/schemas/SysUser"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2020-07-23"
+      },
+      "WechatParams": {
+        "type": "object",
+        "properties": {
+          "platId": {
+            "type": "integer"
+          },
+          "role": {
+            "type": "integer",
+            "description": "1\t管理员\n2\t点评师\n3\t班主任\n4\t网络销售\n5\t销售主管\n6\t乐写字运营\n7\tAi评测运营\n8\t在线教育运营\n9\t碑帖运营\n10\t销售客服\n11\t电话销售"
+          },
+          "terminal": {
+            "type": "integer",
+            "description": "终端类型（1-app 2-小程序 3- h5  4-pc端扫码）"
+          },
+          "appid": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "openId": {
+            "type": "string"
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "grant_type": {
+            "type": "string"
+          },
+          "encryptedData": {
+            "type": "string",
+            "description": "小程序用户信息密文数据"
+          },
+          "iv": {
+            "type": "string"
+          },
+          "configKey": {
+            "type": "string",
+            "description": "微信appId配置 key"
+          },
+          "appCode": {
+            "type": "string",
+            "description": "app编码"
+          },
+          "miniProgramsCode": {
+            "type": "string",
+            "description": "小程序编码"
+          },
+          "miniProgramsType": {
+            "type": "integer",
+            "description": "recommend to use {@link WechatParams#miniProgramsCode}"
+          },
+          "sharedUrl": {
+            "type": "string",
+            "description": "微信分享url"
+          },
+          "miniProgramsUserInfo": {
+            "$ref": "#/components/schemas/MiniProgramsUserInfo",
+            "description": "小程序用户信息明文数据"
+          },
+          "loginFrom": {
+            "type": "string"
+          },
+          "loginChannel": {
+            "type": "string"
+          },
+          "appChannel": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "lastChannel": {
+            "type": "string"
+          },
+          "regChannel": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2020-07-29"
+      },
+      "DyLoginParams": {
+        "type": "object",
+        "properties": {
+          "platId": {
+            "type": "integer"
+          },
+          "miniProgramsCode": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "anonymousCode": {
+            "type": "string"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2020-07-29"
+      },
+      "ScanCodeLoginParams": {
+        "type": "object",
+        "properties": {
+          "loginTerminalType": {
+            "type": "integer"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "proxy": {
+            "type": "integer"
+          }
+        },
+        "description": "author myd\nDate 2022/7/1"
+      },
+      "LoginInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "userId"
+          },
+          "platId": {
+            "type": "integer",
+            "description": "所属系统（1-碑帖 2-教培 ）\n@see com.liupin.common.constant.SystemPlatEnum"
+          },
+          "uid": {
+            "type": "integer",
+            "description": "旧系统uid"
+          },
+          "userName": {
+            "type": "string",
+            "description": "用户名"
+          },
+          "userPic": {
+            "type": "string",
+            "description": "用户头像"
+          },
+          "sex": {
+            "type": "integer",
+            "description": "性别 1：男、2：女"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "loginVersion": {
+            "type": "string",
+            "description": "登录token版本，用于控制用户下线操作"
+          },
+          "platIds": {
+            "type": "string",
+            "description": "b端用户属于多个"
+          },
+          "tenant_id": {
+            "type": "integer",
+            "description": "教培机构id"
+          },
+          "loginTerminalType": {
+            "type": "integer"
+          },
+          "userType": {
+            "type": "integer"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2020-08-05"
+      },
+      "TabletAnonymousLoginParams": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string"
+          }
+        },
+        "description": ""
+      },
+      "WxAndPhoneParams": {
+        "type": "object",
+        "properties": {
+          "openId": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "platId": {
+            "type": "integer"
+          },
+          "smsType": {
+            "type": "integer"
+          },
+          "verifyCode": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "integer"
+          },
+          "loginChannel": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2022-04-20 09:18"
+      },
+      "AppleLoginParams": {
+        "type": "object",
+        "properties": {
+          "appleUserId": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "platId": {
+            "type": "integer"
+          },
+          "smsType": {
+            "type": "integer"
+          },
+          "verifyCode": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "integer"
+          },
+          "loginChannel": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2022-05-07 13:52"
+      },
+      "WxAuthPhoneLoginParams": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string"
+          },
+          "unionId": {
+            "type": "string"
+          },
+          "openId": {
+            "type": "string"
+          },
+          "loginChannel": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2022-05-16 09:26"
+      },
+      "UserDevices": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "integer"
+          },
+          "deviceId": {
+            "type": "string"
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "@author: Jack\n@create: 2023-05-29 09:04"
+      },
+      "SmsParams": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "integer"
+          },
+          "platId": {
+            "type": "integer"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "verifyCode": {
+            "type": "string"
+          },
+          "smsType": {
+            "type": "integer",
+            "description": "验证码类型 1：登录验证码 2：手机号绑定 3-更换验证码（原手机号验证）\n<p>\n碑帖 4-活动拉新验证码"
+          },
+          "signName": {
+            "type": "string"
+          },
+          "challenge": {
+            "type": "string",
+            "description": "图文验证码校验"
+          },
+          "challengeVerifyCode": {
+            "type": "string"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2020-08-17"
+      },
+      "JSONObject": {
+        "type": "object",
+        "description": "(源码未定位: JSONObject)"
+      },
+      "TabletUserReCoverParams": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "integer"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2022-03-29 14:22"
+      },
+      "MergeTabletUserParams": {
+        "type": "object",
+        "properties": {
+          "mainUserId": {
+            "type": "integer"
+          },
+          "toMergeUserId": {
+            "type": "integer"
+          },
+          "dataType": {
+            "type": "integer"
+          },
+          "openId": {
+            "type": "string"
+          },
+          "applyType": {
+            "type": "integer"
+          }
+        },
+        "description": "@author: Jack\n@create: 2022-04-24 09:06"
+      },
+      "TabletUserPhoneUpdate": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2023-04-23 09:56"
+      },
+      "SysBackUserParams": {
+        "type": "object",
+        "properties": {
+          "backUserId": {
+            "type": "integer"
+          },
+          "platId": {
+            "type": "integer"
+          },
+          "platIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "userAccount": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "userPic": {
+            "type": "string"
+          },
+          "role": {
+            "type": "integer"
+          },
+          "email": {
+            "type": "string"
+          },
+          "sex": {
+            "type": "integer"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "syncType": {
+            "type": "integer"
+          },
+          "map": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "roleCode": {
+            "type": "string"
+          }
+        },
+        "description": ""
+      },
+      "SysBackUser": {
+        "type": "object",
+        "properties": {
+          "backUserId": {
+            "type": "integer"
+          },
+          "platId": {
+            "type": "string",
+            "description": "所属平台"
+          },
+          "platNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "uid": {
+            "type": "integer"
+          },
+          "userAccount": {
+            "type": "string",
+            "description": "账户"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码"
+          },
+          "userName": {
+            "type": "string",
+            "description": "用户姓名"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机"
+          },
+          "userPic": {
+            "type": "string"
+          },
+          "role": {
+            "type": "integer"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "userRoles": {
+            "type": "string"
+          },
+          "roleNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "roleCode": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱"
+          },
+          "sex": {
+            "type": "integer",
+            "description": "性别 1：男、2：女"
+          },
+          "status": {
+            "type": "integer",
+            "description": "状态（0-正常 1-冻结 2-注销）"
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "cancelReason": {
+            "type": "string"
+          },
+          "freezeReason": {
+            "type": "string"
+          },
+          "unfreezeReason": {
+            "type": "string"
+          },
+          "systems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SystemEnum"
+            }
+          }
+        },
+        "description": ""
+      },
+      "PasswordUpdateParam": {
+        "type": "object",
+        "properties": {
+          "userAccount": {
+            "type": "string"
+          },
+          "oldPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-06-10 09:19"
+      },
+      "UserInfoModifyParams": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "userPic": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sex": {
+            "type": "integer"
+          },
+          "userRealName": {
+            "type": "string"
+          },
+          "province": {
+            "type": "integer"
+          },
+          "provinceName": {
+            "type": "string"
+          },
+          "city": {
+            "type": "integer"
+          },
+          "cityName": {
+            "type": "string"
+          },
+          "area": {
+            "type": "integer"
+          },
+          "areaName": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2020-09-21"
+      },
+      "PhoneBindParams": {
+        "type": "object",
+        "properties": {
+          "BY_UMENG": {
+            "type": "integer"
+          },
+          "BY_CUSTOMER": {
+            "type": "integer"
+          },
+          "bindType": {
+            "type": "integer",
+            "description": "手机绑定方式"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "verifyCode": {
+            "type": "string"
+          },
+          "uMengToken": {
+            "type": "string"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2020-09-15"
+      },
+      "TabletWxBindParams": {
+        "type": "object",
+        "properties": {
+          "openId": {
+            "type": "string"
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "LoginType": {
+            "type": "integer"
+          },
+          "terminal": {
+            "type": "integer"
+          }
+        },
+        "description": "@author: Jack\n@create: 2022-04-25 17:28"
+      },
+      "TabletPhoneBindParams": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string"
+          },
+          "verifyCode": {
+            "type": "string"
+          },
+          "uMengToken": {
+            "type": "string"
+          },
+          "bindType": {
+            "type": "integer"
+          }
+        },
+        "description": "@author: Jack\n@create: 2022-05-27 14:15"
+      },
+      "UserSyncParams": {
+        "type": "object",
+        "properties": {
+          "userInfo": {
+            "$ref": "#/components/schemas/SysUser"
+          },
+          "authLoginInfo": {
+            "$ref": "#/components/schemas/SysUserAuthLogin"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2020-11-17"
+      },
+      "SysBackUserSyncParams": {
+        "type": "object",
+        "properties": {
+          "platId": {
+            "type": "integer"
+          },
+          "userAccount": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "sex": {
+            "type": "integer"
+          },
+          "uid": {
+            "type": "integer"
+          },
+          "roleCode": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-05-29 10:39"
+      },
+      "WechatCallbackParams": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "authId": {
+            "type": "integer"
+          },
+          "orgId": {
+            "type": "integer"
+          },
+          "userId": {
+            "type": "integer"
+          },
+          "platId": {
+            "type": "integer"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2020-07-28"
+      },
+      "WechatSharedConfigInfo": {
+        "type": "object",
+        "properties": {
+          "appId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "integer"
+          },
+          "nonceStr": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          }
+        },
+        "description": "Description:\nauthor: yu.hb\nDate: 2021-03-16"
+      },
+      "MiniProgramQRCodeParams": {
+        "type": "object",
+        "description": "(源码未定位: MiniProgramQRCodeParams)"
+      },
+      "GenerateUrllinkParam": {
+        "type": "object",
+        "properties": {
+          "defaultAccessType": {
+            "type": "boolean"
+          },
+          "configKey": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "expireType": {
+            "type": "integer"
+          },
+          "expireTime": {
+            "type": "integer"
+          },
+          "expireInterval": {
+            "type": "integer"
+          },
+          "cloudBase": {
+            "$ref": "#/components/schemas/CloudBase"
+          },
+          "envVersion": {
+            "type": "string"
+          }
+        },
+        "description": "文档地址 ：  https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/qrcode-link/url-link/generateUrlLink.html\nauthor myd\nDate 2025/3/19"
+      },
+      "GenerateUrllinkParam2": {
+        "type": "object",
+        "properties": {
+          "defaultAccessType": {
+            "type": "boolean"
+          },
+          "configKey": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "envVersion": {
+            "type": "string"
+          },
+          "expireType": {
+            "type": "integer"
+          },
+          "expireTime": {
+            "type": "integer"
+          },
+          "expireInterval": {
+            "type": "integer"
+          }
+        },
+        "description": "文档地址 ：  https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/qrcode-link/url-scheme/generateScheme.html\nauthor myd\nDate 2025/3/19"
+      },
+      "MiniProgramsMsgParams": {
+        "type": "object",
+        "description": "(源码未定位: MiniProgramsMsgParams)"
+      },
+      "WechatUserInfo": {
+        "type": "object",
+        "properties": {
+          "openid": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "sex": {
+            "type": "string",
+            "description": "1-男 2-女 0-未知"
+          },
+          "province": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "headimgurl": {
+            "type": "string"
+          },
+          "unionid": {
+            "type": "string"
+          },
+          "purePhoneNumber": {
+            "type": "string",
+            "description": "手机号"
+          }
+        },
+        "description": "Description: 微信用户基本信息\nauthor: yu.hb\nDate: 2020-07-29"
+      },
+      "WpLoginParams": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "integer"
+          }
+        },
+        "description": "@author: Jack\n@create: 2022-08-30 15:13"
+      },
+      "ZheMeiMoBaoLoginParams": {
+        "type": "object",
+        "properties": {
+          "encryptedData": {
+            "type": "string"
+          },
+          "iv": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "integer"
+          },
+          "miniProgramsCode": {
+            "type": "string"
+          },
+          "appChannel": {
+            "type": "string"
+          },
+          "regChannel": {
+            "type": "string",
+            "description": "注册渠道"
+          }
+        },
+        "description": ""
+      },
+      "ComponentParams": {
+        "type": "object",
+        "properties": {
+          "platId": {
+            "type": "integer",
+            "description": "业务线id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ComponentType",
+            "description": "组件类型 MENU-菜单 BUTTON-按钮"
+          },
+          "system": {
+            "$ref": "#/components/schemas/SystemEnum",
+            "description": "所属系统"
+          },
+          "code": {
+            "type": "string",
+            "description": "组件编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "菜单名称"
+          },
+          "parentId": {
+            "type": "integer",
+            "description": "父级id，最顶层父级id为0"
+          },
+          "status": {
+            "type": "integer",
+            "description": "0-可用 1-禁用"
+          },
+          "sort": {
+            "type": "integer",
+            "description": "排序"
+          },
+          "componentUrl": {
+            "type": "string"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string",
+            "description": "跳转连接"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-04 09:39"
+      },
+      "ComponentUpdateParams": {
+        "type": "object",
+        "properties": {
+          "componentId": {
+            "type": "integer"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-04 14:31"
+      },
+      "SystemEnum": {
+        "type": "string",
+        "enum": [
+          "TABLET",
+          "TRAINING",
+          "SMART_PEN",
+          "NEW_EDU_ONLINE",
+          "OLD_EDU_ONLINE"
+        ],
+        "description": "@author: Jack\n@create: 2021-08-04 10:53"
+      },
+      "ComponentStatusParams": {
+        "type": "object",
+        "properties": {
+          "componentIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "status": {
+            "type": "integer"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-06 10:00"
+      },
+      "RoleParams": {
+        "type": "object",
+        "properties": {
+          "platId": {
+            "type": "integer"
+          },
+          "roleCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "roleName": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-05 09:22"
+      },
+      "RoleUpdateParams": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "integer"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-06 13:38"
+      },
+      "RoleQueryParams": {
+        "type": "object",
+        "properties": {
+          "platId": {
+            "type": "integer"
+          },
+          "roleName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-06 11:01"
+      },
+      "RoleStatusParams": {
+        "type": "object",
+        "properties": {
+          "roleIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "status": {
+            "type": "integer"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-06 13:48"
+      },
+      "AssignRoleComponentParams": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "integer"
+          },
+          "system": {
+            "$ref": "#/components/schemas/SystemEnum"
+          },
+          "componentIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "syncUser": {
+            "type": "boolean"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-06 13:56"
+      },
+      "RoleComponentParams": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "integer"
+          },
+          "system": {
+            "$ref": "#/components/schemas/SystemEnum"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-11 13:34"
+      },
+      "SysTeacherParam": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": ""
+      },
+      "SysTeacher": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": ""
+      },
+      "UserLogParam": {
+        "type": "object",
+        "properties": {
+          "userName": {
+            "type": "string"
+          },
+          "platId": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "integer"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          }
+        },
+        "description": "用户日志参数\nauthor myd\nDate 2021/8/5"
+      },
+      "SystemLogParam": {
+        "type": "object",
+        "properties": {
+          "userName": {
+            "type": "string"
+          },
+          "platId": {
+            "type": "integer"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "serviceStr": {
+            "type": "string"
+          }
+        },
+        "description": "用户日志参数\nauthor myd\nDate 2021/8/5"
+      },
+      "BackAdminUserParams": {
+        "type": "object",
+        "properties": {
+          "userAccount": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "platId": {
+            "type": "integer"
+          },
+          "roleId": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "integer"
+          }
+        },
+        "description": "author myd\nDate 2021/8/7"
+      },
+      "UserOperateParams": {
+        "type": "object",
+        "properties": {
+          "backUserIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "reason": {
+            "type": "string"
+          },
+          "platId": {
+            "type": "integer"
+          }
+        },
+        "description": "author myd\nDate 2021/8/6"
+      },
+      "AssignRoleParams": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer"
+          },
+          "roleIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-03 16:07"
+      },
+      "AssignComponentParams": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer"
+          },
+          "componentIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "system": {
+            "$ref": "#/components/schemas/SystemEnum"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-09 10:37"
+      },
+      "UserComponentsParams": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer"
+          },
+          "system": {
+            "$ref": "#/components/schemas/SystemEnum"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-16 09:59"
+      },
+      "OptionRolesQueryParams": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer"
+          },
+          "roleName": {
+            "type": "string"
+          },
+          "platId": {
+            "type": "integer"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-16 16:32"
+      },
+      "PlatSyncData": {
+        "type": "object",
+        "description": "(源码未定位: PlatSyncData)"
+      },
+      "BackUserInfo": {
+        "type": "object",
+        "properties": {
+          "backUserId": {
+            "type": "integer"
+          },
+          "platId": {
+            "type": "string",
+            "description": "所属平台"
+          },
+          "uid": {
+            "type": "integer"
+          },
+          "userAccount": {
+            "type": "string",
+            "description": "账户"
+          },
+          "userName": {
+            "type": "string",
+            "description": "用户姓名"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机"
+          },
+          "userPic": {
+            "type": "string"
+          },
+          "role": {
+            "type": "integer"
+          },
+          "roleCode": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱"
+          },
+          "sex": {
+            "type": "integer",
+            "description": "性别 1：男、2：女"
+          },
+          "status": {
+            "type": "integer",
+            "description": "状态（0-正常 1-冻结 2-注销）"
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SysBackRoleInfo"
+            }
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-06 16:35"
+      },
+      "MiniProgramsUserInfo": {
+        "type": "object",
+        "description": "(源码未定位: MiniProgramsUserInfo)"
+      },
+      "CloudBase": {
+        "type": "object",
+        "description": "(源码未定位: CloudBase)"
+      },
+      "ComponentType": {
+        "type": "string",
+        "enum": [
+          "MENU"
+        ],
+        "description": "@author: Jack\n@create: 2021-08-03 10:11"
+      },
+      "SysBackRoleInfo": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "integer"
+          },
+          "platId": {
+            "type": "integer"
+          },
+          "roleCode": {
+            "type": "string"
+          }
+        },
+        "description": "@author: Jack\n@create: 2021-08-06 16:54"
+      }
+    }
+  }
+}

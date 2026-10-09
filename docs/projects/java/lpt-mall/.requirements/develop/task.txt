@@ -1,0 +1,13 @@
+需求1：
+
+修复一下 执行mvn spring-boot:run -pl yudao-server -Dspring-boot.run.profiles=test 报错：
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+2026-10-09 10:45:49.505 | ERROR 1621877 | main [TID: N/A] o.s.boot.SpringApplication               | Application run failed
+
+org.springframework.beans.factory.BeanCurrentlyInCreationException: Error creating bean with name 'payWalletTransactionServiceImpl': Bean with name 'payWalletTransactionServiceImpl' has been injected into other beans [payWalletServiceImpl] in its raw version as part of a circular reference, but has eventually been wrapped. This means that said other beans do not use the final version of the bean. This is often the result of over-eager type matching - consider using 'getBeanNamesForType' with the 'allowEagerInit' flag turned off, for example.
+        at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:649)
+        at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:542)
+        at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:335)
+        at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+        at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:333)
+

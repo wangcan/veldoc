@@ -1,0 +1,6 @@
+需求
+1. 按核心、通用、业务属性，分析介绍项目的各个模块。结果保存在 .requirements/info/intro-module.md
+2. 提供项目打包、热部署等相关的命令操作文档。结果保存在 .requirements/info/intro-deploy.md
+
+忽略以下所有需求描述
+-. 。结果保存在 .requirements/info/intro-.md
