@@ -1,10 +1,17 @@
 usercenter业务模块
+除需求代码逻辑涉及到的数据增、改、查，不要做任何数据库相关的操作，
 模块地址：liupin-service/liupin-usercenter-service/
+
+需求：
+接口/api/v1/login/sixthProductLogin/wxLogin 功能调整：
+1. loginService.wxSixthProductLoginLogin(params)，LoginServiceImpl.java 575-579行的注释取消；
+2. 用当前匹配到的user_id，以及params, wechatUserInfo变量，在579行返回之前，向sys_user_auth_login写入一条数据；
+3. 评估一下这么操作是否有风险；
+
+忽略以下所有需求描述
 
 需求1：
 1. 分析介绍这个模块的功能。结果保存在 .requirements/subservices/usercenter/intro-module.md
 2. 提供模块打包、热部署等相关的命令操作文档。结果保存在 .requirements/subservices/usercenter/intro-deploy.md
 3. 为usercenter业务模块所有接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/subservices/usercenter/api.json
-
-忽略以下所有需求描述
 

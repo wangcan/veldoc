@@ -1,0 +1,5 @@
+
+需求1：
+1. https://nuxt.com/ 项目源码地址：/data/project/frontend/nuxt.com/；
+2. 为项目生成一个跟https://nuxt.com/一样的顶部菜单导航栏（header）；
+3. 为项目生成一个跟https://nuxt.com/一样的底部信息栏（footer）；

@@ -1,0 +1,5 @@
+项目底层源码基于：https://github.com/antfu/vitesse-nuxt；
+已集成模块 https://github.com/x-extends/vxe-table
+后续扩展的功能，同时支持PC和移动端；
+
+
