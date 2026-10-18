@@ -20,6 +20,11 @@ case $1 in
   resources=(.claude .requirements CLAUDE.md)
   ;;
 
+'job')
+  fullPath="${targetPath}rd/backend/job-laravel/"
+  sourcePath="/data/project/backend/job-laravel"
+  resources=(.mcp.json boost.json .claude .requirements CLAUDE.md README.md)
+  ;;
 'laravel')
   fullPath="${targetPath}rd/backend/laravel/"
   sourcePath="/data/project/backend/ai-laravel"

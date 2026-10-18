@@ -1,0 +1,3148 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Copybook 定制字帖模块 API",
+        "version": "1.0.0",
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "description": "定制字帖模块（Copybook）接口文档。基于用户提供的姓名、性别、版式，生成可供打印装订成册的姓名字帖 pdf 文件；男生、女生可选用不同的封面和内容页纸张。\n\n## 通用约定\n\n- 所有接口均以 `/api/v1` 为前缀（本文档 servers 已包含该前缀）。\n- 所有响应为 JSON（Content-Type: application/json）。\n- 认证方式为 JWT：先调用 `POST /admin/login` 获取 `access_token`，之后在请求头携带 `Authorization: Bearer {token}`。除登录接口外的所有接口均需要认证，未认证返回 401。\n- 管理员登录校验账号密码，且仅状态为启用（status=true）的管理员可以登录。\n- 分页列表接口统一支持 `page`（页码，从 1 开始）与 `per_page`（每页数量，默认 15）查询参数，响应结构统一为 `{data: [...], meta: {...}}`（列表响应不含 success 字段）。\n- 详情/新增/更新类响应统一为 `{success: true, data: ..., message: ...}` 结构（详情响应不含 message）。\n- 删除接口返回 204 无响应体。\n- 参数校验失败返回 422，格式为 `{message: ..., errors: {字段名: [错误信息]}}`。\n- 路由模型不存在时返回 404，格式为 `{message: ...}`。\n- 姓名字帖记录状态（记录与 pdf 单页共用）：pending 未处理 / processing 处理中 / completed 已完成 / name_abnormal 姓名字数异常 / font_abnormal 无字库异常 / other_abnormal 其他异常。\n- 权限标识取值：index 首页 / namecopybook 姓名字帖 / childrenstamp 儿童印章 / nametag 姓名贴 / fontmanage 字库管理 / system 系统管理。当前版本权限仅用于前端菜单展示控制，后端接口暂未按权限拦截。"
+    },
+    "servers": [
+        {
+            "url": "/api/v1",
+            "description": "Copybook 模块 API（相对路径，按实际部署域名拼接）"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "认证",
+            "description": "管理员 JWT 登录认证（登录 / 当前管理员 / 退出 / 刷新令牌）"
+        },
+        {
+            "name": "管理员管理",
+            "description": "管理员账号的增删改查（含角色分配、头像、昵称）"
+        },
+        {
+            "name": "角色权限管理",
+            "description": "极简版角色权限管理。角色支持软删除；已分配给管理员的角色删除会被拒绝（409）；角色名称唯一索引包含软删除记录（软删除的角色名称不能被新角色复用）"
+        },
+        {
+            "name": "字库管理",
+            "description": "汉字字库（标准体 / 手写体）分页查询与单字字库内容（base64）获取"
+        },
+        {
+            "name": "姓名字帖版本",
+            "description": "姓名字帖版本管理。代码为主键，路由按代码绑定；代码创建后不可修改；删除版本会级联删除其下所有版式"
+        },
+        {
+            "name": "姓名字帖版式",
+            "description": "姓名字帖版式管理。版式被姓名字帖记录引用后不可删除（数据库外键限制）"
+        },
+        {
+            "name": "姓名字帖记录",
+            "description": "姓名字帖记录的添加与查询。记录不可编辑和删除，不提供更新/删除接口；多音字姓名单条添加，非多音字姓名可批量添加"
+        },
+        {
+            "name": "姓名单字字数配置",
+            "description": "姓名单字字数配置查询（只读，来源于模块配置文件，供版式配置引用）"
+        }
+    ],
+    "paths": {
+        "/admin/login": {
+            "post": {
+                "tags": ["认证"],
+                "summary": "管理员登录",
+                "description": "账号 + 密码登录，返回 JWT。仅状态为启用的管理员可以登录；账号或密码错误（或管理员被停用）返回 401。",
+                "operationId": "adminLogin",
+                "security": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            },
+                            "example": {
+                                "account": "admin",
+                                "password": "123456"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "登录成功，返回 JWT 令牌",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/TokenData"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                                        "token_type": "bearer",
+                                        "expires_in": 3600
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "账号或密码错误，或管理员被停用",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "账号或密码错误"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            }
+        },
+        "/admin/me": {
+            "get": {
+                "tags": ["认证"],
+                "summary": "获取当前登录管理员",
+                "description": "返回当前认证的管理员信息（含头像、昵称、角色及角色权限信息）。角色未分配时 role 为 null。",
+                "operationId": "adminMe",
+                "responses": {
+                    "200": {
+                        "description": "当前管理员信息",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Admin"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            }
+        },
+        "/admin/logout": {
+            "post": {
+                "tags": ["认证"],
+                "summary": "退出登录",
+                "description": "使当前 JWT 失效。",
+                "operationId": "adminLogout",
+                "responses": {
+                    "200": {
+                        "description": "退出成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                },
+                                "example": {
+                                    "success": true,
+                                    "message": "退出成功"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            }
+        },
+        "/admin/refresh": {
+            "post": {
+                "tags": ["认证"],
+                "summary": "刷新令牌",
+                "description": "使用当前有效 JWT 换取新令牌（旧令牌失效）。",
+                "operationId": "adminRefresh",
+                "responses": {
+                    "200": {
+                        "description": "刷新成功，返回新 JWT 令牌",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/TokenData"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            }
+        },
+        "/admins": {
+            "get": {
+                "tags": ["管理员管理"],
+                "summary": "管理员分页列表",
+                "description": "分页返回管理员列表（含角色信息，角色未分配时 role 为 null）。支持按账号、昵称模糊搜索，按角色 ID、状态精确筛选。",
+                "operationId": "listAdmins",
+                "parameters": [
+                    {
+                        "name": "account",
+                        "in": "query",
+                        "required": false,
+                        "description": "账号模糊搜索",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "nickname",
+                        "in": "query",
+                        "required": false,
+                        "description": "昵称模糊搜索",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "role_id",
+                        "in": "query",
+                        "required": false,
+                        "description": "角色 ID 精确筛选（提供即生效）",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "description": "状态精确筛选（提供即生效：true 启用 / false 禁用）",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "管理员分页列表",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            },
+            "post": {
+                "tags": ["管理员管理"],
+                "summary": "新增管理员",
+                "description": "创建管理员账号。账号全局唯一；role_id 指向的角色必须存在且未被软删除，传 null 或不传表示不分配角色。",
+                "operationId": "createAdmin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminStoreRequest"
+                            },
+                            "example": {
+                                "account": "zhangsan",
+                                "password": "123456",
+                                "phone": "13800138000",
+                                "status": true,
+                                "avatar": "https://cdn.example.com/avatars/zhangsan.png",
+                                "nickname": "张三",
+                                "role_id": 1
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "管理员创建成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Admin"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "管理员创建成功"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            }
+        },
+        "/admins/{admin}": {
+            "parameters": [
+                {
+                    "name": "admin",
+                    "in": "path",
+                    "required": true,
+                    "description": "管理员 ID",
+                    "schema": {
+                        "type": "integer"
+                    },
+                    "example": 1
+                }
+            ],
+            "get": {
+                "tags": ["管理员管理"],
+                "summary": "管理员详情",
+                "description": "返回单个管理员信息（含角色信息，角色未分配时 role 为 null）。",
+                "operationId": "showAdmin",
+                "responses": {
+                    "200": {
+                        "description": "管理员详情",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Admin"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            },
+            "put": {
+                "tags": ["管理员管理"],
+                "summary": "更新管理员",
+                "description": "更新管理员信息。所有字段均可选（部分更新）；password 不传或传 null 时不修改密码；role_id 传 null 可清除角色分配（角色须存在且未软删除）。",
+                "operationId": "updateAdmin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminUpdateRequest"
+                            },
+                            "example": {
+                                "nickname": "张三丰",
+                                "role_id": 2
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "管理员更新成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Admin"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "管理员更新成功"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            },
+            "patch": {
+                "$ref": "#/paths/~1admins~1{admin}/put"
+            },
+            "delete": {
+                "tags": ["管理员管理"],
+                "summary": "删除管理员",
+                "description": "删除管理员账号（物理删除）。姓名字帖生成日志中保留操作者 ID 与账号快照，不受管理员删除影响。",
+                "operationId": "deleteAdmin",
+                "responses": {
+                    "204": {
+                        "description": "删除成功（无响应体）"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            }
+        },
+        "/role-permissions": {
+            "get": {
+                "tags": ["角色权限管理"],
+                "summary": "获取权限选项",
+                "description": "返回角色可选的权限选项（键为权限标识，值为权限名称），供前端渲染角色权限表单。权限选项来源于模块配置文件。",
+                "operationId": "permissionOptions",
+                "responses": {
+                    "200": {
+                        "description": "权限选项",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "description": "权限标识 => 权限名称",
+                                            "additionalProperties": {
+                                                "type": "string",
+                                                "description": "权限名称（中文）"
+                                            }
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "index": "首页",
+                                        "namecopybook": "姓名字帖",
+                                        "childrenstamp": "儿童印章",
+                                        "nametag": "姓名贴",
+                                        "fontmanage": "字库管理",
+                                        "system": "系统管理"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            }
+        },
+        "/roles": {
+            "get": {
+                "tags": ["角色权限管理"],
+                "summary": "角色分页列表",
+                "description": "分页返回角色列表（按 ID 倒序，软删除的角色不返回）。支持按角色名称模糊搜索。",
+                "operationId": "listRoles",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "description": "角色名称模糊搜索",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "角色分页列表",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoleListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            },
+            "post": {
+                "tags": ["角色权限管理"],
+                "summary": "新增角色",
+                "description": "创建角色。角色名称唯一（唯一索引包含软删除记录，已删除角色的名称不能复用）；permissions 为权限标识集合，至少一项、不可重复、取值必须是权限选项的键。",
+                "operationId": "createRole",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleStoreRequest"
+                            },
+                            "example": {
+                                "name": "字帖运营",
+                                "description": "负责姓名字帖业务",
+                                "permissions": ["index", "namecopybook", "fontmanage"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "角色创建成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Role"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "角色创建成功"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            }
+        },
+        "/roles/{role}": {
+            "parameters": [
+                {
+                    "name": "role",
+                    "in": "path",
+                    "required": true,
+                    "description": "角色 ID",
+                    "schema": {
+                        "type": "integer"
+                    },
+                    "example": 1
+                }
+            ],
+            "get": {
+                "tags": ["角色权限管理"],
+                "summary": "角色详情",
+                "description": "返回单个角色信息（软删除的角色返回 404）。",
+                "operationId": "showRole",
+                "responses": {
+                    "200": {
+                        "description": "角色详情",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Role"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            },
+            "put": {
+                "tags": ["角色权限管理"],
+                "summary": "更新角色",
+                "description": "更新角色信息。所有字段均可选（部分更新）；名称唯一性校验忽略自身。",
+                "operationId": "updateRole",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleUpdateRequest"
+                            },
+                            "example": {
+                                "description": "负责姓名字帖与姓名贴业务",
+                                "permissions": ["index", "namecopybook", "nametag"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "角色更新成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Role"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "角色更新成功"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            },
+            "patch": {
+                "$ref": "#/paths/~1roles~1{role}/put"
+            },
+            "delete": {
+                "tags": ["角色权限管理"],
+                "summary": "删除角色（软删除）",
+                "description": "软删除角色。仍有管理员引用该角色（role_id 指向该角色）时删除被拒绝，返回 409，需先调整这些管理员的角色分配。软删除后角色名称不能被新角色复用。",
+                "operationId": "deleteRole",
+                "responses": {
+                    "204": {
+                        "description": "删除成功（无响应体）"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    },
+                    "409": {
+                        "description": "该角色已分配给管理员，无法删除",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "该角色已分配给管理员，无法删除"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/characters": {
+            "get": {
+                "tags": ["字库管理"],
+                "summary": "字库分页列表",
+                "description": "分页返回汉字字库列表（按 ID 升序）。布尔筛选参数仅在传真值（1/true/on/yes 等）时生效，可与多个筛选同时组合（AND）。",
+                "operationId": "listCharacters",
+                "parameters": [
+                    {
+                        "name": "character",
+                        "in": "query",
+                        "required": false,
+                        "description": "单字模糊搜索",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "王"
+                    },
+                    {
+                        "name": "has_standard",
+                        "in": "query",
+                        "required": false,
+                        "description": "筛选有标准体字库的单字（传真值时生效）",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "has_handwritten",
+                        "in": "query",
+                        "required": false,
+                        "description": "筛选有手写体字库的单字（传真值时生效）",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "has_both",
+                        "in": "query",
+                        "required": false,
+                        "description": "筛选既有标准体又有手写体字库的单字（传真值时生效）",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "standard_used",
+                        "in": "query",
+                        "required": false,
+                        "description": "筛选标准体字库被使用过的单字（传真值时生效）",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "handwritten_used",
+                        "in": "query",
+                        "required": false,
+                        "description": "选手写体字库被使用过的单字（传真值时生效）",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "both_used",
+                        "in": "query",
+                        "required": false,
+                        "description": "筛选标准体与手写体字库均被使用过的单字（传真值时生效）",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "字库分页列表",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CharacterListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            }
+        },
+        "/characters/{character}": {
+            "get": {
+                "tags": ["字库管理"],
+                "summary": "获取单字字库内容",
+                "description": "返回指定单字的字库标记位与字体文件内容。字体文件内容为 base64 编码的文件字节（字库目录下与单字同名的文件）；对应标记位为 false 或文件不存在时该内容字段为 null。",
+                "operationId": "showCharacter",
+                "parameters": [
+                    {
+                        "name": "character",
+                        "in": "path",
+                        "required": true,
+                        "description": "单个汉字（URL 编码传递）",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1
+                        },
+                        "example": "王"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "单字字库详情",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/CharacterDetail"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "description": "字库不存在",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "字库不存在"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/name-copybook-versions": {
+            "get": {
+                "tags": ["姓名字帖版本"],
+                "summary": "姓名字帖版本分页列表",
+                "description": "分页返回姓名字帖版本列表（按代码升序）。支持按代码、名称模糊搜索。",
+                "operationId": "listNameCopybookVersions",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "required": false,
+                        "description": "版本代码模糊搜索",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "description": "版本名称模糊搜索",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "版本分页列表",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NameCopybookVersionListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            },
+            "post": {
+                "tags": ["姓名字帖版本"],
+                "summary": "新增姓名字帖版本",
+                "description": "创建姓名字帖版本。代码作为主键全局唯一，创建后不可修改。",
+                "operationId": "createNameCopybookVersion",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NameCopybookVersionStoreRequest"
+                            },
+                            "example": {
+                                "code": "V2026A",
+                                "name": "2026年A版",
+                                "male_preview_url": "https://cdn.example.com/previews/v2026a-male.png",
+                                "female_preview_url": "https://cdn.example.com/previews/v2026a-female.png"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "版本创建成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/NameCopybookVersion"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "姓名字帖版本创建成功"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            }
+        },
+        "/name-copybook-versions/{name_copybook_version}": {
+            "parameters": [
+                {
+                    "name": "name_copybook_version",
+                    "in": "path",
+                    "required": true,
+                    "description": "版本代码（路由按代码绑定，不是数字 ID）",
+                    "schema": {
+                        "type": "string"
+                    },
+                    "example": "V2026A"
+                }
+            ],
+            "get": {
+                "tags": ["姓名字帖版本"],
+                "summary": "姓名字帖版本详情",
+                "description": "按版本代码返回单个版本信息。",
+                "operationId": "showNameCopybookVersion",
+                "responses": {
+                    "200": {
+                        "description": "版本详情",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/NameCopybookVersion"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            },
+            "put": {
+                "tags": ["姓名字帖版本"],
+                "summary": "更新姓名字帖版本",
+                "description": "更新版本信息。版本代码为主键不可修改（请求体中不包含代码字段）；所有字段均可选（部分更新）。",
+                "operationId": "updateNameCopybookVersion",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NameCopybookVersionUpdateRequest"
+                            },
+                            "example": {
+                                "name": "2026年A版（修订）"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "版本更新成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/NameCopybookVersion"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "姓名字帖版本更新成功"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            },
+            "patch": {
+                "$ref": "#/paths/~1name-copybook-versions~1{name_copybook_version}/put"
+            },
+            "delete": {
+                "tags": ["姓名字帖版本"],
+                "summary": "删除姓名字帖版本",
+                "description": "删除版本（按代码）。其下所有版式会被级联删除。",
+                "operationId": "deleteNameCopybookVersion",
+                "responses": {
+                    "204": {
+                        "description": "删除成功（无响应体）"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            }
+        },
+        "/name-copybook-layouts": {
+            "get": {
+                "tags": ["姓名字帖版式"],
+                "summary": "姓名字帖版式分页列表",
+                "description": "分页返回版式列表（按 sort 升序、id 升序，含所属版本信息）。支持按版本代码精确、名称模糊、字体精确、是否有笔顺筛选（has_stroke_order 提供即生效）。",
+                "operationId": "listNameCopybookLayouts",
+                "parameters": [
+                    {
+                        "name": "version_code",
+                        "in": "query",
+                        "required": false,
+                        "description": "版本代码精确筛选",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "description": "版式名称模糊搜索",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "font",
+                        "in": "query",
+                        "required": false,
+                        "description": "字体精确筛选",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["standard", "handwritten"]
+                        }
+                    },
+                    {
+                        "name": "has_stroke_order",
+                        "in": "query",
+                        "required": false,
+                        "description": "是否有笔顺筛选（提供即生效：true 有笔顺 / false 无笔顺）",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "版式分页列表",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NameCopybookLayoutListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            },
+            "post": {
+                "tags": ["姓名字帖版式"],
+                "summary": "新增姓名字帖版式",
+                "description": "创建版式。version_code 必须为已存在的版本代码；三个姓名配置代码必须取自姓名单字字数配置元素，且 name_length 分别匹配两字/三字/四字姓名（配置元素中每组的单页代码也必须存在于基础单页代码表）。",
+                "operationId": "createNameCopybookLayout",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NameCopybookLayoutStoreRequest"
+                            },
+                            "example": {
+                                "version_code": "V2026A",
+                                "name": "P14 标准体版式",
+                                "content_page_count": 14,
+                                "font": "standard",
+                                "has_stroke_order": true,
+                                "two_char_config_code": "two_p14",
+                                "three_char_config_code": "three_p14",
+                                "four_char_config_code": "four_p14",
+                                "male_product_code": "M-P14-STD",
+                                "female_product_code": "F-P14-STD",
+                                "status": true,
+                                "sort": 1,
+                                "remark": "14页标准体，含笔顺"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "版式创建成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/NameCopybookLayout"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "姓名字帖版式创建成功"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            }
+        },
+        "/name-copybook-layouts/{name_copybook_layout}": {
+            "parameters": [
+                {
+                    "name": "name_copybook_layout",
+                    "in": "path",
+                    "required": true,
+                    "description": "版式 ID",
+                    "schema": {
+                        "type": "integer"
+                    },
+                    "example": 1
+                }
+            ],
+            "get": {
+                "tags": ["姓名字帖版式"],
+                "summary": "姓名字帖版式详情",
+                "description": "返回单个版式信息（含所属版本信息）。",
+                "operationId": "showNameCopybookLayout",
+                "responses": {
+                    "200": {
+                        "description": "版式详情",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/NameCopybookLayout"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            },
+            "put": {
+                "tags": ["姓名字帖版式"],
+                "summary": "更新姓名字帖版式",
+                "description": "更新版式信息。所有字段均可选（部分更新）；姓名配置代码、版本代码等校验规则与新增一致。注意：已被姓名字帖记录引用的版式信息会以快照形式保留在记录中。",
+                "operationId": "updateNameCopybookLayout",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NameCopybookLayoutUpdateRequest"
+                            },
+                            "example": {
+                                "status": false,
+                                "remark": "停用该版式"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "版式更新成功",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/NameCopybookLayout"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "姓名字帖版式更新成功"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            },
+            "patch": {
+                "$ref": "#/paths/~1name-copybook-layouts~1{name_copybook_layout}/put"
+            },
+            "delete": {
+                "tags": ["姓名字帖版式"],
+                "summary": "删除姓名字帖版式",
+                "description": "删除版式。已被姓名字帖记录引用（外键约束）的版式删除会失败，需先处理相关记录。",
+                "operationId": "deleteNameCopybookLayout",
+                "responses": {
+                    "204": {
+                        "description": "删除成功（无响应体）"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            }
+        },
+        "/name-copybooks": {
+            "get": {
+                "tags": ["姓名字帖记录"],
+                "summary": "姓名字帖记录分页列表",
+                "description": "分页返回姓名字帖记录（按 ID 倒序）。支持按批次码精确、姓名模糊、性别精确、状态精确、版式 ID 精确、版本代码精确筛选。",
+                "operationId": "listNameCopybooks",
+                "parameters": [
+                    {
+                        "name": "batch_code",
+                        "in": "query",
+                        "required": false,
+                        "description": "批次码精确筛选",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "description": "姓名模糊搜索",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "gender",
+                        "in": "query",
+                        "required": false,
+                        "description": "性别精确筛选",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["male", "female"]
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "description": "状态精确筛选",
+                        "schema": {
+                            "$ref": "#/components/schemas/CopybookStatus"
+                        }
+                    },
+                    {
+                        "name": "layout_id",
+                        "in": "query",
+                        "required": false,
+                        "description": "版式 ID 精确筛选",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "version_code",
+                        "in": "query",
+                        "required": false,
+                        "description": "版本代码精确筛选",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "姓名字帖记录分页列表",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NameCopybookListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            },
+            "post": {
+                "tags": ["姓名字帖记录"],
+                "summary": "添加姓名字帖记录",
+                "description": "添加姓名字帖记录（记录不可编辑和删除，无更新/删除接口）。\n\n- 多音字姓名只能单条添加：提供 `name` + `polyphonic_code`，不能同时提供 `names`；\n- 非多音字姓名可批量添加：提供 `names`（姓名去重后逐条添加）；\n- 批次码、性别、版式 ID 必填；版式必须存在且为使用中（status=true）；\n- 同一批次码有新增记录时，批次内序号自动加 1；\n- 批次码 + 姓名 + 性别 + 多音字编码 + 版式 ID 相同的记录视为重复，跳过并在 skipped 中说明；\n- 按版式对应的单页配置生成 pdf 单页记录与 pdf 关联记录；姓名不是 2-4 个汉字记为姓名字数异常，单字缺字库记为无字库异常；\n- 操作者（当前登录管理员）记入生成日志表。",
+                "operationId": "createNameCopybooks",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NameCopybookStoreRequest"
+                            },
+                            "examples": {
+                                "batch": {
+                                    "summary": "非多音字批量添加",
+                                    "value": {
+                                        "batch_code": "B20261015001",
+                                        "gender": "male",
+                                        "layout_id": 1,
+                                        "names": ["王小明", "李华"]
+                                    }
+                                },
+                                "polyphonic": {
+                                    "summary": "多音字单条添加",
+                                    "value": {
+                                        "batch_code": "B20261015001",
+                                        "gender": "female",
+                                        "layout_id": 1,
+                                        "name": "乐诗",
+                                        "polyphonic_code": "YUE"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "添加成功（含新增与跳过明细）。姓名字数异常/无字库异常的记录也会创建，状态记为对应异常。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "created": {
+                                                    "type": "array",
+                                                    "description": "本次新增的记录",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/NameCopybook"
+                                                    }
+                                                },
+                                                "skipped": {
+                                                    "type": "array",
+                                                    "description": "跳过的姓名及原因（重复记录）",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/SkippedNameCopybook"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "添加结果汇总",
+                                            "example": "姓名字帖添加成功：新增 2 条，跳过 1 条"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "success": true,
+                                    "data": {
+                                        "created": [
+                                            {
+                                                "id": 1,
+                                                "batch_code": "B20261015001",
+                                                "batch_sequence": 1,
+                                                "name": "王小明",
+                                                "gender": "male",
+                                                "name_length": 3,
+                                                "polyphonic_code": "",
+                                                "layout_id": 1,
+                                                "version_code": "V2026A",
+                                                "layout_name": "P14 标准体版式",
+                                                "product_code": "M-P14-STD",
+                                                "status": "pending",
+                                                "status_label": "未处理",
+                                                "exception_message": null,
+                                                "download_count": 0,
+                                                "created_at": "2026-10-15T08:00:00.000000Z",
+                                                "updated_at": "2026-10-15T08:00:00.000000Z"
+                                            }
+                                        ],
+                                        "skipped": [
+                                            {
+                                                "name": "李华",
+                                                "reason": "该批次码、姓名、性别、多音字编码、版式的记录已存在"
+                                            }
+                                        ]
+                                    },
+                                    "message": "姓名字帖添加成功：新增 1 条，跳过 1 条"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            }
+        },
+        "/name-copybooks/{name_copybook}": {
+            "get": {
+                "tags": ["姓名字帖记录"],
+                "summary": "姓名字帖记录详情",
+                "description": "返回单条记录详情，含版式信息、pdf 单页关联（按拼接顺序，含 pdf 单页详情）与生成日志列表。",
+                "operationId": "showNameCopybook",
+                "parameters": [
+                    {
+                        "name": "name_copybook",
+                        "in": "path",
+                        "required": true,
+                        "description": "姓名字帖记录 ID",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "记录详情（含版式、pdf 单页关联、生成日志）",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/NameCopybookDetail"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundError"
+                    }
+                }
+            }
+        },
+        "/name-page-configs": {
+            "get": {
+                "tags": ["姓名单字字数配置"],
+                "summary": "姓名单字字数配置列表",
+                "description": "返回姓名单字字数配置元素列表（只读，来源于模块配置文件）。每个元素附带按分组重复次数展开后的单页拼接顺序 page_sequence 与总页数 total_pages。支持按姓名字数筛选。",
+                "operationId": "listNamePageConfigs",
+                "parameters": [
+                    {
+                        "name": "name_length",
+                        "in": "query",
+                        "required": false,
+                        "description": "姓名字数精确筛选（2 两字 / 3 三字 / 4 四字）",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [2, 3, 4]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "配置元素列表（非分页）",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/NamePageConfigElement"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            }
+        },
+        "/name-page-configs/{code}": {
+            "get": {
+                "tags": ["姓名单字字数配置"],
+                "summary": "姓名单字字数配置详情",
+                "description": "按配置代码返回单个姓名单字字数配置元素（含 page_sequence 与 total_pages）。",
+                "operationId": "showNamePageConfig",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "description": "配置元素代码",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "two_p14"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "配置元素详情",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "description": "固定为 true"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/NamePageConfigElement"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "404": {
+                        "description": "姓名单字字数配置不存在",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "success": false,
+                                    "message": "姓名单字字数配置不存在"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "JWT 令牌认证。登录接口返回的 access_token 放入请求头：Authorization: Bearer {token}"
+            }
+        },
+        "parameters": {
+            "Page": {
+                "name": "page",
+                "in": "query",
+                "required": false,
+                "description": "页码（从 1 开始）",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 1
+                }
+            },
+            "PerPage": {
+                "name": "per_page",
+                "in": "query",
+                "required": false,
+                "description": "每页数量",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 15
+                }
+            }
+        },
+        "responses": {
+            "UnauthorizedError": {
+                "description": "未认证或令牌无效/过期",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Unauthenticated."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ValidationError": {
+                "description": "参数校验失败",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "required": ["message", "errors"],
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "校验失败摘要"
+                                },
+                                "errors": {
+                                    "type": "object",
+                                    "description": "字段名 => 错误信息列表",
+                                    "additionalProperties": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "example": {
+                            "message": "The account field is required. (and 1 more error)",
+                            "errors": {
+                                "account": ["The account field is required."],
+                                "password": ["The password field is required."]
+                            }
+                        }
+                    }
+                }
+            },
+            "NotFoundError": {
+                "description": "资源不存在（路由模型绑定失败）",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "No query results for model [Modules\\Copybook\\Models\\Admin] 999"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "LoginRequest": {
+                "type": "object",
+                "required": ["account", "password"],
+                "properties": {
+                    "account": {
+                        "type": "string",
+                        "description": "管理员账号",
+                        "example": "admin"
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "密码",
+                        "example": "123456"
+                    }
+                }
+            },
+            "TokenData": {
+                "type": "object",
+                "required": ["access_token", "token_type", "expires_in"],
+                "properties": {
+                    "access_token": {
+                        "type": "string",
+                        "description": "JWT 令牌，后续请求放入 Authorization: Bearer 头"
+                    },
+                    "token_type": {
+                        "type": "string",
+                        "description": "令牌类型，固定 bearer",
+                        "enum": ["bearer"]
+                    },
+                    "expires_in": {
+                        "type": "integer",
+                        "description": "令牌有效期（秒）",
+                        "example": 3600
+                    }
+                }
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "required": ["success", "message"],
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "description": "固定为 false"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "错误描述"
+                    }
+                }
+            },
+            "MessageResponse": {
+                "type": "object",
+                "required": ["success", "message"],
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "description": "固定为 true"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "结果描述"
+                    }
+                }
+            },
+            "PaginationMeta": {
+                "type": "object",
+                "required": ["current_page", "last_page", "per_page", "total"],
+                "properties": {
+                    "current_page": {
+                        "type": "integer",
+                        "description": "当前页码",
+                        "example": 1
+                    },
+                    "from": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "当前页第一条记录的位置（空页为 null）",
+                        "example": 1
+                    },
+                    "last_page": {
+                        "type": "integer",
+                        "description": "最后一页页码",
+                        "example": 1
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "example": 15
+                    },
+                    "to": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "当前页最后一条记录的位置（空页为 null）",
+                        "example": 15
+                    },
+                    "total": {
+                        "type": "integer",
+                        "description": "总记录数",
+                        "example": 15
+                    }
+                }
+            },
+            "PermissionKey": {
+                "type": "string",
+                "description": "权限标识：index 首页 / namecopybook 姓名字帖 / childrenstamp 儿童印章 / nametag 姓名贴 / fontmanage 字库管理 / system 系统管理",
+                "enum": ["index", "namecopybook", "childrenstamp", "nametag", "fontmanage", "system"]
+            },
+            "Gender": {
+                "type": "string",
+                "description": "性别：male 男生 / female 女生",
+                "enum": ["male", "female"]
+            },
+            "LayoutFont": {
+                "type": "string",
+                "description": "字体：standard 标准字体 / handwritten 手写字体",
+                "enum": ["standard", "handwritten"]
+            },
+            "CopybookStatus": {
+                "type": "string",
+                "description": "姓名字帖状态（记录与 pdf 单页共用）：pending 未处理 / processing 处理中 / completed 已完成 / name_abnormal 姓名字数异常 / font_abnormal 无字库异常 / other_abnormal 其他异常",
+                "enum": ["pending", "processing", "completed", "name_abnormal", "font_abnormal", "other_abnormal"]
+            },
+            "Role": {
+                "type": "object",
+                "required": ["id", "name", "permissions"],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "角色 ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "角色名称（唯一，软删除的角色名称不能复用）",
+                        "example": "字帖运营"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "角色描述",
+                        "example": "负责姓名字帖业务"
+                    },
+                    "permissions": {
+                        "type": "array",
+                        "description": "权限标识集合（JSON 数组，至少一项）",
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionKey"
+                        },
+                        "example": ["index", "namecopybook"]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "创建时间（ISO 8601）"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "更新时间（ISO 8601）"
+                    }
+                }
+            },
+            "Admin": {
+                "type": "object",
+                "required": ["id", "account", "status"],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "管理员 ID"
+                    },
+                    "account": {
+                        "type": "string",
+                        "description": "账号（唯一）",
+                        "example": "zhangsan"
+                    },
+                    "avatar": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "头像地址",
+                        "example": "https://cdn.example.com/avatars/zhangsan.png"
+                    },
+                    "nickname": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "昵称",
+                        "example": "张三"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "手机号",
+                        "example": "13800138000"
+                    },
+                    "status": {
+                        "type": "boolean",
+                        "description": "状态：true 启用 / false 禁用（禁用的管理员不能登录）"
+                    },
+                    "role_id": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "角色 ID（单一角色，未分配为 null）"
+                    },
+                    "role": {
+                        "type": "object",
+                        "nullable": true,
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Role"
+                            }
+                        ],
+                        "description": "角色信息（未分配角色时为 null）"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "创建时间（ISO 8601）"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "更新时间（ISO 8601）"
+                    }
+                }
+            },
+            "Character": {
+                "type": "object",
+                "required": ["id", "character", "has_standard_font", "has_handwritten_font", "standard_font_used", "handwritten_font_used"],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "字库 ID"
+                    },
+                    "character": {
+                        "type": "string",
+                        "description": "汉字单字（唯一）",
+                        "example": "王"
+                    },
+                    "has_standard_font": {
+                        "type": "boolean",
+                        "description": "是否有标准体字库"
+                    },
+                    "has_handwritten_font": {
+                        "type": "boolean",
+                        "description": "是否有手写体字库"
+                    },
+                    "standard_font_used": {
+                        "type": "boolean",
+                        "description": "标准体字库是否被使用过"
+                    },
+                    "handwritten_font_used": {
+                        "type": "boolean",
+                        "description": "手写体字库是否被使用过"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "创建时间（ISO 8601）"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "更新时间（ISO 8601）"
+                    }
+                }
+            },
+            "CharacterDetail": {
+                "type": "object",
+                "required": ["character", "has_standard_font", "has_handwritten_font", "standard_font_used", "handwritten_font_used"],
+                "properties": {
+                    "character": {
+                        "type": "string",
+                        "description": "汉字单字",
+                        "example": "王"
+                    },
+                    "has_standard_font": {
+                        "type": "boolean",
+                        "description": "是否有标准体字库"
+                    },
+                    "has_handwritten_font": {
+                        "type": "boolean",
+                        "description": "是否有手写体字库"
+                    },
+                    "standard_font_used": {
+                        "type": "boolean",
+                        "description": "标准体字库是否被使用过"
+                    },
+                    "handwritten_font_used": {
+                        "type": "boolean",
+                        "description": "手写体字库是否被使用过"
+                    },
+                    "standard_content": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "标准体字库文件内容（base64 编码的文件字节）。has_standard_font 为 false 或字库文件缺失时为 null"
+                    },
+                    "handwritten_content": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "手写体字库文件内容（base64 编码的文件字节）。has_handwritten_font 为 false 或字库文件缺失时为 null"
+                    }
+                }
+            },
+            "NameCopybookVersion": {
+                "type": "object",
+                "required": ["code", "name"],
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "版本代码（主键，创建后不可修改）",
+                        "example": "V2026A"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "版本名称",
+                        "example": "2026年A版"
+                    },
+                    "male_preview_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "男生版效果图地址",
+                        "example": "https://cdn.example.com/previews/v2026a-male.png"
+                    },
+                    "female_preview_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "女生版效果图地址",
+                        "example": "https://cdn.example.com/previews/v2026a-female.png"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "创建时间（ISO 8601）"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "更新时间（ISO 8601）"
+                    }
+                }
+            },
+            "NameCopybookLayout": {
+                "type": "object",
+                "required": ["id", "version_code", "name", "content_page_count", "font", "has_stroke_order", "two_char_config_code", "three_char_config_code", "four_char_config_code", "male_product_code", "female_product_code", "status", "sort"],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "版式 ID"
+                    },
+                    "version_code": {
+                        "type": "string",
+                        "description": "版本代码（取姓名字帖版本表 code）",
+                        "example": "V2026A"
+                    },
+                    "version": {
+                        "$ref": "#/components/schemas/NameCopybookVersion",
+                        "description": "所属版本信息"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "版式名称",
+                        "example": "P14 标准体版式"
+                    },
+                    "content_page_count": {
+                        "type": "integer",
+                        "description": "字帖内容页页数",
+                        "example": 14
+                    },
+                    "font": {
+                        "$ref": "#/components/schemas/LayoutFont",
+                        "description": "字体"
+                    },
+                    "has_stroke_order": {
+                        "type": "boolean",
+                        "description": "是否有笔顺"
+                    },
+                    "two_char_config_code": {
+                        "type": "string",
+                        "description": "两字姓名配置代码（取姓名单字字数配置元素代码）",
+                        "example": "two_p14"
+                    },
+                    "three_char_config_code": {
+                        "type": "string",
+                        "description": "三字姓名配置代码（取姓名单字字数配置元素代码）",
+                        "example": "three_p14"
+                    },
+                    "four_char_config_code": {
+                        "type": "string",
+                        "description": "四字姓名配置代码（取姓名单字字数配置元素代码）",
+                        "example": "four_p14"
+                    },
+                    "male_product_code": {
+                        "type": "string",
+                        "description": "男生版商品编码",
+                        "example": "M-P14-STD"
+                    },
+                    "female_product_code": {
+                        "type": "string",
+                        "description": "女生版商品编码",
+                        "example": "F-P14-STD"
+                    },
+                    "status": {
+                        "type": "boolean",
+                        "description": "使用状态：true 使用中 / false 停用（姓名字帖添加时校验版式使用中）"
+                    },
+                    "sort": {
+                        "type": "integer",
+                        "description": "排序（列表按 sort、id 升序）",
+                        "example": 1
+                    },
+                    "remark": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "备注",
+                        "example": "14页标准体，含笔顺"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "创建时间（ISO 8601）"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "更新时间（ISO 8601）"
+                    }
+                }
+            },
+            "NameCopybook": {
+                "type": "object",
+                "required": ["id", "batch_code", "batch_sequence", "name", "gender", "name_length", "polyphonic_code", "layout_id", "version_code", "layout_name", "product_code", "status", "status_label", "download_count"],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "记录 ID"
+                    },
+                    "batch_code": {
+                        "type": "string",
+                        "description": "批次码",
+                        "example": "B20261015001"
+                    },
+                    "batch_sequence": {
+                        "type": "integer",
+                        "description": "当前批次内序号（同一批次码有新增记录时自动加 1）",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "姓名",
+                        "example": "王小明"
+                    },
+                    "gender": {
+                        "$ref": "#/components/schemas/Gender",
+                        "description": "性别"
+                    },
+                    "name_length": {
+                        "type": "integer",
+                        "description": "姓名汉字字数（2-4 为正常，其余记为姓名字数异常）",
+                        "example": 3
+                    },
+                    "polyphonic_code": {
+                        "type": "string",
+                        "description": "多音字编码，空串表示非多音字姓名",
+                        "example": ""
+                    },
+                    "layout_id": {
+                        "type": "integer",
+                        "description": "版式 ID（取姓名字帖版式表 ID）"
+                    },
+                    "version_code": {
+                        "type": "string",
+                        "description": "版本代码（添加时从版式同步的快照）",
+                        "example": "V2026A"
+                    },
+                    "layout_name": {
+                        "type": "string",
+                        "description": "版式名称（添加时从版式同步的快照）",
+                        "example": "P14 标准体版式"
+                    },
+                    "product_code": {
+                        "type": "string",
+                        "description": "商品编码（添加时按性别取版式的男生/女生版商品编码）",
+                        "example": "M-P14-STD"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/CopybookStatus",
+                        "description": "状态"
+                    },
+                    "status_label": {
+                        "type": "string",
+                        "description": "状态中文标签",
+                        "example": "未处理"
+                    },
+                    "exception_message": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "异常描述信息",
+                        "example": null
+                    },
+                    "download_count": {
+                        "type": "integer",
+                        "description": "下载次数",
+                        "example": 0
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "创建时间（ISO 8601）"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "更新时间（ISO 8601）"
+                    }
+                }
+            },
+            "NameCopybookDetail": {
+                "description": "姓名字帖记录详情（详情接口返回，额外包含版式、pdf 单页关联、生成日志）",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/NameCopybook"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "layout": {
+                                "$ref": "#/components/schemas/NameCopybookLayout",
+                                "description": "版式信息"
+                            },
+                            "pdf_relations": {
+                                "type": "array",
+                                "description": "pdf 单页关联列表（按拼接顺序 sort 升序，含 pdf 单页详情）",
+                                "items": {
+                                    "$ref": "#/components/schemas/NameCopybookPdfRelation"
+                                }
+                            },
+                            "logs": {
+                                "type": "array",
+                                "description": "生成日志列表（每个记录至少一条）",
+                                "items": {
+                                    "$ref": "#/components/schemas/NameCopybookGenerationLog"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "NameCopybookPdfRelation": {
+                "type": "object",
+                "required": ["id", "name_copybook_id", "sort", "page_code", "pdf_page_id", "status", "status_label"],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "关联 ID"
+                    },
+                    "name_copybook_id": {
+                        "type": "integer",
+                        "description": "姓名字帖记录 ID"
+                    },
+                    "sort": {
+                        "type": "integer",
+                        "description": "拼接顺序（从 1 开始，拼接最终字帖 pdf 的顺序）",
+                        "example": 1
+                    },
+                    "page_code": {
+                        "type": "string",
+                        "description": "单页代码（基础单页代码表的代码）",
+                        "example": "first"
+                    },
+                    "pdf_page_id": {
+                        "type": "integer",
+                        "description": "pdf 单页 ID（取姓名字帖 pdf 单页表 ID）"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/CopybookStatus",
+                        "description": "pdf 生成状态（与对应 pdf 单页状态保持同步）"
+                    },
+                    "status_label": {
+                        "type": "string",
+                        "description": "状态中文标签",
+                        "example": "未处理"
+                    },
+                    "pdf_page": {
+                        "$ref": "#/components/schemas/NameCopybookPdfPage",
+                        "description": "pdf 单页详情（详情接口返回）"
+                    }
+                }
+            },
+            "NameCopybookPdfPage": {
+                "type": "object",
+                "required": ["id", "character", "is_single_character", "name_length", "polyphonic_code", "layout_id", "version_code", "name_config_code", "font", "has_stroke_order", "page_code", "page_info", "status", "status_label"],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "pdf 单页 ID"
+                    },
+                    "character": {
+                        "type": "string",
+                        "description": "汉字内容：单个汉字或姓名组合（按单页取汉字方式从姓名解析）",
+                        "example": "王"
+                    },
+                    "font_library_id": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "字库 ID（汉字为单个汉字时为对应字库记录 ID；多字组合页为 null）"
+                    },
+                    "is_single_character": {
+                        "type": "boolean",
+                        "description": "是否是单个汉字"
+                    },
+                    "name_length": {
+                        "type": "integer",
+                        "description": "姓名汉字字数",
+                        "example": 3
+                    },
+                    "polyphonic_code": {
+                        "type": "string",
+                        "description": "多音字编码，空串表示非多音字姓名",
+                        "example": ""
+                    },
+                    "layout_id": {
+                        "type": "integer",
+                        "description": "版式 ID"
+                    },
+                    "version_code": {
+                        "type": "string",
+                        "description": "版本代码",
+                        "example": "V2026A"
+                    },
+                    "name_config_code": {
+                        "type": "string",
+                        "description": "姓名配置代码（根据姓名汉字字数选择的版式姓名配置代码）",
+                        "example": "three_p14"
+                    },
+                    "font": {
+                        "$ref": "#/components/schemas/LayoutFont",
+                        "description": "字体"
+                    },
+                    "has_stroke_order": {
+                        "type": "boolean",
+                        "description": "是否有笔顺"
+                    },
+                    "page_code": {
+                        "type": "string",
+                        "description": "单页代码（基础单页代码表的代码）",
+                        "example": "first"
+                    },
+                    "page_info": {
+                        "type": "object",
+                        "description": "单页信息（单页定义的 JSON 快照）",
+                        "required": ["name", "type"],
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "单页名称",
+                                "example": "姓名首字"
+                            },
+                            "type": {
+                                "type": "string",
+                                "description": "单页取汉字方式：single 单个汉字 / partial 部分组合 / full 全名",
+                                "enum": ["single", "partial", "full"]
+                            },
+                            "position": {
+                                "type": "integer",
+                                "description": "type=single 时取姓名第 position 个字（从 0 开始）",
+                                "example": 0
+                            },
+                            "offset": {
+                                "type": "integer",
+                                "description": "type=partial 时取汉字起始偏移（负数表示从姓名末尾数起）",
+                                "example": 0
+                            },
+                            "length": {
+                                "type": "integer",
+                                "description": "type=partial 时取汉字个数",
+                                "example": 2
+                            }
+                        }
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/CopybookStatus",
+                        "description": "pdf 生成状态"
+                    },
+                    "status_label": {
+                        "type": "string",
+                        "description": "状态中文标签",
+                        "example": "未处理"
+                    },
+                    "exception_message": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "异常描述信息（如无字库异常的具体说明）",
+                        "example": null
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "创建时间（ISO 8601）"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "更新时间（ISO 8601）"
+                    }
+                }
+            },
+            "NameCopybookGenerationLog": {
+                "type": "object",
+                "required": ["id", "name_copybook_id", "operator_id", "operator_account", "operated_at"],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "日志 ID"
+                    },
+                    "name_copybook_id": {
+                        "type": "integer",
+                        "description": "姓名字帖记录 ID"
+                    },
+                    "operator_id": {
+                        "type": "integer",
+                        "description": "操作者 ID（管理员表 ID 快照，管理员删除后日志仍可追溯）"
+                    },
+                    "operator_account": {
+                        "type": "string",
+                        "description": "操作者账号（快照）",
+                        "example": "admin"
+                    },
+                    "operated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "操作时间（ISO 8601）"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "创建时间（ISO 8601）"
+                    }
+                }
+            },
+            "SkippedNameCopybook": {
+                "type": "object",
+                "required": ["name", "reason"],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "被跳过的姓名",
+                        "example": "李华"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "description": "跳过原因",
+                        "example": "该批次码、姓名、性别、多音字编码、版式的记录已存在"
+                    }
+                }
+            },
+            "NamePageConfigGroup": {
+                "type": "object",
+                "required": ["code", "name", "repeat", "pages"],
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "组代码（元素内唯一）",
+                        "example": "first"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "组名称",
+                        "example": "姓名首字"
+                    },
+                    "repeat": {
+                        "type": "integer",
+                        "description": "重复次数：拼接最终字帖 pdf 时该组作为一个整体重复的次数",
+                        "example": 2
+                    },
+                    "pages": {
+                        "type": "array",
+                        "description": "基础单页代码列表（按顺序拼接）",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": ["first"]
+                    }
+                }
+            },
+            "NamePageConfigElement": {
+                "type": "object",
+                "required": ["code", "name", "name_length", "groups", "page_sequence", "total_pages"],
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "配置代码（全文件唯一，被版式表引用）",
+                        "example": "two_p14"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "名称",
+                        "example": "两字姓名·P14"
+                    },
+                    "name_length": {
+                        "type": "integer",
+                        "description": "姓名字数：2 两字 / 3 三字 / 4 四字",
+                        "enum": [2, 3, 4],
+                        "example": 2
+                    },
+                    "groups": {
+                        "type": "array",
+                        "description": "单页分组（拼接最终字帖 pdf 时按顺序遍历）",
+                        "items": {
+                            "$ref": "#/components/schemas/NamePageConfigGroup"
+                        }
+                    },
+                    "page_sequence": {
+                        "type": "array",
+                        "description": "单页拼接顺序：按分组顺序、每组重复 repeat 次展开后的单页代码序列",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": ["first", "first", "second", "second", "fullbase", "fullbase", "fullext", "fullext"]
+                    },
+                    "total_pages": {
+                        "type": "integer",
+                        "description": "总页数（page_sequence 的长度）",
+                        "example": 8
+                    }
+                }
+            },
+            "AdminListResponse": {
+                "type": "object",
+                "required": ["data", "meta"],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Admin"
+                        }
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                }
+            },
+            "RoleListResponse": {
+                "type": "object",
+                "required": ["data", "meta"],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Role"
+                        }
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                }
+            },
+            "CharacterListResponse": {
+                "type": "object",
+                "required": ["data", "meta"],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Character"
+                        }
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                }
+            },
+            "NameCopybookVersionListResponse": {
+                "type": "object",
+                "required": ["data", "meta"],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NameCopybookVersion"
+                        }
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                }
+            },
+            "NameCopybookLayoutListResponse": {
+                "type": "object",
+                "required": ["data", "meta"],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NameCopybookLayout"
+                        }
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                }
+            },
+            "NameCopybookListResponse": {
+                "type": "object",
+                "required": ["data", "meta"],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NameCopybook"
+                        }
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                }
+            },
+            "AdminStoreRequest": {
+                "type": "object",
+                "required": ["account", "password"],
+                "properties": {
+                    "account": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "账号（必填，全局唯一）",
+                        "example": "zhangsan"
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 6,
+                        "maxLength": 128,
+                        "description": "密码（必填，6-128 位，存储时自动哈希）",
+                        "example": "123456"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20,
+                        "description": "手机号（可选）",
+                        "example": "13800138000"
+                    },
+                    "status": {
+                        "type": "boolean",
+                        "description": "状态（默认 true 启用；禁用的管理员不能登录）",
+                        "default": true,
+                        "example": true
+                    },
+                    "avatar": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 512,
+                        "description": "头像地址（可选）"
+                    },
+                    "nickname": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 64,
+                        "description": "昵称（可选）",
+                        "example": "张三"
+                    },
+                    "role_id": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "角色 ID（可选；角色必须存在且未软删除，管理员只分配单一角色）",
+                        "example": 1
+                    }
+                }
+            },
+            "AdminUpdateRequest": {
+                "type": "object",
+                "description": "更新管理员（所有字段均可选，部分更新；password 不传或传 null 时不修改密码）",
+                "properties": {
+                    "account": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "账号（唯一性校验忽略自身）",
+                        "example": "zhangsan"
+                    },
+                    "password": {
+                        "type": "string",
+                        "nullable": true,
+                        "minLength": 6,
+                        "maxLength": 128,
+                        "description": "新密码（不传或传 null 时不修改）",
+                        "example": "654321"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20,
+                        "description": "手机号"
+                    },
+                    "status": {
+                        "type": "boolean",
+                        "description": "状态：true 启用 / false 禁用"
+                    },
+                    "avatar": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 512,
+                        "description": "头像地址"
+                    },
+                    "nickname": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 64,
+                        "description": "昵称"
+                    },
+                    "role_id": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "角色 ID（传 null 清除角色分配；角色必须存在且未软删除）"
+                    }
+                }
+            },
+            "RoleStoreRequest": {
+                "type": "object",
+                "required": ["name", "permissions"],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "角色名称（必填，唯一；唯一索引包含软删除记录）",
+                        "example": "字帖运营"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "description": "描述（可选）"
+                    },
+                    "permissions": {
+                        "type": "array",
+                        "minItems": 1,
+                        "description": "权限标识集合（必填，至少一项、不可重复，取值为权限选项的键）",
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionKey"
+                        },
+                        "example": ["index", "namecopybook"]
+                    }
+                }
+            },
+            "RoleUpdateRequest": {
+                "type": "object",
+                "description": "更新角色（所有字段均可选，部分更新；名称唯一性校验忽略自身）",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "角色名称"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "description": "描述"
+                    },
+                    "permissions": {
+                        "type": "array",
+                        "minItems": 1,
+                        "description": "权限标识集合（至少一项、不可重复）",
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionKey"
+                        }
+                    }
+                }
+            },
+            "NameCopybookVersionStoreRequest": {
+                "type": "object",
+                "required": ["code", "name"],
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "版本代码（必填，主键，全局唯一，创建后不可修改）",
+                        "example": "V2026A"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "description": "版本名称（必填）",
+                        "example": "2026年A版"
+                    },
+                    "male_preview_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 512,
+                        "description": "男生版效果图地址（可选）"
+                    },
+                    "female_preview_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 512,
+                        "description": "女生版效果图地址（可选）"
+                    }
+                }
+            },
+            "NameCopybookVersionUpdateRequest": {
+                "type": "object",
+                "description": "更新版本（版本代码不可修改；所有字段均可选，部分更新）",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "description": "版本名称"
+                    },
+                    "male_preview_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 512,
+                        "description": "男生版效果图地址"
+                    },
+                    "female_preview_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 512,
+                        "description": "女生版效果图地址"
+                    }
+                }
+            },
+            "NameCopybookLayoutStoreRequest": {
+                "type": "object",
+                "required": ["version_code", "name", "content_page_count", "font", "two_char_config_code", "three_char_config_code", "four_char_config_code", "male_product_code", "female_product_code"],
+                "properties": {
+                    "version_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "版本代码（必填，必须为已存在的版本代码）",
+                        "example": "V2026A"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "description": "版式名称（必填）",
+                        "example": "P14 标准体版式"
+                    },
+                    "content_page_count": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "字帖内容页页数（必填）",
+                        "example": 14
+                    },
+                    "font": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LayoutFont"
+                            }
+                        ],
+                        "description": "字体（必填，当前支持标准字体、手写字体两种）"
+                    },
+                    "has_stroke_order": {
+                        "type": "boolean",
+                        "description": "是否有笔顺（默认 false）",
+                        "default": false
+                    },
+                    "two_char_config_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "两字姓名配置代码（必填，必须是姓名单字字数配置中 name_length=2 的元素代码）",
+                        "example": "two_p14"
+                    },
+                    "three_char_config_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "三字姓名配置代码（必填，必须是姓名单字字数配置中 name_length=3 的元素代码）",
+                        "example": "three_p14"
+                    },
+                    "four_char_config_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "四字姓名配置代码（必填，必须是姓名单字字数配置中 name_length=4 的元素代码）",
+                        "example": "four_p14"
+                    },
+                    "male_product_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "男生版商品编码（必填）",
+                        "example": "M-P14-STD"
+                    },
+                    "female_product_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "女生版商品编码（必填）",
+                        "example": "F-P14-STD"
+                    },
+                    "status": {
+                        "type": "boolean",
+                        "description": "使用状态（默认 true 使用中；姓名字帖添加时校验版式使用中）",
+                        "default": true
+                    },
+                    "sort": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "排序（默认 0，列表按 sort、id 升序）",
+                        "default": 0,
+                        "example": 1
+                    },
+                    "remark": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "description": "备注（可选）"
+                    }
+                }
+            },
+            "NameCopybookLayoutUpdateRequest": {
+                "type": "object",
+                "description": "更新版式（所有字段均可选，部分更新；校验规则与新增一致）",
+                "properties": {
+                    "version_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "版本代码（必须为已存在的版本代码）"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 128,
+                        "description": "版式名称"
+                    },
+                    "content_page_count": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "字帖内容页页数"
+                    },
+                    "font": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LayoutFont"
+                            }
+                        ],
+                        "description": "字体"
+                    },
+                    "has_stroke_order": {
+                        "type": "boolean",
+                        "description": "是否有笔顺"
+                    },
+                    "two_char_config_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "两字姓名配置代码（必须是姓名单字字数配置中 name_length=2 的元素代码）"
+                    },
+                    "three_char_config_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "三字姓名配置代码（必须是姓名单字字数配置中 name_length=3 的元素代码）"
+                    },
+                    "four_char_config_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "四字姓名配置代码（必须是姓名单字字数配置中 name_length=4 的元素代码）"
+                    },
+                    "male_product_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "男生版商品编码"
+                    },
+                    "female_product_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "女生版商品编码"
+                    },
+                    "status": {
+                        "type": "boolean",
+                        "description": "使用状态：true 使用中 / false 停用"
+                    },
+                    "sort": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "排序"
+                    },
+                    "remark": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255,
+                        "description": "备注"
+                    }
+                }
+            },
+            "NameCopybookStoreRequest": {
+                "type": "object",
+                "description": "添加姓名字帖记录。批次码、性别、版式 ID 必填；多音字姓名添加必须提供 name + polyphonic_code（单条，不能同时提供 names）；非多音字批量添加必须提供 names（姓名去重后逐条添加）。",
+                "required": ["batch_code", "gender", "layout_id"],
+                "properties": {
+                    "batch_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "批次码（必填）",
+                        "example": "B20261015001"
+                    },
+                    "gender": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Gender"
+                            }
+                        ],
+                        "description": "性别（必填）"
+                    },
+                    "layout_id": {
+                        "type": "integer",
+                        "description": "版式 ID（必填，版式必须存在且使用中）",
+                        "example": 1
+                    },
+                    "names": {
+                        "type": "array",
+                        "description": "非多音字姓名列表（批量添加，自动去重；与 name/polyphonic_code 二选一）",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                        },
+                        "example": ["王小明", "李华"]
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "多音字姓名（单条添加；与 names 二选一）",
+                        "example": "乐诗"
+                    },
+                    "polyphonic_code": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "description": "多音字编码（多音字姓名添加时必填）",
+                        "example": "YUE"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,135 @@
+
+需求：
+姓名字帖版本版式调整
+1. 新增一个版本版式配置文件，配置信息格式如下所示：
+
+return [
+    // 版本代码
+    'ncv_1' => [
+        ['content_page_count' => '36', 'has_stroke_order' => 1, 'remark' => '备注', 'male_product_code' => '', 'female_product_code' => ''],
+    ],
+];
+
+2. 提供一个基于版本版式配置文件，更新维护版本版式表的命令，命令处理流程和规则如下：
+  - 读取版本本事配置文件；
+  - 循环处理文件中的版本代码对应的版式配置数组；
+  - 以配置数组为基础，新增两条记录，记录的font 分别为 handwritten、standard，并为每条记录生成name字段值，生产规则：基于 content_page_count、has_stroke_order、font 三个字段的值，生产对应的中文描述 如 18页无笔顺手写体 18页有笔顺楷体；
+
+3. 删除 姓名单字字数配置 相关的两个接口；删除 姓名字帖版式 相关的5个接口；
+
+需求：
+1. name_copybook_layouts status 增加一个取值，status=99 标记当前配置记录已弃用；
+2. 命令 php artisan copybook:sync-version-layouts 调整，针对每个version_code，新增加的配置记录从1开始，逐条加1；
+
+执行说明：
+- 版式表 status 由 boolean 调整为 tinyint（迁移 2026_10_16_055824），取值 1 使用中 / 0 停用 / 99 已弃用，默认仍为 1；模型 cast 同步改为 integer；
+- 姓名字帖添加记录时 LayoutInUse 规则仅放行 status=1 的版式，0 提示“姓名字帖版式已停用。”、99 提示“姓名字帖版式已弃用。”，均 422 拒绝；
+- 同步命令：每个 version_code 内本次新增加的版式记录 sort 按配置项顺序（每项先 handwritten 后 standard）从 1 开始逐条加 1；已有记录的 sort 保持原值（重跑命令不会重新编号存量记录，需重新编号时清空版式表后重跑）；
+- 真实库已执行迁移并清空重跑同步命令，32 条版式记录已按版本内 1..2N 编号；
+- 注意：配置文件 ncv_4 存在两个 content_page_count=18 的配置项（仅 has_stroke_order 不同），命令匹配键为 (version_code, content_page_count, font)，后者会覆盖前者的 name/商品编码等字段，最终仅保留“18页有笔顺”记录（既有行为，本次未调整匹配键）。
+
+
+需求：
+1. name_copybook_layouts status增加一个取值，status=99 标记当前配置记录已弃用；
+2. 命令 php artisan copybook:sync-version-layouts 调整，针对每个version_code，新增加的配置记录从1开始，逐条加1；
+
+需求：
+1. name_copybook_layouts has_stroke_order 调整为 integer 类型；
+2. 命令 php artisan copybook:sync-version-layouts 调整：要为不同的 has_stroke_order 生成单独的记录；
+
+需求：
+1. name_copybook_layouts has_stroke_order调整为 integer类型；
+2. 命令 php artisan copybook:sync-version-layouts 调整：要为不同的has_stroke_order生成单独的记录；
+
+执行说明：
+- 版式表 has_stroke_order 由 boolean 调整为 tinyint（迁移 2026_10_16_061211），取值 0 无 / 1 有，默认仍为 0；模型 cast 同步改为 integer；版式资源字段返回整数；
+- name_copybook_pdf_pages.has_stroke_order 为快照字段，保持 boolean 类型与 cast 不变，服务写入版式的 int 0/1 值行为不变；
+- 同步命令匹配键调整为 (version_code, content_page_count, font, has_stroke_order)：同页数不同笔顺的配置项各自生成单独的版式记录，互不覆盖（此前 ncv_4 两个 18 页配置仅保留后写的有笔顺记录的问题已解决）；sort 编号规则不变（每版本内新增记录从 1 开始逐条加 1）；
+- 真实库已执行迁移并清空重跑同步命令：34 条版式记录（ncv_4 由 6 条增至 8 条，18页无笔顺 lzt2229/2227 与 18页有笔顺 ZTYEXM000112B/109B 并存，sort 1..8）。
+
+
+
+需求：
+姓名字帖版本控制器调整
+1. 删除当前 姓名字帖版本分页列表、新增姓名字帖版本、姓名字帖版本详情  三个接口；
+2. 新增获取版本版式配置信息明细接口，版式数据，过滤掉status=99的信息，返回格式如下：
+    return [
+        'male' => [
+            'name' => '男',
+            'gender' => 'male',
+            'versions' => [
+                'ncv_1' => [
+                    'version_code' => 'ncv_1',
+                    'preview_url' => 'http://49.235.53.53:5183/姓名字帖封面/1.0我会写名字（男）.png',
+                    'name' => '1.0我会写名字',
+                    'layouts' => [
+                        ['id' => 65, 'name' => '36页有笔顺手写体', 'status' => '1'],
+                        ['id' => 66, 'name' => '36页有笔顺手写体', 'status' => '0'],
+                    ],
+                ],
+            ],
+        ],
+        'female' => [
+            'name' => '女',
+            'gender' => 'female',
+            'versions' => [
+                'ncv_1' => [
+                    'version_code' => 'ncv_1',
+                    'preview_url' => 'http://49.235.53.53:5183/姓名字帖封面/1.0我会写名字（女）.png',
+                    'name' => '1.0我会写名字',
+                    'layouts' => [
+                        ['id' => 65, 'name' => '36页有笔顺手写体', 'status' => '1'],
+                        ['id' => 66, 'name' => '36页有笔顺手写体', 'status' => '0'],
+                    ],
+                ],
+            ],
+        ],
+    ];
+3. 新增获取版本版式配置信息明细接口2，版式数据，过滤掉status=99的信息，返回格式如下：
+    return [
+        'ncv_1' => [
+            'code' => 'ncv_1',
+            'name' => '1.0我会写名字',
+            'male' => [
+                'preview_url' => 'http://49.235.53.53:5183/姓名字帖封面/1.0我会写名字（男）.png',
+                'name' => '男',
+                'gender' => 'male',
+                'layouts' => [
+                    ['id' => 65, 'name' => '36页有笔顺手写体', 'status' => '1', 'demo_files' => ['filename' => 'fileurl']],
+                    ['id' => 66, 'name' => '36页有笔顺手写体', 'status' => '0', 'demo_files' => ['filename' => 'fileurl']],
+                ],
+            ],
+            'female' => [
+                'preview_url' => 'http://49.235.53.53:5183/姓名字帖封面/1.0我会写名字（女）.png',
+                'name' => '女',
+                'gender' => 'female',
+                'layouts' => [
+                    ['id' => 65, 'name' => '36页有笔顺手写体', 'status' => '1', 'demo_files' => ['filename' => 'fileurl']],
+                    ['id' => 66, 'name' => '36页有笔顺手写体', 'status' => '0', 'demo_files' => ['filename' => 'fileurl']],
+                ],
+            ],
+        ],
+    ];
+
+    其中demo_files 获取规则如下：
+    - 新增一个版式demo配置文件，数组的键 ncv_1_65 生成规则是 {version_code}_{版式ID}，文件格式如下：
+    return [
+        // 版本名称+版式名称
+        'ncv_1_65' => [
+            'famale' => [
+                'filename' => 'fileurl',
+            ],
+            'male' => [
+                'filename' => 'fileurl',
+            ],
+        ],
+    ];
+
+    demo_files, 从版式demo配置文件获取相关的demo信息，有则返回，没有返回空数组；
+
+
+需求：
+1. api/v1/version-layout-details2 接口路由 调整为  api/v1/version-layout-list
+2. 调整后，为以下接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/modules/copybook/api-ext.json
+- /api/v1/version-layout-list
+- /api/v1/version-layout-details

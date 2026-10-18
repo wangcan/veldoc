@@ -1,0 +1,1 @@
+当前项目安装了什么包？结果输出到 .requirements/info/package.md
