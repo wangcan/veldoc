@@ -3,13 +3,12 @@
 
 定制姓名字帖业务，根据用户提供的姓名、性别、版式，为用户生成相应的字帖pdf文件供打印装订成册。姓名字帖可以为男生、女生选用不用的封面和内容页纸张。
 
-需求2：
-为以下接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/module/copybook/api-ext.json
-- /api/v1/name-copybooks/*
-
+需求：
+1. 分析Copybook模块，整理一份完整的功能介绍和使用手册文档，文档保存在：.requirements/modules/copybook/readme.md
+2. 分析Copybook模块，基于模块功能，反向整理出一份产品需求文档，文档保存在：.requirements/modules/copybook/prod.md
 
 忽略以下所有需求描述
 
 需求2：
 为以下接口生成接口文档，格式为符合Swagger3.0格式的json文件，文件保存在：.requirements/module/copybook/api-ext.json
-- /api/v1/admin/profile
+- /api/v1/name-copybooks/*

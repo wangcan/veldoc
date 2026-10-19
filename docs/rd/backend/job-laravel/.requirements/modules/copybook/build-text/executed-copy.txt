@@ -1,0 +1,169 @@
+
+需求：
+生成最终的整本pdf姓名字帖：
+针对name_copybooks状态为processing的记录，或者状态为completed 但need_regenerate=1的记录，执行生成最终整本pdf字帖的功能，流程如下：
+1. 获取name_copybook_pdf_relations相关关联单页记录，只有关联单页记录状态全部为completed时，才能进一步执行生成整本pdf的操作；
+2. 验证name_copybook_pdf_relations关联的name_copybook_pdf_pages记录pdf是否存在，不存在，将相关记录状态标记为异常，同时将name_copybooks记录status标记为，pdf_abnormal；exception_message标记为：生成pdf异常；
+3. 获取姓名字帖的姓名单字字数配置，按顺序获取单页pdf，以及重复次数；创建生成一个完整的字帖pdf文件；
+4. 将name_copybooks记录status标记为，completed；exception_message置为空；
+
+
+需求：
+生成单页pdf文件。单页pdf文件由指定的node脚本生成。系统基于name_copybook_pdf_pages表生成 node脚本命令。
+
+1. name_copybook_pdf_pages 新增一个字段：是否强制重新生成pdf，tinyint 类型，0 不强制；1 强制生成pdf；
+2. name_copybooks 新增一个字段：是否需要重新生成pdf，tinyint 类型，0 ，不需要；1 需要；
+3. name_copybook_pdf_relations 新增一个字段：是否需要重新生成pdf，tinyint 类型，0 ，不需要；1 需要；
+
+4. 新增一个env配置参数，node脚本根目录；
+5. 新增一个env配置参数，单页PDF文件根目录；
+6. 从name_copybook_pdf_pages获取需要生成单页pdf的记录，获取条件：status 为空的记录；
+7. 基于name_copybook_pdf_pages记录的 version_code、font、is_single_character 获取node脚本相当路径。初步的规则：
+   - is_single_character=1时的命令路径：脚本根目录/{version_code}/{font}/index_single.js
+   - is_single_character=0时的命令路径：脚本根目录/{version_code}/{font}/index.js
+8. 脚本命令参数：--character={character} --polyphonic_code={polyphonic_code} --has_stroke_order={has_stroke_order}
+9. 系统调用脚本命令+参数，根据执行结果更新name_copybook_pdf_pages记录的状态，同时将状态同步到 name_copybook_pdf_relations表；
+
+
+需求：
+1. name_copybook_pdf_pages新增一个page_code（从name_copybook_pdf_relations记录取值）；
+2. name_copybook_pdf_pages记录唯一性调整：
+     - is_single_character为1时， name_copybook_pdf_pages 基于 version_code + font + has_stroke_order + character + font_library_id + polyphonic_code 唯一标识一条单页记录；
+     - is_single_character为0时， name_copybook_pdf_pages 基于 version_code + font + has_stroke_order + character + page_code + polyphonic_code   唯一生成一条 单页记录；记录不存在，新增一条记录；将记录的id关联到name_copy_pdf_relations记录；
+3. name_copybooks的记录，完成生成 name_copybook_pdf_relations记录后，将记录状态标识为 processing ；exception_message 置为空字符串；
+4. 添加name_copybooks记录（批量添加和多音字姓名添加）后，返回信息做下调整：
+   - 除了 对基本字段信息的有效性验证，其他返回值，基于本次处理信息涉及到的name_copybooks记录的状态，做信息汇总，并返回汇总数据：
+
+     // 汇总数据
+     [
+         'total' => '本次处理信息的总数',
+         'unique_count' => '去重后的信息数据',
+         'new_count' => '本次新增记录数',
+         'running_count' => '处理中的记录数，状态为[pending, processing]',
+         'completed_count' => '已完成的记录数，状态为[completed]',
+         'exception_count' => '已完成的记录数，状态为[pending, processing, completed] 之外的值',
+     ]
+
+
+需求：
+1. 添加姓名字帖记录时，字段验证失败，返回中文提示信息；
+2. 验证通过的，在name_copybook_generation_logs表生成一条记录；如果相关记录，在name_copybooks已存在的，将存在的记录的last_record_at 调整为当前时间；name_copybooks不存在的，添加一条记录，last_record_at也是当前时间；
+3. 重新设计 name_copybook_pdf_relations、name_copybook_pdf_pages生成功能。按以下功能生成对应的记录：为字帖记录添加一个业务功能：
+   - 姓名中有非中文字符的，则将记录状态标识为 name_abnormal ；exception_message 标记为："有字母/数字/特殊字符"；结束对本条记录的处理流程；
+   - 姓名中文字符数不是 [2,3,4]的记录，则将记录状态标识为 name_abnormal ；exception_message 标记为："超出4个字"或"少于两个字"；结束对本条记录的处理流程；
+   - 将姓名拆分成单个的中文；在characters查找对应的记录，没有记录，则在characters添加一条记录，记录对应的字库标识为0；每个单字都做字库验证，验证失败的，则将记录状态标识为 font_abnormal ；exception_message 标记为："缺少字：*、*"；结束对本条记录的处理流程；
+   - 获取当前记录相关的name_copybook_layouts记录；
+   - 根据name_copybook_layouts记录和当前记录姓名的字数，获取对应的姓名单字字数配置信息；基于姓名单字数配置信息，获取去重后的全部单页信息，为每一天单页信息，创建一条name_copybook_pdf_relations记录；
+   - 为每一条name_copybook_pdf_relations记录，关联一条name_copybook_pdf_pages记录；
+   - name_copybook_pdf_pages记录生成规则：基于name_copybook_pdf_relations记录生成：
+      - 生成name_copybook_pdf_pages的polyphonic_code值，is_single_character为0时，polyphonic_code值直接使用字帖记录的 polyphonic_code值；is_single_character为1时，将字帖记录的 polyphonic_code按下划线拆分，按page_code 和拆分数组的对应关系，获取polyphonic_code值，[first => 0, second=>1,third=>2,fourth=3]，测试对应的polyphonic_code 是2_4，则"测"的polyphonic_code为2；"试"的polyphonic_code为4；
+      - is_single_character为1时， name_copybook_pdf_pages 基于character + font_library_id + font + polyphonic_code + 	layout_id + has_stroke_order 唯一生成一条 单页记录；记录不存在，新增一条记录；将记录的id关联到name_copy_pdf_relations记录；
+      - is_single_character为0时， name_copybook_pdf_pages 基于 character + font + polyphonic_code + layout_id + has_stroke_order 唯一生成一条 单页记录；记录不存在，新增一条记录；将记录的id关联到name_copy_pdf_relations记录；
+
+需求：
+姓名字帖记录功能调整
+1. 新增一个最后登记时间字段，last_record_at， 记录在name_copybook_generation_logs最后一次登记时的时间；
+1. 添加姓名字帖记录接口，拆分成两个接口；一个添加多音字记录，一个批量添加无需指定拼音的姓名字帖记录；
+2. 姓名字帖记录分页列表,拆分成两个接口
+   a. 获取正在进行中的分页数据
+      - 获取status=[pending 未处理 / processing 处理中]的信息；
+      - 默认每页20条信息；
+      - 搜索条件：批次（模糊匹配）、性别（精确匹配）、字帖版本（精确匹配），商品编码（模糊匹配）、姓名（模糊匹配）、创建者（精确匹配）
+      - 列表页额外返回，字帖版本键值对信息、性别键值对信息、创建者键值对信息（创建者从管理员列表获取）
+      - 返回字段列表：
+          {
+            "id": 1,
+            "batch_code": "ncv_1",
+            "batch_sequence": 1,
+            "name": "",
+            "gender": "male",
+            "name_length": 0,
+            "polyphonic_code": "",
+            "layout_id": 65,
+            "version_code": "ncv_1",
+            "version_code_label": "版本名称",
+            "layout_name": "36页有笔顺手写体",
+            "product_code": "lztycl519",
+            "status": "name_abnormal",
+            "status_label": "姓名字数异常",
+            "record_count": "登记次数，当前id在name_copybook_generation_logs表出现的次数",
+            "record_admins": "创建者，当前id在name_copybook_generation_logs表出现的operator_account，多个用逗号分隔",
+            "created_at": "2026-10-16 08:20:38",
+            "last_record_at": "2026-10-16 08:20:38"
+          }
+   b. 获取已完结记录的分页数据：
+      - 获取status 不是pending和processing 的记录信息；
+      - 默认每页200条信息；
+      - 分组后的状态: a. 已完成，包含状态[completed]；b. 异常，除了[completed,pending,processing]之外的状态；
+      - 搜索条件：批次（模糊匹配）、性别（精确匹配）、字帖版本（精确匹配），商品编码（模糊匹配）、姓名（模糊匹配）、创建者（精确匹配），分组后的状态（精确匹配）
+      - 列表页额外返回，字帖版本键值对信息、性别键值对信息、创建者键值对信息（创建者从管理员列表获取）
+      - 返回字段列表：
+          {
+            "id": 1,
+            "batch_code": "ncv_1",
+            "batch_sequence": 1,
+            "name": "",
+            "gender": "male",
+            "name_length": 0,
+            "polyphonic_code": "",
+            "layout_id": 65,
+            "version_code": "ncv_1",
+            "version_code_label": "版本名称",
+            "layout_name": "36页有笔顺手写体",
+            "product_code": "lztycl519",
+            "status": "name_abnormal",
+            "status_label": "姓名字数异常",
+            "exception_message": "姓名字数异常：「」包含非汉字字符，姓名应为 2-4 个汉字",
+            "download_count": 1,
+            "record_count": "登记次数，当前id在name_copybook_generation_logs表出现的次数",
+            "record_admins": "创建者，当前id在name_copybook_generation_logs表出现的operator_account，多个用逗号分隔",
+            "created_at": "2026-10-16 08:20:38",
+            "last_record_at": "2026-10-16 08:20:38"
+          }
+
+
+需求
+调整姓名单字字数配置 (Name Page Configs)
+1. 基础单页 单独作为一个配置文件管理维护；
+2. 姓名单字字数  按姓名字帖页数、姓名单字字数、规则代码三个维度，组织单页拼装完整字帖的配置规则；
+   配置参考示例如下：
+   配置项说明：
+   ['repeat' => 2, 'pages' => ['first']],
+   repeat为单页或单页组合重复次数， pages 指本次用到的单页代码集合
+
+   return [
+       // 姓名字数+字帖页数
+       'p36' => [
+           'two' => [
+               'standard' => [
+                  ['repeat' => 2, 'pages' => ['first']],
+                  ['repeat' => 2, 'pages' => ['second']],
+                  ['repeat' => 2, 'pages' => ['full']],
+                  ['repeat' => 3, 'pages' => ['fullext']],
+               ],
+               'simple' => [
+                  ['repeat' => 1, 'pages' => ['first']],
+                  ['repeat' => 1, 'pages' => ['second']],
+                  ['repeat' => 1, 'pages' => ['full']],
+                  ['repeat' => 1, 'pages' => ['fullext']],
+               ],
+           ],
+           'four' => [
+               'standard' => [
+                  ['repeat' => 2, 'pages' => ['first']],
+                  ['repeat' => 2, 'pages' => ['second']],
+                  ['repeat' => 2, 'pages' => ['third']],
+                  ['repeat' => 2, 'pages' => ['fourth']],
+                  ['repeat' => 2, 'pages' => ['part1', 'part2']],
+                  ['repeat' => 3, 'pages' => ['full']],
+               ],
+           ],
+       ],
+       'p60' => [
+           ...
+       ]
+   ];
+
+3. name_copybook_layouts 字数配置代码取 页数、姓名字数、规则代码三个维度的标识拼接，如 p32_two_standard；
+4. 姓名字数目前只支持2字、3字、4字 姓名，页数：13、15、16、18、24、32、36、40、52、60、64，基于上述信息，生成标准规则的配置信息；
+5. 生成一条更新name_copybook_layouts 字数配置代码的命令；基于name_page_configs中的配置，更新字数配置代码字段；
